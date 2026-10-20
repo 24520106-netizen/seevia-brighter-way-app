@@ -107,8 +107,7 @@
       /* ← về màn vừa xem nếu đến từ một màn trong app; nếu không thì về đích mặc định */
       var backLink = bar.querySelector("a.sv-icon-btn");
       if (backLink) backLink.addEventListener("click", function (event) {
-        var ref = document.referrer;
-        if (ref && ref.indexOf("/screens/") > -1 && ref.split("#")[0] !== location.href.split("#")[0] && history.length > 1) {
+        if (SV.canGoBack()) {
           event.preventDefault();
           history.back();
         }
@@ -474,10 +473,12 @@
       var self = this;
       this.editing = !SV.state.get("emergencyPhone");
       this.render();
-      document.addEventListener("sv:state", function (e) {
+      this._onState = function (e) {
         if (e.detail.name === "emergencyPhone" && !e.detail.value && !self.editing) { self.editing = true; self.render(); }
-      });
+      };
+      document.addEventListener("sv:state", this._onState);
     }
+    disconnectedCallback() { document.removeEventListener("sv:state", this._onState); }
     render(error, typed) {
       var self = this;
       var phone = SV.state.get("emergencyPhone") || "";

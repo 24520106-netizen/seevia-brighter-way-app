@@ -172,13 +172,121 @@
     html.style.setProperty("--device-zoom", Math.max(0.5, z).toFixed(3));
   }
   window.addEventListener("resize", fitDevice);
+  /* Tính ngay (CSS trong <head> đã nạp xong trước script này) để khung không vẽ ở 100% rồi mới co lại */
+  fitDevice();
+
+  function setTitle() {
+    var titleKey = html.getAttribute("data-title-key");
+    var name = (SV.brand && SV.brand.name) || "";
+    document.title = titleKey ? SV.t(titleKey) + " · " + name : name;
+  }
+
+  /* ---------- Chuyển màn không tải lại trang ----------
+     Bấm liên kết tới screens/*.html: lấy HTML màn mới, chỉ thay khung .sv-device, giữ nguyên CSS, font, icon, JS.
+     Mở thẳng từ ổ đĩa (file://) trình duyệt chặn fetch, nên vẫn chuyển trang như cũ. */
+  var pages = {};          /* đường dẫn → Promise<chuỗi HTML> */
+  var navToken = 0;
+  var routed = false;      /* đã chuyển màn bằng router ít nhất một lần */
+  var shown;               /* đường dẫn màn đang hiện */
+
+  function pathOf(url) { return url.split("#")[0]; }
+  function isScreen(url) {
+    var u = new URL(url, location.href);
+    return u.origin === location.origin && /\/screens\/[^\/]+\.html$/.test(u.pathname);
+  }
+  function load(url) {
+    var key = pathOf(url);
+    if (!pages[key]) {
+      pages[key] = fetch(key).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.text();
+      });
+      pages[key].catch(function () { delete pages[key]; });
+    }
+    return pages[key];
+  }
+
+  function swap(text) {
+    var doc = new DOMParser().parseFromString(text, "text/html");
+    var next = doc.querySelector(".sv-device");
+    var current = document.querySelector(".sv-device");
+    if (!next || !current) throw new Error("no device");
+    document.querySelectorAll("body > dialog.sv-sheet").forEach(function (d) { d.remove(); });
+    var key = doc.documentElement.getAttribute("data-title-key");
+    if (key) html.setAttribute("data-title-key", key);
+    else html.removeAttribute("data-title-key");
+    setTitle();
+    current.replaceWith(next);   /* custom element tự nâng cấp khi gắn vào trang */
+    SV.applyText(next);
+    var heading = next.querySelector("h1");
+    if (heading) {
+      if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+      heading.focus({ preventScroll: true });
+    }
+  }
+
+  function render(url, push) {
+    var token = ++navToken;
+    return load(url).then(function (text) {
+      if (token !== navToken) return;
+      /* Cập nhật địa chỉ trước khi gắn DOM: component đọc location.hash (guide.html#voice) */
+      if (push) history.pushState({ sv: true, from: location.href }, "", url);
+      routed = true;
+      shown = pathOf(url);
+      var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (document.startViewTransition && !reduce) {
+        return document.startViewTransition(function () { swap(text); }).updateCallbackDone;
+      }
+      swap(text);
+    }).catch(function () {
+      if (token === navToken) location.href = url;
+    });
+  }
+
+  /* Đi tới một màn (dùng thay cho location.href = "x.html") */
+  SV.go = function (url) {
+    url = new URL(url, location.href).href;
+    if (location.protocol === "file:" || !isScreen(url)) { location.href = url; return; }
+    render(url, true);
+  };
+
+  /* Nút ← của thanh trên: có màn trước trong app thì quay lại đúng màn đó */
+  SV.canGoBack = function () {
+    var st = history.state;
+    if (st && st.sv) return !!st.from;
+    var ref = document.referrer;
+    return !!ref && ref.indexOf("/screens/") > -1 && pathOf(ref) !== pathOf(location.href) && history.length > 1;
+  };
+
+  if (location.protocol !== "file:") {
+    document.addEventListener("click", function (event) {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      var a = event.target.closest && event.target.closest("a[href]");
+      if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download") || !isScreen(a.href)) return;
+      /* Liên kết neo trong cùng màn: để trình duyệt tự cuộn */
+      if (pathOf(a.href) === pathOf(location.href) && a.href.indexOf("#") > -1) return;
+      event.preventDefault();
+      if (a.href === location.href) return;
+      render(a.href, true);
+    });
+    /* Nạp trước khi trỏ chuột / chạm vào liên kết */
+    ["pointerover", "touchstart", "focusin"].forEach(function (type) {
+      document.addEventListener(type, function (event) {
+        var a = event.target.closest && event.target.closest("a[href]");
+        if (a && isScreen(a.href)) load(a.href);
+      }, { passive: true });
+    });
+    shown = pathOf(location.href);
+    window.addEventListener("popstate", function () {
+      if (!routed || pathOf(location.href) === shown) return; /* chỉ đổi #neo */
+      render(location.href, false);
+    });
+  }
 
   /* ---------- Khởi động ---------- */
   document.addEventListener("DOMContentLoaded", function () {
     fitDevice();
-    var titleKey = html.getAttribute("data-title-key");
-    var name = (SV.brand && SV.brand.name) || "";
-    document.title = titleKey ? SV.t(titleKey) + " · " + name : name;
+    setTitle();
     if (!document.querySelector("link[rel=icon]")) {
       var icon = document.createElement("link");
       icon.rel = "icon";

@@ -11,6 +11,7 @@ Bản mô phỏng giao diện app đồng hành của kính SeeVia. HTML/CSS/JS 
 
 - Khung điện thoại **tự thu nhỏ vừa chiều cao cửa sổ**, không cần dùng `Ctrl + −`.
 - Nếu trước đó đã lỡ `Ctrl + −`/`Ctrl + +`: Chrome nhớ mức thu phóng **riêng cho từng file** khi mở từ ổ đĩa, nên mỗi màn to nhỏ khác nhau. Nhấn `Ctrl + 0` một lần ở mỗi màn bị lệch để về 100%.
+- **Chuyển màn mượt, không tải lại trang:** chỉ có khi mở qua server (xem dòng dưới). Mở thẳng file `.html` thì mỗi lần chuyển màn vẫn tải lại cả trang, vì trình duyệt chặn đọc file khác từ ổ đĩa.
 - Muốn mọi màn dùng chung một mức thu phóng: mở qua server nhỏ (`python -m http.server 5510 --directory app` ở thư mục `ui`, rồi vào `http://localhost:5510`).
 
 ## Muốn đổi… → sửa file…

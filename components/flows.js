@@ -203,14 +203,14 @@
         '<span class="sv-list-item__body"><span class="sv-list-item__title">' + esc(SV.t("profile.versionTitle")) + "</span></span>" +
         '<span class="sv-list-item__trail"><span>' + esc(SV.t("profile.versionValue")) + "</span></span></button></li></ul>";
       this.querySelector("button").addEventListener("click", function () {
-        if (SV.state.get("devUnlocked")) { location.href = "dev-test.html"; return; }
+        if (SV.state.get("devUnlocked")) { SV.go("dev-test.html"); return; }
         clearTimeout(timer);
         count += 1;
         timer = setTimeout(function () { count = 0; }, 3000);
         if (count >= 7) {
           SV.state.set("devUnlocked", true);
           SV.snackbar(SV.t("profile.devUnlocked"));
-          setTimeout(function () { location.href = "dev-test.html"; }, 900);
+          setTimeout(function () { SV.go("dev-test.html"); }, 900);
         } else if (count >= 3) {
           SV.snackbar(SV.t("profile.versionHint", { count: 7 - count }));
         }

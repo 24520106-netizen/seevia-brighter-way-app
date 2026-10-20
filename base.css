@@ -91,6 +91,10 @@ input, textarea { caret-color: var(--color-primary-strong); }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 
+/* Chuyển màn (core/app.js): mờ chéo nhanh, không để lộ khoảng trắng */
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: 120ms; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 1ms !important;
