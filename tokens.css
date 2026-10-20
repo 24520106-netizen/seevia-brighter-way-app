@@ -1,0 +1,371 @@
+/* =====================================================================
+   SeeVia · tokens.css
+   Nguồn duy nhất của font, màu, cỡ chữ, khoảng cách, bo góc, đổ bóng.
+   Tầng 1 (--brand-*, --fn-*): màu gốc lấy từ bộ nhận diện ../logo.
+   Tầng 2 (--color-*, --type-*, --space-*…): vai trò. Màn hình và
+   component CHỈ dùng tầng 2, không ghi mã màu trực tiếp.
+
+   Đổi màu chủ đạo: sửa một dòng --color-primary (mục 2.1). Mọi biến thể
+   (chữ liên kết, nền nhạt, viền focus, chế độ tối) tự suy ra từ nó.
+   ===================================================================== */
+
+/* Font: đổi font thì đổi dòng @import này và các --font-* ở mục 1.3. */
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap");
+/* Bộ icon Material Symbols (bo tròn, hợp nét logo và Android). */
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block");
+
+:root {
+  /* ---------------------------------------------------------------
+     1. TẦNG 1 · MÀU GỐC (brand). Đúng mã trong ../logo/brand-showcase.html
+     --------------------------------------------------------------- */
+
+  /* 1.1 Bảng màu SeeVia */
+  --brand-sapphire: #405FFA;      /* Electric Sapphire · chủ đạo, nút */
+  --brand-sapphire-600: #2E48E0;  /* Sapphire 600 · chữ liên kết trên nền sáng */
+  --brand-cyan: #09BBC8;          /* Strong Cyan · điểm sáng, CHỈ trên nền tối */
+  --brand-iris: #8B6CFF;          /* Iris · đuôi tím dải SV, chỉ trang trí */
+  --brand-lilac: #E7E0FF;         /* Lilac · nền nhấn tím */
+  --brand-frozen: #D9FCED;        /* Frozen Water · nền nhấn nhẹ */
+  --brand-aqua: #9DEAF1;          /* điểm dừng gradient Pearl */
+  --brand-sky: #6DB4FF;           /* điểm dừng gradient Pearl */
+  --brand-ink-900: #1B1838;       /* Ink 900 · nền tối sâu nhất */
+  --brand-ink-800: #2A2650;       /* Ink 800 · tiêu đề, wordmark, nền tối */
+  --brand-indigo: #3B3664;        /* Twilight Indigo · chữ nội dung */
+  --brand-indigo-soft: #524D78;   /* chữ phụ (7,35:1 trên Pearl) */
+  --brand-dusk-glow-a: #4A43A0;   /* ánh trong gradient Dusk */
+  --brand-dusk-glow-b: #2C3FB8;   /* ánh trong gradient Dusk */
+  --brand-pearl: #F6F8FF;         /* nền trang */
+  --brand-sunken: #F4F5FC;        /* nền lõm */
+  --brand-tint: #EEF2FF;          /* nền ánh sapphire */
+  --brand-line: #E9EAF5;          /* viền mảnh */
+  --brand-on-dark-soft: #D6D6E8;  /* chữ phụ trên nền tối */
+  --brand-evergreen: #07240F;     /* chữ trạng thái thành công */
+  --brand-white: #FFFFFF;
+
+  /* 1.2 Màu chức năng (bộ nhận diện không có đỏ/cam; thêm cho lỗi, SOS, cảnh báo) */
+  --fn-red-700: #B3172F;          /* 6,3:1 trên trắng */
+  --fn-red-900: #5C0716;
+  --fn-red-100: #FDE6EA;
+  --fn-red-300: #FF9AA8;          /* đỏ trên nền tối */
+  --fn-amber-800: #7A4A00;        /* 7,4:1 trên trắng */
+  --fn-amber-100: #FFF0D2;
+  --fn-amber-300: #FFC874;        /* vàng trên nền tối */
+  --fn-green-300: #7FE3B4;        /* xanh trên nền tối */
+
+  /* 1.3 Font */
+  --font-display: "Playfair Display", "Lora", Georgia, serif;     /* tiêu đề lớn */
+  --font-sans: "Be Vietnam Pro", system-ui, "Segoe UI", Roboto, sans-serif; /* mọi chữ đọc */
+  --font-icon: "Material Symbols Rounded";
+
+  /* ---------------------------------------------------------------
+     2. TẦNG 2 · VAI TRÒ (theo Material 3, chủ đề sáng)
+     --------------------------------------------------------------- */
+
+  /* 2.1 Màu chủ đạo: núm điều chỉnh duy nhất */
+  --color-primary: var(--brand-sapphire);
+
+  /* Suy ra từ --color-primary, không cần sửa */
+  --color-primary-fill: var(--color-primary);                                       /* nền nút chính */
+  --color-on-primary: var(--brand-white);
+  --color-primary-strong: oklch(from var(--color-primary) calc(l - 0.08) c h);     /* chữ liên kết; với Sapphire ≈ Sapphire 600 */
+  --color-primary-container: color-mix(in oklab, var(--color-primary) 13%, var(--brand-white));
+  --color-on-primary-container: color-mix(in oklab, var(--color-primary) 55%, var(--brand-ink-900));
+  --color-focus: var(--color-primary-strong);
+
+  /* 2.2 Phụ, nhấn */
+  --color-secondary-container: var(--brand-lilac);        /* ô chỉ báo tab đang chọn, chip đã chọn */
+  --color-on-secondary-container: var(--brand-ink-800);
+  --color-accent-on-dark: var(--brand-cyan);              /* điểm sáng trên nền tối */
+
+  /* 2.3 Nền và bề mặt */
+  --color-background: var(--brand-pearl);
+  --color-surface: var(--brand-white);
+  --color-surface-dim: var(--brand-sunken);
+  --color-surface-container: var(--brand-tint);
+  --color-surface-container-high: color-mix(in oklab, var(--color-primary) 9%, var(--brand-white));
+  --color-scrim: rgb(27 24 56 / 0.48);
+
+  /* 2.4 Chữ */
+  --color-on-surface: var(--brand-ink-800);               /* tiêu đề, chữ mạnh */
+  --color-text: var(--brand-indigo);                      /* chữ nội dung */
+  --color-text-muted: var(--brand-indigo-soft);           /* chữ phụ, mô tả */
+  --color-text-link: var(--color-primary-strong);
+
+  /* 2.5 Viền */
+  --color-outline: color-mix(in oklab, var(--brand-indigo) 58%, var(--brand-white)); /* viền ô nhập: ≥3:1 */
+  --color-outline-variant: var(--brand-line);             /* đường chia, viền thẻ */
+
+  /* 2.6 Trạng thái */
+  --color-success: var(--brand-evergreen);
+  --color-success-container: var(--brand-frozen);
+  --color-on-success-container: var(--brand-evergreen);
+  --color-warning: var(--fn-amber-800);
+  --color-warning-container: var(--fn-amber-100);
+  --color-on-warning-container: var(--fn-amber-800);
+  --color-error: var(--fn-red-700);
+  --color-on-error: var(--brand-white);
+  --color-error-container: var(--fn-red-100);
+  --color-on-error-container: var(--fn-red-900);
+  --color-sos: var(--fn-red-700);
+  --color-on-sos: var(--brand-white);
+
+  /* 2.7 Lớp trạng thái tương tác (Material state layer) */
+  --state-hover: 0.08;
+  --state-focus: 0.12;
+  --state-pressed: 0.14;
+
+  /* 2.8 Gradient thương hiệu */
+  --gradient-dusk:
+    radial-gradient(80% 70% at 20% 0%, var(--brand-dusk-glow-a) 0%, transparent 60%),
+    radial-gradient(70% 60% at 100% 100%, var(--brand-dusk-glow-b) 0%, transparent 60%),
+    var(--brand-ink-800);
+  --gradient-glass: linear-gradient(90deg, var(--brand-cyan), var(--color-primary) 55%, var(--brand-iris));
+  --color-device-frame: var(--brand-ink-900);              /* viền khung điện thoại trong bản mock */
+  --color-on-dusk: var(--brand-white);
+  --color-on-dusk-muted: var(--brand-on-dark-soft);
+  --color-dusk-edge: transparent;                          /* viền vùng Dusk: chỉ hiện ở chủ đề tối */
+
+  /* ---------------------------------------------------------------
+     3. CHỮ (thang Material 3, cỡ nhân với --font-scale)
+     --------------------------------------------------------------- */
+  --font-scale: 1;              /* 0.88 · 1 · 1.28, đặt qua html[data-font] */
+
+  --type-display-size: calc(36px * var(--font-scale));
+  --type-display-line: 1.2;
+  --type-display-weight: 600;
+  --type-headline-l-size: calc(30px * var(--font-scale));
+  --type-headline-l-line: 1.25;
+  --type-headline-m-size: calc(26px * var(--font-scale));
+  --type-headline-m-line: 1.3;
+  --type-headline-s-size: calc(22px * var(--font-scale));
+  --type-headline-s-line: 1.32;
+  --type-headline-weight: 600;
+
+  --type-title-l-size: calc(20px * var(--font-scale));
+  --type-title-l-line: 1.4;
+  --type-title-m-size: calc(18px * var(--font-scale));
+  --type-title-m-line: 1.42;
+  --type-title-s-size: calc(16px * var(--font-scale));
+  --type-title-s-line: 1.45;
+  --type-title-weight: 600;
+
+  --type-body-l-size: calc(18px * var(--font-scale));
+  --type-body-l-line: 1.55;
+  --type-body-m-size: calc(16px * var(--font-scale));
+  --type-body-m-line: 1.55;
+  --type-body-s-size: calc(15px * var(--font-scale));
+  --type-body-s-line: 1.5;
+  --type-body-weight: 400;
+
+  --type-label-l-size: calc(16px * var(--font-scale));
+  --type-label-l-line: 1.35;
+  --type-label-m-size: calc(14px * var(--font-scale));
+  --type-label-m-line: 1.35;
+  --type-label-s-size: calc(13px * var(--font-scale));
+  --type-label-s-line: 1.3;
+  --type-label-weight: 600;
+  --type-label-tracking: 0.01em;
+  --type-system-size: 14px;
+  --type-nav-label-max: 16px;   /* trần cỡ nhãn thanh điều hướng (chữ To xuống 2 dòng) */     /* chữ thanh trạng thái hệ thống, không phóng theo cỡ chữ app */
+
+  /* ---------------------------------------------------------------
+     4. KHOẢNG CÁCH, LƯỚI, KÍCH THƯỚC
+     --------------------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --layout-gutter: var(--space-4);        /* lề hai bên màn hình */
+  --layout-stack: var(--space-3);         /* khoảng giữa các khối cùng nhóm */
+  --layout-section: var(--space-8);       /* khoảng trước một mục mới */
+  --layout-section-after: var(--space-3); /* khoảng sau tiêu đề mục */
+  --layout-card-pad: var(--space-4);
+
+  --size-touch: 48px;                     /* vùng chạm tối thiểu (Android 48dp) */
+  --size-icon: 24px;
+  --size-icon-tile: 44px;                 /* ô icon đầu dòng danh sách */
+  --size-button: 48px;
+  --size-field: 56px;
+  --size-top-bar: 64px;
+  --size-nav-bar: 80px;
+  --size-status-bar: 32px;
+  --size-gesture-bar: 20px;
+  --size-device-w: 390px;
+  --size-device-h: 844px;
+  --size-sos: 184px;
+
+  /* ---------------------------------------------------------------
+     5. BO GÓC (mềm như nét bo tròn của logo, không góc nhọn)
+     --------------------------------------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  /* ---------------------------------------------------------------
+     6. ĐỔ BÓNG (độ nổi tông Material + bóng mềm của thương hiệu)
+     --------------------------------------------------------------- */
+  --shadow-color: 42 38 80;   /* Ink 800 */
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px rgb(var(--shadow-color) / 0.06), 0 2px 6px -2px rgb(var(--shadow-color) / 0.10);
+  --elevation-2: 0 1px 2px rgb(var(--shadow-color) / 0.06), 0 12px 32px -12px rgb(var(--shadow-color) / 0.22);
+  --elevation-3: 0 2px 4px rgb(var(--shadow-color) / 0.08), 0 24px 48px -16px rgb(var(--shadow-color) / 0.32);
+
+  /* ---------------------------------------------------------------
+     7. CHUYỂN ĐỘNG (Material easing)
+     --------------------------------------------------------------- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized-decel: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-emphasized-accel: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --dur-short: 150ms;
+  --dur-medium: 250ms;
+  --dur-long: 400ms;
+
+  --border-width: 1px;
+  --focus-ring: 3px solid var(--color-focus);
+  --focus-offset: 2px;
+
+  color-scheme: light;
+}
+
+/* ---------------------------------------------------------------
+   CỠ CHỮ người dùng chọn (màn Hiển thị)
+   --------------------------------------------------------------- */
+html[data-font="sm"] { --font-scale: 0.88; }
+html[data-font="md"] { --font-scale: 1; }
+html[data-font="lg"] { --font-scale: 1.28; }
+
+/* ---------------------------------------------------------------
+   CHỦ ĐỀ TỐI: theo hệ thống, hoặc ép bằng html[data-theme="dark"]
+   --------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]):not([data-contrast="high"]) {
+    --color-on-primary: var(--brand-ink-900);
+    --color-primary-strong: color-mix(in oklab, var(--color-primary) 52%, var(--brand-white));
+    --color-primary-container: color-mix(in oklab, var(--color-primary) 34%, var(--brand-ink-900));
+    --color-on-primary-container: color-mix(in oklab, var(--color-primary) 22%, var(--brand-white));
+    --color-primary-fill: var(--color-primary-strong);
+    --color-secondary-container: color-mix(in oklab, var(--brand-iris) 30%, var(--brand-ink-900));
+    --color-on-secondary-container: var(--brand-lilac);
+    --color-background: var(--brand-ink-900);
+    --color-surface: color-mix(in oklab, var(--brand-ink-800) 70%, var(--brand-ink-900));
+    --color-surface-dim: var(--brand-ink-900);
+    --color-surface-container: var(--brand-ink-800);
+    --color-surface-container-high: color-mix(in oklab, var(--brand-indigo) 80%, var(--brand-ink-800));
+    --color-scrim: rgb(0 0 0 / 0.6);
+    --color-on-surface: var(--brand-white);
+    --color-text: color-mix(in oklab, var(--brand-on-dark-soft) 70%, var(--brand-white));
+    --color-text-muted: var(--brand-on-dark-soft);
+    --color-outline: color-mix(in oklab, var(--brand-on-dark-soft) 52%, var(--brand-ink-800));
+    --color-outline-variant: color-mix(in oklab, var(--brand-indigo) 75%, var(--brand-ink-800));
+    --color-success: var(--fn-green-300);
+    --color-success-container: color-mix(in oklab, var(--fn-green-300) 18%, var(--brand-ink-900));
+    --color-on-success-container: var(--fn-green-300);
+    --color-warning: var(--fn-amber-300);
+    --color-warning-container: color-mix(in oklab, var(--fn-amber-300) 16%, var(--brand-ink-900));
+    --color-on-warning-container: var(--fn-amber-300);
+    --color-error: var(--fn-red-300);
+    --color-on-error: var(--brand-ink-900);
+    --color-error-container: color-mix(in oklab, var(--fn-red-300) 18%, var(--brand-ink-900));
+    --color-on-error-container: var(--fn-red-300);
+    --color-sos: var(--fn-red-700);
+    --color-dusk-edge: color-mix(in oklab, var(--brand-lilac) 22%, transparent);
+    --color-device-frame: #08071A;
+    --shadow-color: 0 0 0;
+    color-scheme: dark;
+  }
+}
+html[data-theme="dark"]:not([data-contrast="high"]) {
+  --color-on-primary: var(--brand-ink-900);
+  --color-primary-strong: color-mix(in oklab, var(--color-primary) 52%, var(--brand-white));
+  --color-primary-container: color-mix(in oklab, var(--color-primary) 34%, var(--brand-ink-900));
+  --color-on-primary-container: color-mix(in oklab, var(--color-primary) 22%, var(--brand-white));
+  --color-primary-fill: var(--color-primary-strong);
+  --color-secondary-container: color-mix(in oklab, var(--brand-iris) 30%, var(--brand-ink-900));
+  --color-on-secondary-container: var(--brand-lilac);
+  --color-background: var(--brand-ink-900);
+  --color-surface: color-mix(in oklab, var(--brand-ink-800) 70%, var(--brand-ink-900));
+  --color-surface-dim: var(--brand-ink-900);
+  --color-surface-container: var(--brand-ink-800);
+  --color-surface-container-high: color-mix(in oklab, var(--brand-indigo) 80%, var(--brand-ink-800));
+  --color-scrim: rgb(0 0 0 / 0.6);
+  --color-on-surface: var(--brand-white);
+  --color-text: color-mix(in oklab, var(--brand-on-dark-soft) 70%, var(--brand-white));
+  --color-text-muted: var(--brand-on-dark-soft);
+  --color-outline: color-mix(in oklab, var(--brand-on-dark-soft) 52%, var(--brand-ink-800));
+  --color-outline-variant: color-mix(in oklab, var(--brand-indigo) 75%, var(--brand-ink-800));
+  --color-success: var(--fn-green-300);
+  --color-success-container: color-mix(in oklab, var(--fn-green-300) 18%, var(--brand-ink-900));
+  --color-on-success-container: var(--fn-green-300);
+  --color-warning: var(--fn-amber-300);
+  --color-warning-container: color-mix(in oklab, var(--fn-amber-300) 16%, var(--brand-ink-900));
+  --color-on-warning-container: var(--fn-amber-300);
+  --color-error: var(--fn-red-300);
+  --color-on-error: var(--brand-ink-900);
+  --color-error-container: color-mix(in oklab, var(--fn-red-300) 18%, var(--brand-ink-900));
+  --color-on-error-container: var(--fn-red-300);
+  --color-sos: var(--fn-red-700);
+  --color-dusk-edge: color-mix(in oklab, var(--brand-lilac) 22%, transparent);
+  --color-device-frame: #08071A;
+  --shadow-color: 0 0 0;
+  color-scheme: dark;
+}
+
+/* ---------------------------------------------------------------
+   TƯƠNG PHẢN CAO (tính năng của app): nền gần đen, chữ trắng,
+   điểm nhấn cyan, viền rõ. Thắng mọi chủ đề khác.
+   --------------------------------------------------------------- */
+html[data-contrast="high"] {
+  --color-primary-fill: var(--brand-cyan);
+  --color-on-primary: var(--brand-ink-900);
+  --color-primary-strong: var(--brand-cyan);
+  --color-primary-container: var(--brand-ink-900);
+  --color-on-primary-container: var(--brand-cyan);
+  --color-focus: #FFFFFF;
+  --color-secondary-container: var(--brand-cyan);
+  --color-on-secondary-container: #0B0A1A;
+  --color-accent-on-dark: var(--brand-cyan);
+  --color-background: #0B0A1A;
+  --color-surface: #0B0A1A;
+  --color-surface-dim: #0B0A1A;
+  --color-surface-container: #16142E;
+  --color-surface-container-high: #1F1C3D;
+  --color-scrim: rgb(0 0 0 / 0.78);
+  --color-on-surface: #FFFFFF;
+  --color-text: #FFFFFF;
+  --color-text-muted: var(--brand-lilac);
+  --color-text-link: var(--brand-cyan);
+  --color-outline: #FFFFFF;
+  --color-outline-variant: #CFCBEA;
+  --color-success: var(--fn-green-300);
+  --color-success-container: #0B0A1A;
+  --color-on-success-container: var(--fn-green-300);
+  --color-warning: var(--fn-amber-300);
+  --color-warning-container: #0B0A1A;
+  --color-on-warning-container: var(--fn-amber-300);
+  --color-error: var(--fn-red-300);
+  --color-on-error: #0B0A1A;
+  --color-error-container: #0B0A1A;
+  --color-on-error-container: var(--fn-red-300);
+  --color-sos: var(--fn-red-700);
+  --color-on-sos: #FFFFFF;
+  --color-device-frame: var(--brand-indigo);
+  --gradient-dusk: #0B0A1A;
+  --gradient-glass: var(--brand-cyan);
+  --color-on-dusk-muted: var(--brand-lilac);
+  --shadow-color: 0 0 0;
+  --elevation-1: none;
+  --elevation-2: none;
+  --elevation-3: none;
+  --border-width: 2px;
+  --focus-ring: 3px solid #FFFFFF;
+  color-scheme: dark;
+}

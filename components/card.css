@@ -1,0 +1,144 @@
+/* Thẻ: filled (mặc định) · outlined · thẻ trạng thái kính (Dusk, chữ ký thị giác của SeeVia). */
+
+.sv-card {
+  display: block;
+  padding: var(--layout-card-pad);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-outline-variant);
+}
+.sv-card--filled { background: var(--color-surface-container); border-color: transparent; }
+.sv-card--elevated { border-color: transparent; box-shadow: var(--elevation-2); }
+html[data-contrast="high"] .sv-card,
+html[data-contrast="high"] .sv-card--filled { border-color: var(--color-outline-variant); }
+
+/* ---------- Thẻ trạng thái kính ---------- */
+.sv-glasses {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--gradient-dusk);
+  color: var(--color-on-dusk);
+  overflow: hidden;
+  isolation: isolate;
+}
+html[data-contrast="high"] .sv-glasses { border: var(--border-width) solid var(--color-outline); }
+
+.sv-glasses__head { display: flex; align-items: center; gap: var(--space-3); }
+.sv-glasses__icon {
+  display: grid; place-items: center;
+  width: 48px; height: 48px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--color-on-dusk) 10%, transparent);
+  color: var(--color-on-dusk);
+}
+.sv-glasses__icon .sv-icon { font-size: 28px; }
+/* Thẻ kính là một liên kết: cả thẻ bấm được */
+.sv-glasses--link { color: var(--color-on-dusk); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.sv-glasses--link::before { content: ""; position: absolute; inset: 0; background: var(--color-on-dusk); opacity: 0; z-index: -1; transition: opacity var(--dur-short) var(--ease-standard); }
+.sv-glasses--link:hover::before { opacity: var(--state-hover); }
+.sv-glasses--link:active::before { opacity: var(--state-pressed); }
+.sv-glasses--link:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+.sv-glasses__chevron { display: grid; place-items: center; width: var(--size-touch); height: var(--size-touch); margin-inline-start: auto; color: var(--color-on-dusk); }
+.sv-glasses__name {
+  font: var(--type-title-weight) var(--type-title-l-size)/var(--type-title-l-line) var(--font-sans);
+  color: var(--color-on-dusk);
+}
+.sv-glasses__state {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font: var(--type-label-weight) var(--type-label-m-size)/var(--type-label-m-line) var(--font-sans);
+  color: var(--color-accent-on-dark);
+}
+.sv-glasses__state svg { width: 12px; height: 12px; fill: currentColor; }
+.sv-glasses__state--off { color: var(--color-on-dusk-muted); }
+
+/* Thanh pin: dải thủy tinh cyan → primary → iris, như nét logo */
+.sv-meter { display: grid; gap: var(--space-2); }
+.sv-meter__row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font: var(--type-body-weight) var(--type-body-s-size)/var(--type-body-s-line) var(--font-sans);
+  color: var(--color-on-dusk-muted);
+}
+.sv-meter__value { font: var(--type-title-weight) var(--type-title-m-size)/1 var(--font-sans); color: var(--color-on-dusk); }
+.sv-meter__track {
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--color-on-dusk) 16%, transparent);
+  overflow: hidden;
+}
+.sv-meter__fill {
+  display: block; height: 100%;
+  width: var(--value, 50%);
+  border-radius: inherit;
+  background: var(--gradient-glass);
+}
+
+.sv-glasses__meta {
+  display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4);
+  font: var(--type-body-weight) var(--type-body-s-size)/var(--type-body-s-line) var(--font-sans);
+  color: var(--color-on-dusk-muted);
+}
+.sv-glasses__meta b { font-weight: 600; color: var(--color-on-dusk); }
+
+/* ---------- Vùng Dusk đầu Trang chủ ---------- */
+.sv-dusk-head {
+  padding-bottom: var(--space-5);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background: var(--gradient-dusk);
+  color: var(--color-on-dusk);
+  box-shadow: inset 0 calc(var(--border-width) * -1) 0 var(--color-dusk-edge);
+}
+html[data-contrast="high"] .sv-dusk-head { border-bottom: var(--border-width) solid var(--color-outline); }
+.sv-dusk-head__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-top-bar);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--layout-gutter);
+}
+.sv-dusk-head__bar .sv-logo { margin-inline-end: auto; }
+.sv-dusk-head__bar .sv-icon-btn { color: var(--color-on-dusk); }
+.sv-dusk-head__intro { display: grid; gap: var(--space-2); padding: var(--space-2) var(--layout-gutter) var(--space-5); }
+.sv-dusk-head__greeting { color: var(--color-on-dusk); }
+.sv-dusk-head__lede { color: var(--color-on-dusk-muted); max-width: 34ch; }
+/* Thẻ kính nằm trong vùng Dusk: một tấm nền sáng hơn một bậc */
+.sv-dusk-head .sv-glasses {
+  margin: 0 var(--layout-gutter);
+  background: color-mix(in oklab, var(--color-on-dusk) 8%, transparent);
+  border: var(--border-width) solid color-mix(in oklab, var(--color-on-dusk) 14%, transparent);
+}
+
+/* Dòng trạng thái SOS trong vùng Dusk */
+.sv-sos-status {
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: 64px;
+  margin: var(--space-3) var(--layout-gutter) 0;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklab, var(--color-on-dusk) 8%, transparent);
+  border: var(--border-width) solid color-mix(in oklab, var(--color-on-dusk) 14%, transparent);
+  color: var(--color-on-dusk);
+  text-decoration: none;
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+}
+.sv-sos-status::before { content: ""; position: absolute; inset: 0; background: var(--color-on-dusk); opacity: 0; z-index: -1; transition: opacity var(--dur-short) var(--ease-standard); }
+.sv-sos-status:hover::before { opacity: var(--state-hover); }
+.sv-sos-status:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+html[data-contrast="high"] .sv-sos-status { border-color: var(--color-outline); }
+.sv-sos-status__icon {
+  display: grid; place-items: center; flex: none;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-sos);
+  color: var(--color-on-sos);
+}
+.sv-sos-status__icon .sv-icon { font-size: 22px; }
+.sv-sos-status__body { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.sv-sos-status__title { font: var(--type-label-weight) var(--type-label-l-size)/var(--type-label-l-line) var(--font-sans); }
+.sv-sos-status__sub { font: var(--type-body-weight) var(--type-body-s-size)/var(--type-body-s-line) var(--font-sans); color: var(--color-on-dusk-muted); }
+.sv-sos-status > .sv-icon:last-child { color: var(--color-on-dusk-muted); }

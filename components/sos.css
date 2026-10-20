@@ -1,0 +1,120 @@
+/* Nút SOS: nhấn 3 lần → đếm ngược 5 giây (vòng sáng chạy quanh nút, chạm để hủy) → đã gửi.
+   Ba chấm tiến độ cho người nhìn được; trình đọc màn hình được báo bằng lời ở mỗi bước. */
+
+.sv-sos { display: grid; justify-items: center; gap: var(--space-4); text-align: center; }
+
+.sv-sos__button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--size-sos);
+  height: var(--size-sos);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-sos);
+  color: var(--color-on-sos);
+  box-shadow: 0 0 0 8px color-mix(in oklab, var(--color-sos) 16%, transparent), var(--elevation-2);
+  isolation: isolate;
+  transition: transform var(--dur-short) var(--ease-standard), box-shadow var(--dur-medium) var(--ease-standard), background var(--dur-medium) var(--ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.sv-sos__button::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; z-index: -1; transition: opacity var(--dur-short) var(--ease-standard); }
+.sv-sos__button:hover::before { opacity: var(--state-hover); }
+.sv-sos__button:active { transform: scale(0.97); }
+html[data-contrast="high"] .sv-sos__button { box-shadow: 0 0 0 4px var(--color-outline); }
+
+.sv-sos__face { display: grid; justify-items: center; gap: var(--space-1); }
+.sv-sos__face .sv-icon { font-size: 40px; }
+.sv-sos__word { font: 700 calc(40px * var(--font-scale))/1 var(--font-sans); letter-spacing: 0.04em; }
+.sv-sos__count { font: 700 calc(64px * var(--font-scale))/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.sv-sos__sub { font: var(--type-label-weight) var(--type-label-l-size)/1.2 var(--font-sans); }
+
+/* Vòng đếm ngược: chạy hết một vòng trong 5 giây */
+.sv-sos__ring {
+  position: absolute;
+  inset: -14px;
+  width: calc(100% + 28px);
+  height: calc(100% + 28px);
+  max-width: none;
+  transform: rotate(-90deg);
+  pointer-events: none;
+  opacity: 0;
+}
+.sv-sos__ring circle {
+  fill: none;
+  stroke: var(--color-sos);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 295.3;
+  stroke-dashoffset: 0;
+}
+html[data-contrast="high"] .sv-sos__ring circle { stroke: var(--color-outline); }
+.sv-sos.is-counting .sv-sos__ring { opacity: 1; }
+.sv-sos.is-counting .sv-sos__ring circle { animation: sv-sos-ring 5s linear forwards; }
+@keyframes sv-sos-ring { to { stroke-dashoffset: 295.3; } }
+.sv-sos.is-counting .sv-sos__button { box-shadow: var(--elevation-2); }
+
+/* Đã gửi: nút chuyển sang nền nhạt, viền đỏ */
+.sv-sos.is-sent .sv-sos__button {
+  background: var(--color-surface);
+  color: var(--color-sos);
+  box-shadow: inset 0 0 0 4px var(--color-sos);
+}
+.sv-sos.is-sent .sv-sos__face .sv-icon { font-size: 56px; }
+
+.sv-sos__dots { display: flex; gap: var(--space-2); }
+.sv-sos.is-counting .sv-sos__dots,
+.sv-sos.is-sent .sv-sos__dots { visibility: hidden; }
+.sv-sos__dot {
+  width: 12px; height: 12px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-sos);
+  background: transparent;
+  transition: background var(--dur-short) var(--ease-standard);
+}
+.sv-sos__dot.is-on { background: var(--color-sos); }
+html[data-contrast="high"] .sv-sos__dot { border-color: var(--color-outline); }
+html[data-contrast="high"] .sv-sos__dot.is-on { background: var(--color-outline); }
+
+.sv-sos__hint { font: var(--type-title-weight) var(--type-title-s-size)/var(--type-title-s-line) var(--font-sans); color: var(--color-on-surface); max-width: 30ch; }
+.sv-sos__hint:empty { display: none; }
+.sv-sos__recipient { margin-top: calc(var(--space-2) * -1); }
+.sv-sos__result { width: 100%; text-align: start; }
+
+/* Thẻ kết quả sau khi gửi */
+.sv-sos-sent {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-error-container);
+  color: var(--color-on-error-container);
+}
+html[data-contrast="high"] .sv-sos-sent { border: var(--border-width) solid currentColor; }
+.sv-sos-sent__mark {
+  display: grid; place-items: center;
+  width: 48px; height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--color-sos);
+  color: var(--color-on-sos);
+}
+.sv-sos-sent__body { display: grid; gap: var(--space-1); }
+.sv-sos-sent__title { margin: 0; font: var(--type-title-weight) var(--type-title-m-size)/var(--type-title-m-line) var(--font-sans); }
+.sv-sos-sent__title:focus { outline: none; }
+.sv-sos-sent__title:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+.sv-sos-sent__meta { font-weight: 600; }
+.sv-sos-sent .sv-btn { grid-column: 1 / -1; }
+
+/* Thẻ chứa nút SOS trên màn An toàn */
+.sv-sos-card { padding: var(--space-8) var(--space-4) var(--space-6); border-radius: var(--radius-xl); }
+
+/* Chưa có số người thân: nút chưa dùng được, mời thêm số */
+.sv-sos.is-nophone .sv-sos__button {
+  background: var(--color-surface);
+  color: var(--color-sos);
+  box-shadow: inset 0 0 0 3px var(--color-sos);
+}
+.sv-sos.is-nophone .sv-sos__dots { visibility: hidden; }
+.sv-sos__direct { min-height: var(--size-touch); padding: 0 var(--space-4); border: var(--border-width) solid var(--color-sos); border-radius: var(--radius-full); background: var(--color-surface); color: var(--color-sos); font: var(--type-label-weight) var(--type-label-l-size)/1 var(--font-sans); }

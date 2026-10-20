@@ -1,0 +1,86 @@
+/* Bottom sheet xác nhận (dùng <dialog>) và snackbar phản hồi nhanh. */
+
+/* ---------- Bottom sheet ---------- */
+.sv-sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: var(--size-device-w);
+  max-height: 85vh;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-6) var(--space-6);
+  border: 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--color-surface-container-high);
+  color: var(--color-text);
+  box-shadow: var(--elevation-3);
+}
+.sv-sheet[open] { animation: sv-sheet-in var(--dur-long) var(--ease-emphasized-decel); }
+.sv-sheet::backdrop { background: var(--color-scrim); animation: sv-fade-in var(--dur-medium) var(--ease-standard); }
+html[data-contrast="high"] .sv-sheet { border-top: var(--border-width) solid var(--color-outline); }
+.sv-sheet__handle {
+  width: 32px; height: 4px;
+  margin: 0 auto var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--color-outline);
+}
+.sv-sheet__title { margin-bottom: var(--space-2); }
+.sv-sheet__body { margin-bottom: var(--space-6); color: var(--color-text); }
+.sv-sheet__actions { display: grid; gap: var(--space-2); }
+
+
+@keyframes sv-sheet-in { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes sv-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- Snackbar ---------- */
+.sv-snackbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--size-nav-bar) + var(--space-4));
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: calc(min(100vw, var(--size-device-w)) - 2 * var(--layout-gutter));
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-on-surface);
+  color: var(--color-background);
+  box-shadow: var(--elevation-3);
+  font: var(--type-body-weight) var(--type-body-m-size)/var(--type-body-m-line) var(--font-sans);
+  transform: translate(-50%, 16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--dur-medium) var(--ease-emphasized-decel), opacity var(--dur-medium) var(--ease-standard);
+}
+.sv-snackbar.is-visible { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.sv-snackbar__text { flex: 1; }
+.sv-snackbar .sv-btn--text { --btn-fg: var(--color-primary-container); min-height: 40px; margin: -8px -8px -8px 0; }
+.sv-device .sv-snackbar { position: absolute; width: calc(100% - 2 * var(--layout-gutter)); }
+html[data-contrast="high"] .sv-snackbar { background: var(--color-surface-container-high); color: var(--color-on-surface); border: var(--border-width) solid var(--color-outline); }
+
+/* Nội dung sheet chi tiết */
+.sv-sheet { overflow-y: auto; }
+.sv-sheet__lead {
+  display: grid; place-items: center;
+  width: 56px; height: 56px;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+.sv-sheet__lead .sv-icon { font-size: 28px; }
+.sv-sheet__title:focus { outline: none; }
+.sv-sheet__title:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+.sv-sheet__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-bottom: var(--space-3); }
+.sv-sheet__subtitle { margin: var(--space-2) 0 var(--space-2); font: var(--type-title-weight) var(--type-title-s-size)/var(--type-title-s-line) var(--font-sans); color: var(--color-on-surface); }
+.sv-sheet__say, .sv-sheet__note { display: flex; gap: var(--space-2); align-items: flex-start; color: var(--color-text-muted); }
+.sv-sheet__say { margin-bottom: var(--space-4); }
+.sv-sheet__say .sv-icon, .sv-sheet__note .sv-icon { font-size: 20px; margin-top: 2px; color: var(--color-primary-strong); }
+.sv-sheet__say b { color: var(--color-on-surface); font-weight: 600; }
+.sv-sheet__note { margin: calc(var(--space-3) * -1) 0 var(--space-5); }
+.sv-steps { display: grid; gap: var(--space-2); margin: 0 0 var(--space-6); padding-inline-start: 1.4em; font: var(--type-body-weight) var(--type-body-m-size)/var(--type-body-m-line) var(--font-sans); color: var(--color-text); }
+.sv-steps li::marker { font-weight: 700; color: var(--color-primary-strong); }
+
+.sv-sheet--in-device { border-radius: var(--radius-xl) var(--radius-xl) 34px 34px; }

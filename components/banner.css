@@ -1,0 +1,30 @@
+/* Thông báo trong trang: info · success · warning · error. Luôn có icon + chữ. */
+
+.sv-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container);
+  color: var(--color-on-surface);
+  font: var(--type-body-weight) var(--type-body-m-size)/var(--type-body-m-line) var(--font-sans);
+}
+.sv-banner .sv-icon { margin-top: 1px; }
+.sv-banner--info    { background: var(--color-primary-container); color: var(--color-on-primary-container); }
+.sv-banner--success { background: var(--color-success-container); color: var(--color-on-success-container); }
+.sv-banner--warning { background: var(--color-warning-container); color: var(--color-on-warning-container); }
+.sv-banner--error   { background: var(--color-error-container);   color: var(--color-on-error-container); }
+html[data-contrast="high"] .sv-banner { border: var(--border-width) solid currentColor; }
+
+/* Nhãn "Bản mô phỏng" gọn, đặt trên thanh tiêu đề */
+.sv-demo-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  min-height: 28px; padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-warning-container);
+  color: var(--color-on-warning-container);
+  font: var(--type-label-weight) var(--type-label-m-size)/1 var(--font-sans);
+}
+.sv-demo-tag .sv-icon { font-size: 16px; }
+html[data-contrast="high"] .sv-demo-tag { border: var(--border-width) solid currentColor; }

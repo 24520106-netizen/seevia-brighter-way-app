@@ -1,0 +1,107 @@
+/* Thanh trên (top app bar) và thanh điều hướng dưới (navigation bar) kiểu Material 3. */
+
+/* ---------- Top app bar ---------- */
+.sv-top-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--size-top-bar);
+  padding: var(--space-2) var(--space-1);
+  background: var(--color-background);
+  color: var(--color-on-surface);
+}
+.sv-top-bar__title {
+  flex: 1;
+  min-width: 0;
+  padding-inline: var(--space-3);
+  font: var(--type-title-weight) var(--type-title-l-size)/var(--type-title-l-line) var(--font-sans);
+  color: var(--color-on-surface);
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sv-top-bar > .sv-icon-btn:first-child + .sv-top-bar__title { padding-inline-start: var(--space-1); }
+.sv-top-bar__actions { display: flex; align-items: center; gap: var(--space-1); margin-inline-start: auto; padding-inline: var(--space-2); }
+.sv-top-bar.is-scrolled { background: var(--color-surface-container); }
+
+/* Biến thể lớn: tiêu đề Playfair dưới hàng điều hướng */
+.sv-top-bar--large { flex-wrap: wrap; padding-bottom: var(--space-4); }
+.sv-top-bar--large .sv-top-bar__title {
+  order: 3;
+  flex-basis: 100%;
+  padding: var(--space-3) var(--layout-gutter) 0;
+  white-space: normal;
+  font: var(--type-headline-weight) var(--type-headline-l-size)/var(--type-headline-l-line) var(--font-display);
+}
+.sv-top-bar--large .sv-top-bar__actions { margin-inline-start: auto; }
+
+/* Biến thể collapsing: tiêu đề hiện dần khi nội dung cuộn qua tiêu đề lớn */
+.sv-top-bar--collapsing .sv-top-bar__title { opacity: 0; transform: translateY(4px); transition: opacity var(--dur-medium) var(--ease-standard), transform var(--dur-medium) var(--ease-standard); }
+.sv-device.is-scrolled .sv-top-bar--collapsing .sv-top-bar__title { opacity: 1; transform: none; }
+.sv-device.is-scrolled .sv-top-bar { background: var(--color-surface-container); }
+.sv-top-bar__actions:empty { display: none; }
+
+/* Tiêu đề lớn đầu màn tab (Playfair) */
+.sv-page-title { padding: var(--space-1) var(--layout-gutter) 0; }
+.sv-page-title__lede { margin-top: var(--space-2); color: var(--color-text-muted); }
+
+/* Biến thể Dusk cho Trang chủ */
+.sv-top-bar--dusk { background: transparent; color: var(--color-on-dusk); }
+.sv-top-bar--dusk .sv-top-bar__title,
+.sv-top-bar--dusk .sv-icon-btn { color: var(--color-on-dusk); }
+
+/* ---------- Navigation bar ---------- */
+.sv-nav-bar {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: var(--size-nav-bar);
+  padding: var(--space-3) 0 var(--space-4);
+  background: var(--color-surface-container);
+  border-top: var(--border-width) solid var(--color-outline-variant);
+}
+html:not([data-contrast="high"]) .sv-nav-bar { border-top-color: transparent; }
+.sv-nav-bar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--size-touch);
+  padding: 0;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.sv-nav-bar__indicator {
+  position: relative;
+  display: grid; place-items: center;
+  width: 64px; height: 32px;
+  border-radius: var(--radius-full);
+  isolation: isolate;
+  overflow: hidden;
+  transition: background var(--dur-medium) var(--ease-standard);
+}
+.sv-nav-bar__indicator::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; z-index: -1; transition: opacity var(--dur-short) var(--ease-standard); }
+.sv-nav-bar__item:hover .sv-nav-bar__indicator::before { opacity: var(--state-hover); }
+.sv-nav-bar__label {
+  /* Nhãn thanh điều hướng không phóng quá 14px để 5 đích luôn vừa một hàng; nội dung màn hình vẫn phóng đủ */
+  max-width: 100%;
+  padding: 0 2px;
+  font: var(--type-label-weight) min(var(--type-label-m-size), var(--type-nav-label-max))/1.2 var(--font-sans);
+  letter-spacing: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+.sv-nav-bar__item[aria-current="page"] { color: var(--color-on-surface); }
+.sv-nav-bar__item[aria-current="page"] .sv-nav-bar__indicator {
+  background: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+}
+.sv-nav-bar__item[aria-current="page"] .sv-icon { font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24; }
+.sv-nav-bar__item:focus-visible { outline: none; }
+.sv-nav-bar__item:focus-visible .sv-nav-bar__indicator { outline: var(--focus-ring); outline-offset: 2px; }
+
+html[data-font="lg"] .sv-nav-bar__label { white-space: normal; }
+
+/* Chữ To: tiêu đề thanh trên được xuống 2 dòng thay vì bị cắt */
+html[data-font="lg"] .sv-top-bar__title { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; }

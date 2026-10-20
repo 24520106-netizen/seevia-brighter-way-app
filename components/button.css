@@ -1,0 +1,110 @@
+/* Nút: filled · tonal · outlined · text · danger · icon · FAB. Dùng <button> hoặc <a>. */
+
+.sv-btn {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-primary-strong);
+  --btn-border: transparent;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--size-button);
+  min-width: var(--size-touch);
+  padding: 0 var(--space-6);
+  border: var(--border-width) solid var(--btn-border);
+  border-radius: var(--radius-full);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font: var(--type-label-weight) var(--type-label-l-size)/var(--type-label-l-line) var(--font-sans);
+  letter-spacing: var(--type-label-tracking);
+  text-decoration: none;
+  text-align: center;
+  isolation: isolate;
+  overflow: hidden;
+  transition: box-shadow var(--dur-short) var(--ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.sv-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity var(--dur-short) var(--ease-standard);
+}
+.sv-btn:hover::before { opacity: var(--state-hover); }
+.sv-btn:focus-visible::before { opacity: var(--state-focus); }
+.sv-btn:active::before { opacity: var(--state-pressed); }
+.sv-btn .sv-icon { font-size: 20px; margin-inline-start: calc(var(--space-2) * -1); }
+
+.sv-btn--filled  { --btn-bg: var(--color-primary-fill); --btn-fg: var(--color-on-primary); }
+.sv-btn--filled:hover { box-shadow: var(--elevation-1); }
+.sv-btn--tonal   { --btn-bg: var(--color-primary-container); --btn-fg: var(--color-on-primary-container); }
+.sv-btn--outlined{ --btn-border: var(--color-outline); --btn-fg: var(--color-primary-strong); }
+.sv-btn--text    { padding-inline: var(--space-3); --btn-fg: var(--color-primary-strong); }
+.sv-btn--danger  { --btn-bg: var(--color-error); --btn-fg: var(--color-on-error); }
+.sv-btn--danger-text { padding-inline: var(--space-3); --btn-fg: var(--color-error); }
+.sv-btn--block   { display: flex; width: 100%; }
+
+.sv-btn:disabled,
+.sv-btn[aria-disabled="true"] {
+  --btn-bg: color-mix(in oklab, var(--color-on-surface) 10%, transparent);
+  --btn-fg: color-mix(in oklab, var(--color-on-surface) 50%, transparent);
+  --btn-border: color-mix(in oklab, var(--color-on-surface) 14%, transparent);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.sv-btn:disabled::before { display: none; }
+
+html[data-contrast="high"] .sv-btn--tonal { --btn-border: var(--color-primary-strong); }
+
+/* Nút icon tròn 48 */
+.sv-icon-btn {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--size-touch);
+  height: var(--size-touch);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-on-surface);
+  text-decoration: none;
+  isolation: isolate;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.sv-icon-btn::before {
+  content: ""; position: absolute; inset: 4px; border-radius: inherit;
+  background: currentColor; opacity: 0; z-index: -1;
+  transition: opacity var(--dur-short) var(--ease-standard);
+}
+.sv-icon-btn:hover::before { opacity: var(--state-hover); }
+.sv-icon-btn:active::before { opacity: var(--state-pressed); }
+.sv-icon-btn--tonal { background: var(--color-surface-container); }
+
+/* FAB mở rộng: một hành động chính của màn hình */
+.sv-fab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 0 var(--space-5) 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  box-shadow: var(--elevation-2);
+  font: var(--type-label-weight) var(--type-label-l-size)/1 var(--font-sans);
+  letter-spacing: var(--type-label-tracking);
+  isolation: isolate;
+  overflow: hidden;
+}
+.sv-fab::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; z-index: -1; transition: opacity var(--dur-short) var(--ease-standard); }
+.sv-fab:hover::before { opacity: var(--state-hover); }
+.sv-fab:active::before { opacity: var(--state-pressed); }
+html[data-contrast="high"] .sv-fab { border: var(--border-width) solid var(--color-primary-strong); }

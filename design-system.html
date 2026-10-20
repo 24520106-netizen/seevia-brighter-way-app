@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="vi" data-title-key="ds.title">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="components/index.css">
+<link rel="stylesheet" href="docs/design-system.css">
+<script src="brand/brand.js"></script>
+<script src="content/vi.js"></script>
+<script>
+  /* Chữ riêng của trang tài liệu này (không phải chữ trong app) */
+  SV.content.ds = { title: "Hệ thống thiết kế" };
+</script>
+<script src="core/app.js"></script>
+</head>
+<body>
+
+<header class="ds-top">
+  <div class="ds-top__inner">
+    <div class="ds-top__brand">
+      <sv-logo variant="full" height="34"></sv-logo>
+      <span class="t-label-m t-muted">Hệ thống thiết kế · bước 2</span>
+    </div>
+    <div class="ds-top__controls">
+      <div class="sv-segmented" role="radiogroup" aria-label="Chủ đề" id="ctl-scheme">
+        <button class="sv-segmented__item" role="radio" value="light" aria-checked="false"><span class="sv-icon" aria-hidden="true">check</span>Sáng</button>
+        <button class="sv-segmented__item" role="radio" value="dark" aria-checked="false"><span class="sv-icon" aria-hidden="true">check</span>Tối</button>
+        <button class="sv-segmented__item" role="radio" value="contrast" aria-checked="false"><span class="sv-icon" aria-hidden="true">check</span>Tương phản cao</button>
+      </div>
+      <div class="sv-segmented" role="radiogroup" aria-label="Cỡ chữ" id="ctl-font">
+        <button class="sv-segmented__item" role="radio" value="sm" aria-checked="false"><span class="sv-icon" aria-hidden="true">check</span>Nhỏ</button>
+        <button class="sv-segmented__item" role="radio" value="md" aria-checked="false"><span class="sv-icon" aria-hidden="true">check</span>Vừa</button>
+        <button class="sv-segmented__item" role="radio" value="lg" aria-checked="false"><span class="sv-icon" aria-hidden="true">check</span>To</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="ds">
+
+  <section class="ds-hero">
+    <h1 class="t-display"><span data-brand="name"></span> trên điện thoại</h1>
+    <p class="t-body-l ds-hero__lede">Bộ nhận diện trong thư mục <code>logo</code>, chuyển thành hệ thống giao diện Android (Material 3) cho app đồng hành của kính. Mọi màu, chữ, khoảng cách trên trang này đọc trực tiếp từ <code>tokens.css</code>. Đổi chủ đề và cỡ chữ ở thanh trên để xem cả hệ thống thay đổi theo.</p>
+    <p class="t-label-l"><span data-brand="slogan"></span></p>
+  </section>
+
+  <!-- ============ LOGO ============ -->
+  <section class="ds-section" id="logo">
+    <h2 class="t-headline-l">Logo</h2>
+    <p class="t-body-m ds-note">Lấy nguyên từ <code>brand/</code>. Logo đầy đủ tự đổi sang bản nền tối hoặc bản trắng khi app ở chế độ tối hay tương phản cao. Thay file SVG trong <code>brand/</code> là mọi màn hình đổi theo.</p>
+    <div class="ds-logos">
+      <div class="ds-logo"><sv-logo variant="full" height="56"></sv-logo><span class="ds-logo__name">Đầy đủ (tự đổi theo chủ đề)</span></div>
+      <div class="ds-logo ds-logo--dusk"><sv-logo variant="fullDark" height="56"></sv-logo><span class="ds-logo__name">Nền tối · logo-full-dark.svg</span></div>
+      <div class="ds-logo"><sv-logo variant="mark" height="56"></sv-logo><span class="ds-logo__name">Biểu tượng · logo-mark.svg</span></div>
+      <div class="ds-logo"><sv-logo variant="icon" height="64"></sv-logo><span class="ds-logo__name">App icon · logo-icon.svg</span></div>
+      <div class="ds-logo"><sv-logo variant="wordmark" height="40"></sv-logo><span class="ds-logo__name">Wordmark · logo-wordmark.svg</span></div>
+      <div class="ds-logo ds-logo--dusk"><sv-logo variant="white" height="56"></sv-logo><span class="ds-logo__name">Một màu trắng · logo-white.svg</span></div>
+      <div class="ds-logo"><sv-logo variant="black" height="56"></sv-logo><span class="ds-logo__name">Một màu đen · logo-black.svg</span></div>
+    </div>
+  </section>
+
+  <!-- ============ MÀU ============ -->
+  <section class="ds-section" id="mau">
+    <h2 class="t-headline-l">Màu</h2>
+    <p class="t-body-m ds-note">Hai tầng. Tầng 1 là mã màu gốc của bộ nhận diện. Tầng 2 là vai trò mà màn hình và component dùng; giá trị hiển thị dưới đây là giá trị đang áp dụng ở chủ đề hiện tại.</p>
+
+    <h3 class="t-title-l ds-sub">Tầng 2 · vai trò</h3>
+    <div class="ds-swatches" id="role-swatches"></div>
+
+    <h3 class="t-title-l ds-sub">Cặp chữ / nền và độ tương phản (WCAG)</h3>
+    <div class="ds-table-wrap">
+      <table class="ds-table">
+        <thead><tr><th>Mẫu</th><th>Chữ</th><th>Nền</th><th>Tỉ lệ</th><th>Kết luận</th></tr></thead>
+        <tbody id="contrast-rows"></tbody>
+      </table>
+    </div>
+
+    <h3 class="t-title-l ds-sub">Tầng 1 · màu gốc SeeVia</h3>
+    <div class="ds-swatches" id="brand-swatches"></div>
+  </section>
+
+  <!-- ============ CHỮ ============ -->
+  <section class="ds-section" id="chu">
+    <h2 class="t-headline-l">Chữ</h2>
+    <p class="t-body-m ds-note">Playfair Display cho tiêu đề lớn, Be Vietnam Pro cho mọi chữ đọc, đúng bộ nhận diện. Thang theo vai trò Material 3; chữ đọc tối thiểu 16px. Mọi cỡ nhân với hệ số cỡ chữ người dùng chọn (×0,88 · ×1 · ×1,28).</p>
+    <div class="ds-type" id="type-rows">
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="display">Display · Playfair 600</span><span class="t-display">Kính trợ lý thị giác</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="headline-l">Headline L · Playfair 600</span><span class="t-headline-l">Kính của bạn đã sẵn sàng</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="headline-m">Headline M · Playfair 600</span><span class="t-headline-m">Ảnh và video</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="headline-s">Headline S · Playfair 600</span><span class="t-headline-s">Hủy liên kết kính?</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="title-l">Title L · Be Vietnam Pro 600</span><span class="t-title-l">Lịch sử hoạt động</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="title-m">Title M · Be Vietnam Pro 600</span><span class="t-title-m">Cấu hình số khẩn cấp</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="title-s">Title S · Be Vietnam Pro 600</span><span class="t-title-s">Đọc chữ và sách báo</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="body-l">Body L · Be Vietnam Pro 400</span><span class="t-body-l">Kính đọc thành tiếng văn bản, bảng hiệu và mệnh giá tiền bằng tiếng Việt.</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="body-m">Body M · Be Vietnam Pro 400</span><span class="t-body-m">SeeVia gọi số này khi bạn kích hoạt SOS. Không có cuộc gọi thật nào trong bản mô phỏng.</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="body-s">Body S · Be Vietnam Pro 400</span><span class="t-body-s t-muted">Hôm nay, 09:42 · Đi bộ tới Bưu điện Trung tâm</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="label-l">Label L · Be Vietnam Pro 600</span><span class="t-label-l">Lưu số khẩn cấp</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="label-m">Label M · Be Vietnam Pro 600</span><span class="t-label-m">Trang chủ · Tính năng · An toàn</span></div>
+      <div class="ds-type__row"><span class="ds-type__spec" data-spec="label-s">Label S · Be Vietnam Pro 600</span><span class="t-label-s">Hoàn tất</span></div>
+    </div>
+  </section>
+
+  <!-- ============ KHOẢNG CÁCH · BO GÓC · BÓNG ============ -->
+  <section class="ds-section" id="khoang-cach">
+    <h2 class="t-headline-l">Khoảng cách, bo góc, đổ bóng</h2>
+    <p class="t-body-m ds-note">Lưới 4px. Lề màn hình 16, khoảng giữa khối 12, trước mỗi mục mới 32. Vùng chạm tối thiểu 48. Bo góc mềm như nét bo tròn của logo; nút và chip bo tròn hẳn.</p>
+    <div class="ds-grid-3">
+      <div class="ds-panel">
+        <h3 class="t-title-m">Khoảng cách</h3>
+        <div class="ds-space">
+          <div class="ds-space__row"><span>space-1 · 4</span><span class="ds-space__bar" style="width:var(--space-1)"></span></div>
+          <div class="ds-space__row"><span>space-2 · 8</span><span class="ds-space__bar" style="width:var(--space-2)"></span></div>
+          <div class="ds-space__row"><span>space-3 · 12</span><span class="ds-space__bar" style="width:var(--space-3)"></span></div>
+          <div class="ds-space__row"><span>space-4 · 16</span><span class="ds-space__bar" style="width:var(--space-4)"></span></div>
+          <div class="ds-space__row"><span>space-6 · 24</span><span class="ds-space__bar" style="width:var(--space-6)"></span></div>
+          <div class="ds-space__row"><span>space-8 · 32</span><span class="ds-space__bar" style="width:var(--space-8)"></span></div>
+          <div class="ds-space__row"><span>space-12 · 48</span><span class="ds-space__bar" style="width:var(--space-12)"></span></div>
+        </div>
+      </div>
+      <div class="ds-panel">
+        <h3 class="t-title-m">Bo góc</h3>
+        <div class="ds-radius">
+          <div style="border-radius:var(--radius-xs)">xs 4</div>
+          <div style="border-radius:var(--radius-sm)">sm 8</div>
+          <div style="border-radius:var(--radius-md)">md 12</div>
+          <div style="border-radius:var(--radius-lg)">lg 16</div>
+          <div style="border-radius:var(--radius-xl)">xl 28</div>
+          <div style="border-radius:var(--radius-full)">full</div>
+        </div>
+      </div>
+      <div class="ds-panel">
+        <h3 class="t-title-m">Đổ bóng</h3>
+        <div class="ds-elev">
+          <div style="box-shadow:var(--elevation-1)">elevation-1 · nút khi rê chuột</div>
+          <div style="box-shadow:var(--elevation-2)">elevation-2 · FAB, thẻ nổi</div>
+          <div style="box-shadow:var(--elevation-3)">elevation-3 · bottom sheet, snackbar</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMPONENT ============ -->
+  <section class="ds-section" id="component">
+    <h2 class="t-headline-l">Component cơ bản</h2>
+    <p class="t-body-m ds-note">Viết một lần trong <code>components/</code>, các màn hình chỉ ghép lại. Mọi chữ dưới đây lấy từ <code>content/vi.js</code>.</p>
+
+    <div class="ds-components">
+
+      <div class="ds-demo">
+        <p class="ds-demo__title">Nút</p>
+        <div class="ds-row">
+          <button class="sv-btn sv-btn--filled" type="button" data-t="demo.buttons.primary"></button>
+          <button class="sv-btn sv-btn--tonal" type="button"><span class="sv-icon" aria-hidden="true">link</span><span data-t="demo.buttons.tonal"></span></button>
+        </div>
+        <div class="ds-row">
+          <button class="sv-btn sv-btn--outlined" type="button" data-t="demo.buttons.outlined"></button>
+          <button class="sv-btn sv-btn--text" type="button" data-t="demo.buttons.text"></button>
+          <button class="sv-btn sv-btn--filled" type="button" disabled data-t="demo.buttons.disabled"></button>
+        </div>
+        <div class="ds-row">
+          <button class="sv-btn sv-btn--danger" type="button" id="demo-sheet" data-t="demo.buttons.danger"></button>
+          <button class="sv-icon-btn sv-icon-btn--tonal" type="button" data-t-aria="common.edit"><span class="sv-icon" aria-hidden="true">edit</span></button>
+        </div>
+        <div class="ds-row">
+          <button class="sv-fab" type="button"><span class="sv-icon" aria-hidden="true">mic</span><span data-t="demo.buttons.fab"></span></button>
+        </div>
+      </div>
+
+      <div class="ds-demo">
+        <p class="ds-demo__title">Chip và nhãn trạng thái</p>
+        <div class="ds-row">
+          <span class="sv-chip"><span class="sv-icon" aria-hidden="true">record_voice_over</span><span data-t="demo.chips.voice"></span></span>
+          <span class="sv-chip"><span class="sv-icon" aria-hidden="true">back_hand</span><span data-t="demo.chips.handsFree"></span></span>
+        </div>
+        <div class="ds-row">
+          <button class="sv-chip" type="button" aria-pressed="true"><span class="sv-icon" aria-hidden="true">check</span><span data-t="demo.chips.filterToday"></span></button>
+          <button class="sv-chip" type="button" aria-pressed="false"><span data-t="demo.chips.filterWeek"></span></button>
+        </div>
+        <div class="ds-row">
+          <span class="sv-badge sv-badge--success"><span class="sv-icon" aria-hidden="true">check_circle</span><span data-t="status.done"></span></span>
+          <span class="sv-badge sv-badge--error"><span class="sv-icon" aria-hidden="true">error</span><span data-t="status.failed"></span></span>
+          <span class="sv-badge sv-badge--primary"><span data-t="status.linked"></span></span>
+          <span class="sv-demo-tag"><span class="sv-icon" aria-hidden="true">science</span><span data-t="common.demoBadge"></span></span>
+        </div>
+      </div>
+
+      <div class="ds-demo">
+        <p class="ds-demo__title">Thẻ trạng thái kính (chữ ký thị giác)</p>
+        <sv-glasses-card connected battery="82" version="2.1.4" href="#"></sv-glasses-card>
+      </div>
+
+      <div class="ds-demo">
+        <p class="ds-demo__title">Danh sách</p>
+        <ul class="sv-list" role="list">
+          <li><sv-list-item href="#" icon="history" heading="demo.list.activity" sub="demo.list.activitySub"></sv-list-item></li>
+          <li><sv-list-item href="#" icon="photo_library" heading="demo.list.album" sub="demo.list.albumSub"></sv-list-item></li>
+          <li><sv-list-item href="#" icon="format_size" heading="demo.list.fontSize" trailing="value:demo.list.fontSizeValue" compact></sv-list-item></li>
+          <li><sv-list-item icon="contrast" heading="demo.list.contrast" sub="demo.list.contrastSub" trailing="switch"></sv-list-item></li>
+        </ul>
+      </div>
+
+      <div class="ds-demo">
+        <p class="ds-demo__title">Ô nhập</p>
+        <div class="sv-field">
+          <label class="sv-field__label" for="f-phone" data-t="demo.field.phoneLabel"></label>
+          <input class="sv-field__control" id="f-phone" type="tel" inputmode="tel" aria-describedby="f-phone-help">
+          <p class="sv-field__help" id="f-phone-help" data-t="demo.field.phoneHelp"></p>
+        </div>
+        <div class="sv-field sv-field--error">
+          <label class="sv-field__label" for="f-serial" data-t="demo.field.serialLabel"></label>
+          <input class="sv-field__control" id="f-serial" aria-invalid="true" aria-describedby="f-serial-err" data-t-placeholder="demo.field.serialPlaceholder">
+          <p class="sv-field__help" id="f-serial-err"><span class="sv-icon" aria-hidden="true">error</span><span data-t="demo.field.serialError"></span></p>
+        </div>
+        <div class="sv-field">
+          <label class="sv-field__label" for="f-msg" data-t="demo.field.messageLabel"></label>
+          <textarea class="sv-field__control" id="f-msg" data-t-placeholder="demo.field.messagePlaceholder"></textarea>
+        </div>
+      </div>
+
+      <div class="ds-demo">
+        <p class="ds-demo__title">Công tắc và nút chọn nhiều phần</p>
+        <div class="ds-row">
+          <button class="sv-switch" role="switch" aria-checked="true" data-t-aria="demo.list.contrast"><span class="sv-switch__handle"><span class="sv-icon" aria-hidden="true">check</span></span></button>
+          <button class="sv-switch" role="switch" aria-checked="false" data-t-aria="demo.list.contrast"><span class="sv-switch__handle"><span class="sv-icon" aria-hidden="true">check</span></span></button>
+        </div>
+        <div class="sv-segmented" role="radiogroup" data-t-aria="demo.segmented.label">
+          <button class="sv-segmented__item" role="radio" value="sm" aria-checked="false" tabindex="-1"><span class="sv-icon" aria-hidden="true">check</span><span data-t="demo.segmented.small"></span></button>
+          <button class="sv-segmented__item" role="radio" value="md" aria-checked="true"><span class="sv-icon" aria-hidden="true">check</span><span data-t="demo.segmented.medium"></span></button>
+          <button class="sv-segmented__item" role="radio" value="lg" aria-checked="false" tabindex="-1"><span class="sv-icon" aria-hidden="true">check</span><span data-t="demo.segmented.large"></span></button>
+        </div>
+        <p class="ds-demo__title">Thông báo</p>
+        <div class="l-stack">
+          <p class="sv-banner sv-banner--info"><span class="sv-icon" aria-hidden="true">info</span><span data-t="demo.banners.info"></span></p>
+          <p class="sv-banner sv-banner--success"><span class="sv-icon" aria-hidden="true">check_circle</span><span data-t="demo.banners.success"></span></p>
+          <p class="sv-banner sv-banner--warning"><span class="sv-icon" aria-hidden="true">battery_alert</span><span data-t="demo.banners.warning"></span></p>
+          <p class="sv-banner sv-banner--error" role="alert"><span class="sv-icon" aria-hidden="true">error</span><span data-t="demo.banners.error"></span></p>
+        </div>
+        <div class="ds-row">
+          <button class="sv-btn sv-btn--outlined" type="button" id="demo-snack">Hiện snackbar</button>
+        </div>
+      </div>
+
+      <div class="ds-demo">
+        <p class="ds-demo__title">Nút SOS (nhấn 3 lần)</p>
+        <sv-sos-button></sv-sos-button>
+      </div>
+
+      <div class="ds-demo">
+        <p class="ds-demo__title">Trạng thái rỗng và accordion</p>
+        <div class="sv-empty">
+          <div class="sv-empty__mark" id="empty-mark"></div>
+          <p class="sv-empty__title" data-t="demo.empty.title"></p>
+          <p class="sv-empty__body t-body-m" data-t="demo.empty.body"></p>
+          <a class="sv-btn sv-btn--tonal" href="#" data-t="demo.empty.action"></a>
+        </div>
+        <details class="sv-accordion" open>
+          <summary><span class="sv-icon" aria-hidden="true">link</span><span data-t="demo.accordion.q1"></span><span class="sv-icon" aria-hidden="true">expand_more</span></summary>
+          <p class="sv-accordion__body t-body-m" data-t="demo.accordion.a1"></p>
+        </details>
+        <details class="sv-accordion">
+          <summary><span class="sv-icon" aria-hidden="true">mic</span><span data-t="demo.accordion.q2"></span><span class="sv-icon" aria-hidden="true">expand_more</span></summary>
+          <p class="sv-accordion__body t-body-m" data-t="demo.accordion.a2"></p>
+        </details>
+      </div>
+
+      <div class="ds-demo ds-demo--wide">
+        <p class="ds-demo__title">Thanh trên, thanh điều hướng và khung điện thoại 390×844</p>
+        <div class="ds-phone-wrap">
+          <div class="sv-device sv-device--dusk" id="demo-device">
+            <sv-status-bar></sv-status-bar>
+            <div class="sv-device__screen">
+              <div class="ds-home-head sv-dusk-head">
+                <sv-top-bar variant="dusk">
+                  <span class="sv-demo-tag"><span class="sv-icon" aria-hidden="true">science</span><span data-t="common.demoBadge"></span></span>
+                  <a class="sv-icon-btn" href="#" data-t-aria="nav.profile"><span class="sv-icon" aria-hidden="true">account_circle</span></a>
+                </sv-top-bar>
+                <div class="l-gutter" style="padding-bottom:var(--space-4)">
+                  <sv-logo variant="white" height="40" decorative></sv-logo>
+                  <p class="t-headline-l" style="color:var(--color-on-dusk);margin-top:var(--space-3)" data-t="demo.topBar.homeGreeting"></p>
+                </div>
+                <sv-glasses-card connected battery="82" version="2.1.4" href="#"></sv-glasses-card>
+              </div>
+              <div class="l-gutter">
+                <section class="l-section">
+                  <h2 class="sv-section-title" data-t="demo.section.shortcuts"></h2>
+                  <ul class="sv-list" role="list">
+                    <li><sv-list-item href="#" icon="history" heading="demo.list.activity" sub="demo.list.activitySub"></sv-list-item></li>
+                    <li><sv-list-item href="#" icon="photo_library" heading="demo.list.album" sub="demo.list.albumSub"></sv-list-item></li>
+                  </ul>
+                </section>
+              </div>
+            </div>
+            <sv-nav-bar active="home" base="screens/"></sv-nav-bar>
+            <div class="sv-gesture-bar" aria-hidden="true"></div>
+          </div>
+
+          <div class="sv-device">
+            <sv-status-bar></sv-status-bar>
+            <sv-top-bar heading="demo.topBar.screenTitle" back="#">
+              <button class="sv-icon-btn" type="button" data-t-aria="common.more"><span class="sv-icon" aria-hidden="true">more_vert</span></button>
+            </sv-top-bar>
+            <div class="sv-device__screen">
+              <div class="sv-empty">
+                <div class="sv-empty__mark" id="empty-mark-2"></div>
+                <p class="sv-empty__title" data-t="demo.empty.title"></p>
+                <p class="sv-empty__body t-body-m" data-t="demo.empty.body"></p>
+                <a class="sv-btn sv-btn--tonal" href="#" data-t="demo.empty.action"></a>
+              </div>
+            </div>
+            <sv-nav-bar active="home" base="screens/"></sv-nav-bar>
+            <div class="sv-gesture-bar" aria-hidden="true"></div>
+          </div>
+
+          <div class="ds-phone-notes t-body-m">
+            <p class="t-title-m">Cách ghép</p>
+            <p>Trang chủ mở đầu bằng vùng Dusk (Ink 800 với ánh sapphire) chứa logo, lời chào và thẻ trạng thái kính. Đây là màu “vỏ” của app; phần dưới là nền Pearl với danh sách trắng.</p>
+            <p>Màn con dùng thanh trên nhỏ của Material: nút quay lại, tiêu đề canh trái, hành động bên phải. Nút Back hệ thống luôn hoạt động.</p>
+            <p>Thanh điều hướng 5 đích, nhãn một dòng, ô chỉ báo màu Lilac sau icon của tab đang mở.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script src="components/elements.js"></script>
+<script src="docs/design-system.js"></script>
+</body>
+</html>

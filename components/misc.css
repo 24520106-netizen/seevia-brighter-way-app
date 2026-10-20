@@ -1,0 +1,77 @@
+/* Tiêu đề mục, trạng thái rỗng, accordion, logo. */
+
+/* ---------- Tiêu đề mục ---------- */
+.sv-section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font: var(--type-title-weight) var(--type-title-m-size)/var(--type-title-m-line) var(--font-sans);
+  color: var(--color-on-surface);
+}
+.sv-section-title a { font: var(--type-label-weight) var(--type-label-l-size)/1 var(--font-sans); text-decoration: none; }
+
+/* ---------- Trạng thái rỗng ---------- */
+.sv-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-6);
+  text-align: center;
+}
+.sv-empty__mark {
+  display: grid; place-items: center;
+  width: 88px; height: 88px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-container);
+  color: var(--color-primary-strong);
+}
+.sv-empty__mark svg { width: 36px; height: 36px; fill: currentColor; }
+.sv-empty__title { font: var(--type-headline-weight) var(--type-headline-s-size)/var(--type-headline-s-line) var(--font-display); color: var(--color-on-surface); }
+.sv-empty__body { max-width: 30ch; color: var(--color-text-muted); }
+.sv-empty .sv-btn { margin-top: var(--space-2); }
+
+/* ---------- Accordion (<details class="sv-accordion">) ---------- */
+.sv-accordion {
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-outline-variant);
+}
+.sv-accordion + .sv-accordion { margin-top: var(--space-2); }
+.sv-accordion > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 64px;
+  padding: var(--space-3) var(--space-4);
+  list-style: none;
+  cursor: pointer;
+  font: var(--type-title-weight) var(--type-title-s-size)/var(--type-title-s-line) var(--font-sans);
+  color: var(--color-on-surface);
+  border-radius: inherit;
+}
+.sv-accordion > summary::-webkit-details-marker { display: none; }
+.sv-accordion > summary > span:not(.sv-icon) { flex: 1; }
+.sv-accordion > summary .sv-icon:last-child { color: var(--color-text-muted); transition: transform var(--dur-medium) var(--ease-standard); }
+.sv-accordion[open] > summary .sv-icon:last-child { transform: rotate(180deg); }
+.sv-accordion > summary .sv-icon:first-child { color: var(--color-primary-strong); }
+.sv-accordion__body { padding: 0 var(--space-4) var(--space-4) calc(var(--space-4) + var(--size-icon) + var(--space-3)); color: var(--color-text); }
+
+/* ---------- Logo ---------- */
+.sv-logo { display: inline-block; }
+.sv-logo img { display: block; height: 100%; width: auto; }
+
+/* ---------- Đầu mục có liên kết "Xem tất cả" (liên kết nằm ngoài tiêu đề, vùng chạm 48) ---------- */
+.sv-section-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: calc(var(--layout-section-after) - var(--space-2)); margin-top: calc(var(--space-2) * -1); }
+.sv-section-link {
+  display: inline-flex; align-items: center;
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  margin-inline-end: calc(var(--space-3) * -1);
+  border-radius: var(--radius-full);
+  color: var(--color-text-link);
+  font: var(--type-label-weight) var(--type-label-l-size)/1 var(--font-sans);
+  text-decoration: none;
+}
+.sv-section-link:hover { text-decoration: underline; }

@@ -1,0 +1,70 @@
+/* Công tắc (Material 3 switch) và nút chọn nhiều phần (segmented button). */
+
+/* ---------- Switch: <button class="sv-switch" role="switch" aria-checked="false"> ---------- */
+.sv-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  width: 52px;
+  height: 32px;
+  padding: 0;
+  border: 2px solid var(--color-outline);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-container);
+  transition: background var(--dur-medium) var(--ease-standard), border-color var(--dur-medium) var(--ease-standard);
+}
+.sv-switch::after { content: ""; position: absolute; inset: -8px -4px; } /* vùng chạm 48 */
+.sv-switch__handle {
+  position: absolute;
+  left: 6px;
+  display: grid; place-items: center;
+  width: 16px; height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-outline);
+  color: transparent;
+  transition: left var(--dur-medium) var(--ease-emphasized-decel), width var(--dur-medium) var(--ease-standard), height var(--dur-medium) var(--ease-standard), background var(--dur-medium) var(--ease-standard);
+}
+.sv-switch__handle .sv-icon { font-size: 16px; }
+.sv-switch[aria-checked="true"] { background: var(--color-primary-fill); border-color: var(--color-primary-fill); }
+.sv-switch[aria-checked="true"] .sv-switch__handle {
+  left: 22px; width: 24px; height: 24px;
+  background: var(--color-on-primary);
+  color: var(--color-primary-strong);
+}
+html[data-contrast="high"] .sv-switch[aria-checked="true"] .sv-switch__handle { color: var(--color-on-primary); background: var(--color-on-primary); }
+html[data-contrast="high"] .sv-switch[aria-checked="true"] .sv-switch__handle .sv-icon { color: var(--color-primary-fill); }
+
+/* ---------- Segmented: <div class="sv-segmented" role="radiogroup"> với <button role="radio"> ---------- */
+.sv-segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border: var(--border-width) solid var(--color-outline);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.sv-segmented__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--size-button);
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--color-on-surface);
+  font: var(--type-label-weight) var(--type-label-l-size)/1 var(--font-sans);
+  isolation: isolate;
+}
+.sv-segmented__item + .sv-segmented__item { border-inline-start: var(--border-width) solid var(--color-outline); }
+.sv-segmented__item::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; z-index: -1; transition: opacity var(--dur-short) var(--ease-standard); }
+.sv-segmented__item:hover::before { opacity: var(--state-hover); }
+.sv-segmented__item:focus-visible { outline-offset: -4px; }
+.sv-segmented__item .sv-icon { font-size: 18px; display: none; }
+.sv-segmented__item[aria-checked="true"] {
+  background: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+}
+.sv-segmented__item[aria-checked="true"] .sv-icon { display: inline-grid; }

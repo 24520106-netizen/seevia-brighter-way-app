@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="SeeVia mark">
+  <title>SeeVia mark</title>
+  <defs>
+    <linearGradient id="mgS" x1="15" y1="18" x2="34" y2="43" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#09BBC8"/><stop offset="1" stop-color="#405FFA"/>
+    </linearGradient>
+    <linearGradient id="mgV" x1="27" y1="31" x2="52" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#405FFA"/><stop offset="1" stop-color="#8B6CFF"/>
+    </linearGradient>
+    <filter id="mglow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#mglow)">
+    <path d="M38,17 L28,17 C19.5,17 13.5,20.5 13.5,25.5 C13.5,30 18,31.6 24.5,33.2 C31,34.8 33.5,37 32.5,40.6 C31.4,44.4 27,46.2 22.5,46.2 C18.4,46.2 15.6,44 13.8,41" fill="none" stroke="url(#mgS)" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M27,31 C31.8,33.6 35,38 38.2,45.6 C39.4,48.6 41.6,48.6 42.8,45.6 L52.5,25" fill="none" stroke="url(#mgV)" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
+  </g>
+  <g opacity="0.42" transform="translate(-1.1,-1.3)">
+    <path d="M38,17 L28,17 C19.5,17 13.5,20.5 13.5,25.5 C13.5,30 18,31.6 24.5,33.2 C31,34.8 33.5,37 32.5,40.6 C31.4,44.4 27,46.2 22.5,46.2 C18.4,46.2 15.6,44 13.8,41" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+    <path d="M27,31 C31.8,33.6 35,38 38.2,45.6 C39.4,48.6 41.6,48.6 42.8,45.6 L52.5,25" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  </g>
+</svg>

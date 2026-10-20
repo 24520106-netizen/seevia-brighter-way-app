@@ -1,0 +1,51 @@
+/* Chip (assist · filter) và nhãn trạng thái (badge). */
+
+.sv-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--color-outline);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-on-surface);
+  font: var(--type-label-weight) var(--type-label-m-size)/1 var(--font-sans);
+  letter-spacing: var(--type-label-tracking);
+  isolation: isolate;
+  overflow: hidden;
+}
+/* Vùng chạm 48 dù chip cao 40 */
+.sv-chip::after { content: ""; position: absolute; inset: -4px 0; }
+.sv-chip .sv-icon { font-size: 18px; color: var(--color-primary-strong); }
+button.sv-chip::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; z-index: -1; transition: opacity var(--dur-short) var(--ease-standard); }
+button.sv-chip:hover::before { opacity: var(--state-hover); }
+.sv-chip[aria-pressed="true"],
+.sv-chip[aria-checked="true"] {
+  border-color: transparent;
+  background: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+}
+.sv-chip[aria-pressed="true"] .sv-icon { color: inherit; }
+
+/* Nhãn trạng thái: chữ luôn đi kèm, không chỉ dựa vào màu */
+.sv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-container);
+  color: var(--color-on-surface);
+  font: var(--type-label-weight) var(--type-label-s-size)/1 var(--font-sans);
+  letter-spacing: var(--type-label-tracking);
+  white-space: nowrap;
+}
+.sv-badge .sv-icon { font-size: 16px; }
+.sv-badge--success { background: var(--color-success-container); color: var(--color-on-success-container); }
+.sv-badge--error   { background: var(--color-error-container);   color: var(--color-on-error-container); }
+.sv-badge--warning { background: var(--color-warning-container); color: var(--color-on-warning-container); }
+.sv-badge--primary { background: var(--color-primary-container); color: var(--color-on-primary-container); }
+html[data-contrast="high"] .sv-badge { border: var(--border-width) solid currentColor; }

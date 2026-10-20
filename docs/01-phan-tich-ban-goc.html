@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phân tích bản gốc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F7F9; --paper:#FFFFFF; --ink:#141A22; --muted:#56606E; --faint:#8A93A0;
+  --line:#E2E5EA; --line-strong:#C9CED6; --accent:#0B6E86; --accent-soft:#E6F4F7;
+  --warn:#9A5600; --warn-soft:#FDF0DC; --bad:#B42318; --bad-soft:#FDECEA; --ok:#0B7A45; --ok-soft:#E3F6EC;
+  --radius:10px; --font:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1217; --paper:#161B22; --ink:#E8ECF1; --muted:#A3ADBA; --faint:#77818E;
+    --line:#262D36; --line-strong:#38414C; --accent:#5CC6DE; --accent-soft:#12303A;
+    --warn:#F2B35B; --warn-soft:#33260F; --bad:#FF8A7A; --bad-soft:#3A1A17; --ok:#5BE39A; --ok-soft:#12301F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1217; --paper:#161B22; --ink:#E8ECF1; --muted:#A3ADBA; --faint:#77818E;
+  --line:#262D36; --line-strong:#38414C; --accent:#5CC6DE; --accent-soft:#12303A;
+  --warn:#F2B35B; --warn-soft:#33260F; --bad:#FF8A7A; --bad-soft:#3A1A17; --ok:#5BE39A; --ok-soft:#12301F;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code{font:500 .86em/1 ui-monospace,Consolas,monospace;background:var(--accent-soft);color:var(--ink);padding:2px 5px;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header.top{padding:40px 0 24px;border-bottom:1px solid var(--line)}
+.eyebrow{font:600 12px/1 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 12px}
+h1{font:800 clamp(26px,4vw,36px)/1.2 var(--font);margin:0 0 10px;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:720px;margin:0}
+.meta{margin-top:16px;color:var(--faint);font-size:13px}
+nav.toc{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:8px;padding-bottom:8px;scrollbar-width:none}
+nav.toc a{flex:none;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:999px}
+nav.toc a:hover{background:var(--accent-soft);color:var(--ink)}
+section{padding:40px 0 8px}
+h2{font:800 22px/1.3 var(--font);margin:0 0 6px}
+h2 .n{color:var(--faint);font-weight:600;margin-right:6px}
+h3{font:700 16px/1.4 var(--font);margin:24px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px;max-width:760px}
+.callout{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--radius);padding:16px 18px;margin:20px 0}
+.callout strong{display:block;margin-bottom:4px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:24px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.stat b{display:block;font:800 28px/1.1 var(--font);font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+
+/* flow map */
+.flow{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px;overflow-x:auto}
+.flow-grid{display:grid;grid-template-columns:repeat(5,minmax(170px,1fr));gap:12px;min-width:900px}
+.col{display:flex;flex-direction:column;gap:8px}
+.node{border:1px solid var(--line-strong);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.35;background:var(--paper)}
+.node small{display:block;color:var(--faint);font:500 11px/1.3 ui-monospace,Consolas,monospace;margin-top:2px}
+.node.tab{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.node.tab small{color:rgba(255,255,255,.75)}
+.node.state{border-style:dashed;color:var(--muted)}
+.node.dead{border-style:dotted;color:var(--faint)}
+.arrow{font-size:11px;color:var(--faint);padding-left:10px;line-height:1}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px;border:1px solid var(--line-strong)}
+.legend .l-tab{background:var(--accent);border-color:var(--accent)}
+.legend .l-state{border-style:dashed}
+.legend .l-dead{border-style:dotted}
+
+/* screens */
+.screens{display:grid;gap:16px}
+.screen{display:grid;grid-template-columns:150px 1fr;gap:18px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.screen img{width:150px;border-radius:12px;border:1px solid var(--line);display:block;background:var(--bg)}
+.screen .noimg{width:150px;aspect-ratio:390/844;border-radius:12px;border:1px dashed var(--line-strong);display:grid;place-items:center;color:var(--faint);font-size:12px;text-align:center;padding:8px}
+.screen h3{margin:0 0 2px}
+.route{font:500 12px/1 ui-monospace,Consolas,monospace;color:var(--faint)}
+.screen dl{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;margin:12px 0 0;font-size:14px}
+.screen dt{color:var(--faint);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.screen dd{margin:0}
+.screen dd.mobile{background:var(--accent-soft);border-radius:6px;padding:6px 10px}
+
+/* tables */
+.tbl{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;font-size:14px}
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius)}
+.tbl th,.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--faint);background:var(--bg);font-weight:700}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* swatches */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sw{background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12px}
+.sw .chip{height:52px;border-bottom:1px solid var(--line)}
+.sw div.t{padding:8px 10px;line-height:1.35}
+.sw b{display:block;font-size:13px}
+.sw code{background:none;padding:0;color:var(--muted)}
+.type-row{display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.type-row:last-child{border-bottom:0}
+.type-row .spec{flex:none;width:150px;color:var(--faint);font:500 12px/1.3 ui-monospace,Consolas,monospace}
+.type-row .sample{color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.radius-demo{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.radius-demo div{width:72px;height:52px;border:1.5px solid var(--accent);background:var(--accent-soft);display:grid;place-items:end center;font-size:11px;color:var(--muted);padding-bottom:4px}
+.space-demo{display:flex;flex-direction:column;gap:6px}
+.space-demo div{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.space-demo span{display:block;height:12px;background:var(--accent);border-radius:2px}
+
+.issues{counter-reset:i;display:grid;gap:10px;padding:0;margin:0;list-style:none}
+.issues li{counter-increment:i;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px 12px 50px;position:relative}
+.issues li::before{content:counter(i);position:absolute;left:14px;top:12px;width:24px;height:24px;border-radius:50%;background:var(--bad-soft);color:var(--bad);font:700 12px/24px var(--font);text-align:center}
+.issues li b{display:block}
+.issues li span{color:var(--muted);font-size:14px}
+.sev{display:inline-block;font:700 11px/1 var(--font);padding:3px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.sev.hi{background:var(--bad-soft);color:var(--bad)}
+.sev.md{background:var(--warn-soft);color:var(--warn)}
+.sev.lo{background:var(--accent-soft);color:var(--accent)}
+
+.qs{display:grid;gap:12px}
+.q{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);border-radius:var(--radius);padding:14px 16px}
+.q b{display:block;margin-bottom:4px}
+.q p{margin:0;color:var(--ink);font-size:14px}
+.q .pick{margin-top:6px;font-size:13px;color:var(--muted)}
+footer{padding:40px 0 56px;color:var(--faint);font-size:13px}
+
+@media (max-width:720px){
+  .screen{grid-template-columns:1fr}
+  .screen img,.screen .noimg{width:140px}
+  .screen dl{grid-template-columns:1fr}
+  .two{grid-template-columns:1fr}
+  .type-row{flex-direction:column;gap:2px}
+  .type-row .spec{width:auto}
+  .type-row .sample{white-space:normal}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Bước 1/4 · Phân tích bản gốc</p>
+    <h1>Bản gốc “Your Eyes” — sơ đồ, thành phần và hướng chuyển sang app mobile</h1>
+    <p class="lede">Báo cáo duyệt toàn bộ <a href="https://innostar-demo.vercel.app/main">innostar-demo.vercel.app/main</a>: 15 màn hình, các trạng thái phụ, 12 đường dẫn chuyển hướng, cùng hệ thống màu, chữ, khoảng cách lấy trực tiếp từ mã nguồn của bản gốc.</p>
+    <p class="meta">Khảo sát ngày 20/10/2026 · khung đo 390×844 · ảnh chụp lưu ở <code>docs/assets/ban-goc/</code></p>
+    <div class="stats">
+      <div class="stat"><b>15</b><span>màn hình hiển thị</span></div>
+      <div class="stat"><b>5</b><span>tab ở thanh điều hướng dưới</span></div>
+      <div class="stat"><b>12</b><span>đường dẫn chỉ để chuyển hướng</span></div>
+      <div class="stat"><b>0</b><span>modal, hộp thoại</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Mục lục">
+  <div class="wrap">
+    <a href="#tong-quan">Tổng quan</a><a href="#so-do">Sơ đồ</a><a href="#man-hinh">Từng màn hình</a><a href="#trang-thai">Trạng thái</a><a href="#component">Component</a><a href="#thiet-ke">Màu · chữ · lưới</a><a href="#mobile">Chuyển sang mobile</a><a href="#van-de">Vấn đề UX</a><a href="#cau-hoi">Cần bạn trả lời</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section id="tong-quan">
+  <h2><span class="n">0</span>Tổng quan</h2>
+  <div class="callout">
+    <strong>Bản gốc là app mobile chạy trên web, không phải website.</strong>
+    Ứng dụng viết bằng Expo / React Native Web (expo-router). Trên màn hình rộng, nội dung là một cột tối đa 520px ở giữa trang, kèm thanh tab dưới. Vì vậy app mới không cần dựng lại bố cục từ đầu: giữ nguyên cấu trúc, chỉ cần chỉnh cho đúng khung iPhone 14 (thanh trạng thái, vùng an toàn, header iOS, nhãn tab một dòng) và sửa các lỗi UX ở mục 7.
+  </div>
+  <p class="sub">Sản phẩm: app đồng hành của kính AI hỗ trợ người khiếm thị (đặt xe, điều hướng âm thanh, đọc chữ, mô tả cảnh, SOS…). Toàn bộ là bản mô phỏng: dữ liệu giả, lưu trong trình duyệt, có banner “Bản mô phỏng UI độc lập” ở đầu mọi màn. Có sẵn 2 chế độ trợ năng áp dụng cho toàn app: <b>cỡ chữ 3 mức</b> (×0,88 · ×1 · ×1,28) và <b>tương phản cao</b> (nền đen, chữ trắng/vàng).</p>
+</section>
+
+<section id="so-do">
+  <h2><span class="n">1</span>Sơ đồ màn hình và luồng điều hướng</h2>
+  <p class="sub">Năm tab là gốc. Màn con mở theo kiểu xếp chồng (nút ← quay lại). Trang chủ là “trung tâm điều hướng”: 8 thẻ dẫn tới gần hết các màn.</p>
+  <div class="flow">
+    <div class="flow-grid">
+      <div class="col">
+        <div class="node tab">Trang chủ<small>/main</small></div>
+        <div class="arrow">↓ 8 thẻ RowCard</div>
+        <div class="node">→ tab Tính năng</div>
+        <div class="node">→ tab An toàn</div>
+        <div class="node">Lịch sử hoạt động<small>/main/activity</small></div>
+        <div class="node">Ảnh và video<small>/main/album</small></div>
+        <div class="node">Hướng dẫn sử dụng<small>/main/guide</small></div>
+        <div class="node">Dịch thuật (Demo)<small>/main/translation</small></div>
+        <div class="node">Biên bản họp (Demo)<small>/main/meeting</small></div>
+        <div class="node">Quản lý kính<small>/main/glasses</small></div>
+      </div>
+      <div class="col">
+        <div class="node tab">Tính năng<small>/main/features</small></div>
+        <div class="arrow">↓ 7 ô giới thiệu</div>
+        <div class="node dead">Đặt xe · Điều hướng âm thanh · Phát nhạc · Đọc chữ · Mô tả cảnh · Tìm đồ · Chatbot AI<small>không bấm được</small></div>
+      </div>
+      <div class="col">
+        <div class="node tab">An toàn<small>/main/family</small></div>
+        <div class="arrow">↓ trong trang</div>
+        <div class="node state">Nút SOS — nhấn 3 lần → thông báo đã kích hoạt</div>
+        <div class="node state">Lưu số khẩn cấp → thông báo / lỗi</div>
+        <div class="node dead">Gọi khẩn cấp mô phỏng<small>chỉ hiển thị</small></div>
+      </div>
+      <div class="col">
+        <div class="node tab">Cộng đồng<small>/main/community</small></div>
+        <div class="arrow">↓ 4 thẻ</div>
+        <div class="node dead">Bản đồ tuyến đường · Chia sẻ kinh nghiệm · CLB Âm nhạc &amp; Sách nói · Sự kiện<small>không bấm được</small></div>
+      </div>
+      <div class="col">
+        <div class="node tab">Hồ sơ<small>/main/profile</small></div>
+        <div class="arrow">↓ 4 thẻ có mũi tên</div>
+        <div class="node">Hiển thị<small>/main/display</small></div>
+        <div class="node">Quản lý kính<small>/main/glasses</small></div>
+        <div class="node">Tài khoản<small>/main/account</small></div>
+        <div class="node state">Đăng nhập ⇄ Đăng ký → OTP</div>
+        <div class="node">Hỗ trợ &amp; góp ý<small>/main/support</small></div>
+        <div class="node dead">Hướng dẫn · Câu hỏi thường gặp<small>trong Hỗ trợ, không bấm được</small></div>
+        <div class="node state">Chạm “Phiên bản” 7 lần → Kiểm thử action<small>/main/dev-test</small></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="l-tab"></i>Tab gốc</span>
+      <span><i></i>Màn con (xếp chồng, có nút quay lại)</span>
+      <span><i class="l-state"></i>Trạng thái / hành động trong trang</span>
+      <span><i class="l-dead"></i>Trông như bấm được nhưng không có hành động</span>
+    </div>
+  </div>
+
+  <h3>Đường dẫn chỉ để chuyển hướng (không có giao diện riêng)</h3>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Đường dẫn cũ</th><th>Chuyển tới</th></tr></thead>
+    <tbody>
+      <tr><td><code>/</code> · <code>/welcome</code> · <code>/overview</code></td><td><code>/main</code> (Trang chủ)</td></tr>
+      <tr><td><code>/auth</code> · <code>/register</code> · <code>/otp</code></td><td><code>/main/account</code></td></tr>
+      <tr><td><code>/device</code> · <code>/link-glasses</code></td><td><code>/main/glasses</code></td></tr>
+      <tr><td><code>/ride</code> · <code>/music</code> · <code>/navigation</code></td><td><code>/main/features</code></td></tr>
+      <tr><td><code>/support</code></td><td><code>/main/support</code></td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub" style="margin-top:10px">Điều này cho thấy bản gốc từng có màn chào, onboarding, đặt xe, nhạc, điều hướng riêng nhưng đã gộp lại. App mới chỉ làm 15 màn đang hiển thị.</p>
+</section>
+
+<section id="man-hinh">
+  <h2><span class="n">2</span>Từng màn hình: các mục chính và đề xuất cho mobile</h2>
+  <p class="sub">Màn nào cũng có banner mô phỏng ở đầu. Năm màn tab có thanh tab dưới; màn con có header gồm nút ← và tiêu đề.</p>
+  <div class="screens">
+
+    <article class="screen">
+      <img src="assets/ban-goc/home.jpg" alt="Trang chủ bản gốc" loading="lazy">
+      <div>
+        <h3>Trang chủ</h3><span class="route">/main · tab 1</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thẻ chào (logo, “YOUR EYES”, tiêu đề, mô tả) → 2 chip “AI đồng hành”, “Hỗ trợ giọng nói” → thẻ trạng thái kính (chấm xanh Đã kết nối, pill mã kính, ID tài khoản, phiên bản) → tiêu đề mục “Trợ lý AI Kính Thông Minh” → 8 RowCard dẫn tới các màn.</dd>
+          <dt>Trạng thái</dt><dd>Ảnh logo lỗi tải nên đầu thẻ chào trống 92×72px. Kính có 2 trạng thái: đã / chưa kết nối.</dd>
+          <dt>Mobile</dt><dd class="mobile">Header lớn kiểu iOS gồm logo, tên app, chấm trạng thái kính. Gộp thẻ chào và thẻ kính thành một thẻ “Kính của bạn” (pin, kết nối, phiên bản). 8 lối tắt nên chia 2 nhóm: “Dùng kính” (Lịch sử, Album, Dịch, Biên bản) và “Thiết lập” (Kính, Hướng dẫn); bỏ 2 lối tắt trùng với tab Tính năng/An toàn.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/features.jpg" alt="Tính năng bản gốc" loading="lazy">
+      <div>
+        <h3>Tính năng</h3><span class="route">/main/features · tab 2</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thẻ tiêu đề + mô tả → tiêu đề mục → 7 ô (icon trong ô vuông màu nhạt, tên, mô tả): Đặt xe, Điều hướng âm thanh, Phát nhạc, Đọc chữ, Mô tả cảnh, Tìm đồ thất lạc, Chatbot AI.</dd>
+          <dt>Trạng thái</dt><dd>Các ô chỉ để đọc, không bấm được.</dd>
+          <dt>Mobile</dt><dd class="mobile">Giữ dạng danh sách 1 cột; ô nào không bấm được thì bỏ viền nổi để khỏi trông như nút. Thêm dòng “Ra lệnh mẫu” (ví dụ “Đặt xe tới…”) dưới mỗi tính năng để có ích hơn với người dùng đọc màn hình.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/safety.jpg" alt="An toàn bản gốc" loading="lazy">
+      <div>
+        <h3>An toàn &amp; SOS</h3><span class="route">/main/family · tab 3</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thẻ SOS (nút tròn đỏ 188px viền đậm, “Nhấn 3 lần liên tiếp để kích hoạt”, số khẩn cấp) → “Cấu hình số ĐT khẩn cấp” (ô nhập + nút Lưu) → RowCard “Gọi khẩn cấp mô phỏng” → “Hướng dẫn an toàn SOS” (2 dòng).</dd>
+          <dt>Trạng thái</dt><dd>Đã kích hoạt SOS (thông báo hiện ngay dưới nút) · lưu số thành công · lỗi số không hợp lệ.</dd>
+          <dt>Mobile</dt><dd class="mobile">Đặt nút SOS ở giữa nửa trên màn, nằm trong tầm ngón cái. Cấu hình số khẩn cấp chuyển thành một dòng “Người thân: 0901…” và chạm vào để sửa. Cần vùng thông báo đọc được bằng trình đọc màn hình (aria-live) khi SOS kích hoạt.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/community.jpg" alt="Cộng đồng bản gốc" loading="lazy">
+      <div>
+        <h3>Cộng đồng</h3><span class="route">/main/community · tab 4</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thẻ tiêu đề (icon chia sẻ, tên, mô tả) → “Địa điểm thân thiện &amp; hoạt động” → 4 thẻ: Bản đồ tuyến đường, Chia sẻ kinh nghiệm, CLB Âm nhạc &amp; Sách nói, Sự kiện hằng tháng.</dd>
+          <dt>Trạng thái</dt><dd>Không có; thẻ không bấm được.</dd>
+          <dt>Mobile</dt><dd class="mobile">Giữ danh sách; nếu giữ nguyên tính năng thì thẻ vẫn chỉ để đọc nhưng đổi kiểu cho khỏi giống nút. Có thể nối nội dung với trang Cộng đồng trên web SeeVia.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/profile.jpg" alt="Hồ sơ bản gốc" loading="lazy">
+      <div>
+        <h3>Hồ sơ</h3><span class="route">/main/profile · tab 5</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thẻ người dùng (avatar tròn, tên, ID | Serial) → 4 RowCard có mũi tên: Hiển thị, Kính, Tài khoản, Hỗ trợ &amp; góp ý → “Cấu hình số khẩn cấp” (lặp lại tab An toàn) → “Cài đặt trợ năng”: cỡ chữ Nhỏ/Vừa/To + công tắc tương phản cao (lặp lại màn Hiển thị) → “Phiên bản mock 1.0.0” (chạm 7 lần mở công cụ nội bộ) + ghi chú hotline.</dd>
+          <dt>Mobile</dt><dd class="mobile">Chuyển thành danh sách cài đặt kiểu iOS: các dòng xếp nhóm, chữ bên trái, giá trị/mũi tên bên phải. Bỏ 2 khối lặp lại, chỉ hiện giá trị hiện tại (ví dụ “Cỡ chữ · Vừa”) và chạm vào để mở màn Hiển thị.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/activity.jpg" alt="Lịch sử hoạt động bản gốc" loading="lazy">
+      <div>
+        <h3>Lịch sử hoạt động</h3><span class="route">/main/activity</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Header (←, tiêu đề canh trái) → “Các lệnh kính đã gửi tới điện thoại” → 3 thẻ hoạt động: icon + tên lệnh + pill trạng thái (Hoàn tất xanh / Thất bại đỏ) + thời gian + chi tiết.</dd>
+          <dt>Trạng thái</dt><dd>Hoàn tất · Thất bại. Chưa có trạng thái rỗng.</dd>
+          <dt>Mobile</dt><dd class="mobile">Nhóm theo ngày (Hôm nay / Hôm qua) và dùng danh sách gọn hơn thẻ. Thêm trạng thái rỗng “Chưa có lệnh nào”.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/album.jpg" alt="Ảnh và video bản gốc" loading="lazy">
+      <div>
+        <h3>Ảnh và video</h3><span class="route">/main/album</span>
+        <dl>
+          <dt>Mục chính</dt><dd>“Ảnh chụp qua kính” → thẻ ảnh: khung ảnh giữ chỗ (nền màu + icon), tên, mô tả AI, thời gian có icon máy ảnh.</dd>
+          <dt>Trạng thái</dt><dd>Chỉ có ảnh giữ chỗ; chưa có trạng thái rỗng.</dd>
+          <dt>Mobile</dt><dd class="mobile">Lưới 2 cột ảnh vuông, chạm để xem chi tiết kèm mô tả AI (đọc to được). Thêm trạng thái rỗng.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/guide.jpg" alt="Hướng dẫn sử dụng bản gốc" loading="lazy">
+      <div>
+        <h3>Hướng dẫn sử dụng</h3><span class="route">/main/guide</span>
+        <dl>
+          <dt>Mục chính</dt><dd>8 mục gập/mở (accordion), mục đầu mở sẵn: Đăng ký/Đăng nhập, Liên kết kính, Ra lệnh giọng nói, SOS, Lịch sử, Album, Trợ năng, Hỗ trợ.</dd>
+          <dt>Mobile</dt><dd class="mobile">Giữ accordion; tiêu đề một dòng có icon bên trái và mũi tên bên phải, tránh tiêu đề dài bị xuống dòng như bản gốc.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/translation.jpg" alt="Dịch thuật bản gốc" loading="lazy">
+      <div>
+        <h3>Dịch thuật (Demo)</h3><span class="route">/main/translation</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thông báo “chưa kết nối AI” → thẻ chọn ngôn ngữ (Tiếng Anh ⇄ Tiếng Việt) → ô nhập nhiều dòng → nút “Dịch mô phỏng”.</dd>
+          <dt>Trạng thái</dt><dd>Lỗi để trống: “Nhập nội dung trước khi dịch.” · có kết quả: thẻ “Bản dịch” + nút “Nghe mô phỏng”.</dd>
+          <dt>Mobile</dt><dd class="mobile">Thêm nút micro lớn ở cuối màn (dịch giọng nói là trường hợp chính). Nút Dịch dính trên bàn phím khi đang gõ.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/meeting.jpg" alt="Biên bản họp bản gốc" loading="lazy">
+      <div>
+        <h3>Biên bản họp (Demo)</h3><span class="route">/main/meeting</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thông báo mô phỏng → thẻ ghi âm (icon micro, “Sẵn sàng ghi âm”, đồng hồ 00:00, gợi ý) → nút “Bắt đầu ghi âm” → “Biên bản đã lưu” (thẻ: tên, thời gian, tóm tắt).</dd>
+          <dt>Trạng thái</dt><dd>Sẵn sàng · Đang ghi âm (đồng hồ chạy, nút đổi thành dừng) · Đã lưu “Biên bản vừa ghi”.</dd>
+          <dt>Mobile</dt><dd class="mobile">Nút ghi tròn lớn ở giữa như app ghi âm; danh sách biên bản bên dưới.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/glasses.jpg" alt="Quản lý kính bản gốc" loading="lazy">
+      <div>
+        <h3>Quản lý kính</h3><span class="route">/main/glasses</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thẻ giới thiệu (icon kính, tiêu đề, mô tả) → thẻ trạng thái: pill “Đang liên kết”, mã kính, pin 82% · v2.1.4, nút đỏ “Hủy liên kết” → 2 ghi chú.</dd>
+          <dt>Trạng thái</dt><dd>Đã liên kết · Chưa liên kết (ô “Nhập mã serial kính”, ví dụ YE-DEMO-2026, nút Xác nhận) · lỗi để trống serial.</dd>
+          <dt>Mobile</dt><dd class="mobile">Thẻ thiết bị có hình kính, pin dạng thanh. Hủy liên kết nên chuyển thành nút chữ ở cuối và hỏi xác nhận (bản gốc hủy ngay, không hỏi).</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/display.jpg" alt="Hiển thị bản gốc" loading="lazy">
+      <div>
+        <h3>Hiển thị</h3><span class="route">/main/display</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Mô tả → “Cỡ chữ”: 3 thẻ chọn (đang chọn có viền màu + dấu ✓) → “Tương phản cao”: thẻ + nút bật/tắt → “Xem thử”: thẻ xem trước.</dd>
+          <dt>Trạng thái</dt><dd>Tương phản cao bật/tắt; áp dụng ngay cho toàn app (xem ảnh mục 5).</dd>
+          <dt>Mobile</dt><dd class="mobile">Đưa phần xem trước lên đầu để thấy thay đổi ngay; cỡ chữ dùng nút chọn 3 mức nằm ngang.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/account.jpg" alt="Tài khoản bản gốc" loading="lazy">
+      <div>
+        <h3>Tài khoản</h3><span class="route">/main/account</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Đã đăng nhập: thẻ (icon điện thoại, pill “Đã đăng nhập”, tên, SĐT) + nút đỏ “Đăng xuất”.</dd>
+          <dt>Trạng thái</dt><dd>Chưa đăng nhập: nút chọn Đăng nhập/Đăng ký · ô SĐT, Mật khẩu (Đăng ký thêm Tên hiển thị) · bước OTP (“Mã dùng cho trải nghiệm này là 123456”, ô 6 số) · lỗi OTP sai · thông báo thành công.</dd>
+          <dt>Mobile</dt><dd class="mobile">Ô OTP dạng 6 ô số, bàn phím số. Đăng xuất là nút phụ, không cần đỏ to như bản gốc.</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <img src="assets/ban-goc/support.jpg" alt="Hỗ trợ bản gốc" loading="lazy">
+      <div>
+        <h3>Hỗ trợ &amp; góp ý</h3><span class="route">/main/support</span>
+        <dl>
+          <dt>Mục chính</dt><dd>Thẻ hotline nền đậm (1900 1234, không gọi) → 2 thẻ Hướng dẫn, Câu hỏi thường gặp (không bấm được) → “Gửi yêu cầu hỗ trợ”: ô nhập nhiều dòng + nút gửi.</dd>
+          <dt>Trạng thái</dt><dd>Lỗi để trống: “Nhập nội dung trước khi gửi.” · đã gửi: “Mã tiếp nhận: …”.</dd>
+          <dt>Mobile</dt><dd class="mobile">Thẻ Hướng dẫn nối tới màn Hướng dẫn; hotline thành nút gọi (vẫn là mô phỏng).</dd>
+        </dl>
+      </div>
+    </article>
+
+    <article class="screen">
+      <div class="noimg">Màn nội bộ<br>(không chụp)</div>
+      <div>
+        <h3>Kiểm thử action (nội bộ)</h3><span class="route">/main/dev-test · mở bằng 7 lần chạm “Phiên bản”</span>
+        <dl>
+          <dt>Mục chính</dt><dd>9 thẻ handler (Đặt xe, Phát nhạc, Âm lượng, Điều hướng, Khẩn cấp, Gọi liên hệ, Chụp ảnh, Vị trí, Kiểm tra thiết bị): tên + mã kỹ thuật + nút “Chạy mô phỏng …” + dòng trạng thái.</dd>
+          <dt>Mobile</dt><dd class="mobile">Giữ ẩn như bản gốc, giao diện đơn giản (danh sách + nút nhỏ).</dd>
+        </dl>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section id="trang-thai">
+  <h2><span class="n">3</span>Trạng thái đặc biệt: rỗng, lỗi, đang tải, tương phản cao</h2>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Loại</th><th>Bản gốc làm gì</th><th>Đề xuất cho app con</th></tr></thead>
+    <tbody>
+      <tr><td>Đang tải</td><td>Màn trắng 1–2 giây trong lúc tải mã, không có màn chờ.</td><td>Màn chờ có logo; khung xương (skeleton) cho thẻ kính và danh sách.</td></tr>
+      <tr><td>Lỗi nhập</td><td>Dòng chữ đỏ ngay dưới ô (InlineMessage): để trống nội dung, serial, OTP sai, số điện thoại.</td><td>Giữ cách hiện ngay dưới ô; thêm viền đỏ cho ô lỗi và đọc lỗi qua aria-live.</td></tr>
+      <tr><td>Thành công</td><td>Thông báo trong trang (đã lưu số, đã liên kết, SOS đã kích hoạt, mã tiếp nhận).</td><td>Giữ trong trang; thêm toast ngắn ở đáy cho hành động nhanh.</td></tr>
+      <tr><td>Rỗng</td><td>Không có. Lịch sử, Album, Biên bản luôn có dữ liệu mẫu.</td><td>Thêm trạng thái rỗng cho 3 màn này (icon, một câu, nút hành động).</td></tr>
+      <tr><td>Không tìm thấy (404)</td><td>Trang mặc định của Expo, tiếng Anh: “Unmatched Route”.</td><td>Màn 404 tiếng Việt có nút về Trang chủ.</td></tr>
+      <tr><td>Lỗi ảnh</td><td>Logo trên Trang chủ lỗi tải, để lại khoảng trống.</td><td>Dùng logo SVG nội tuyến (không cần tải).</td></tr>
+      <tr><td>Modal / hộp thoại</td><td>Không có. Hủy liên kết kính và đăng xuất chạy ngay, không hỏi.</td><td>Thêm bottom sheet xác nhận cho Hủy liên kết, Đăng xuất, Kích hoạt SOS.</td></tr>
+      <tr><td>Tương phản cao</td><td>Đổi toàn bộ bảng màu: nền #05090D, chữ trắng, điểm nhấn vàng #FFC53D, bỏ bóng.</td><td>Giữ nguyên tính năng; làm bằng một bộ biến màu thay thế trong <code>tokens.css</code>.</td></tr>
+      <tr><td>Cỡ chữ</td><td>Nhân mọi cỡ chữ ×0,88 / ×1 / ×1,28.</td><td>Một biến <code>--font-scale</code> nhân vào mọi cỡ chữ.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="component">
+  <h2><span class="n">4</span>Danh sách component</h2>
+  <p class="sub">Tên trong ngoặc là tên component tìm thấy trong mã bản gốc. Kích thước đo ở khung 390px.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Component</th><th>Mô tả · thông số</th><th>Dùng ở</th></tr></thead>
+    <tbody>
+      <tr><td>Banner mô phỏng (DemoBanner)</td><td>Nền vàng nhạt, viền, icon bình thí nghiệm, chữ 13/600 màu nâu cam; cao ~60px.</td><td>Mọi màn</td></tr>
+      <tr><td>Thanh tab dưới (BottomTabBar)</td><td>5 mục, icon nét 26px + nhãn 14/600; tab đang chọn: chữ xanh đậm + ô nền nhạt sau icon; cao 88px, viền trên.</td><td>5 màn tab</td></tr>
+      <tr><td>Header màn con (StackHeader)</td><td>Nút ← 44×44 viền bo 8 + tiêu đề ~24/800; lúc canh trái, lúc canh giữa.</td><td>10 màn con</td></tr>
+      <tr><td>Thẻ chào (Hero card)</td><td>Logo, tên in hoa 20/700, tiêu đề 22/800, mô tả 16 màu phụ; canh giữa, đệm 24×18.</td><td>Trang chủ, Tính năng, Cộng đồng, Kính</td></tr>
+      <tr><td>Thẻ (Card)</td><td>Nền trắng, viền 1px #B9D9DE, bo 8, đệm 16–18, không đổ bóng.</td><td>Khắp nơi</td></tr>
+      <tr><td>Thẻ dòng (RowCard)</td><td>Ô icon 54×54 nền nhạt bo 8 (icon 28) + tiêu đề 18/700 + mô tả 15/400 + mũi tên tùy chọn; đệm 16.</td><td>Trang chủ, Hồ sơ, An toàn, Hỗ trợ</td></tr>
+      <tr><td>Ô tính năng (FeTile)</td><td>Giống RowCard nhưng không bấm được.</td><td>Tính năng, Cộng đồng</td></tr>
+      <tr><td>Tiêu đề mục</td><td>20/800, cách trên ~28px.</td><td>Khắp nơi</td></tr>
+      <tr><td>Chip</td><td>Viên thuốc viền, icon + chữ 14/700, cao 44 (chỉ để đọc).</td><td>Trang chủ</td></tr>
+      <tr><td>Pill trạng thái (StatusPill)</td><td>Bo tròn hẳn, đệm 8×14, chữ 14/700; xanh (Hoàn tất, Đang liên kết), đỏ (Thất bại), xám (Bật/Tắt).</td><td>Trang chủ, Lịch sử, Kính, Tài khoản</td></tr>
+      <tr><td>Chấm trạng thái</td><td>Chấm tròn xanh + “Đã kết nối” màu xanh.</td><td>Trang chủ</td></tr>
+      <tr><td>Ô nhập (AppTextInput)</td><td>Cao 52, viền 1px, bo 8, đệm 12×14, chữ 16; loại nhiều dòng cao ~130.</td><td>An toàn, Dịch, Hỗ trợ, Tài khoản, Kính</td></tr>
+      <tr><td>Nút chính (PrimaryButton)</td><td>Cao 52, nền #0B6E86, chữ trắng 16/700, bo 8, rộng hết thẻ.</td><td>Khắp nơi</td></tr>
+      <tr><td>Nút nguy hiểm</td><td>Như nút chính, nền đỏ #C0271F.</td><td>Kính, Tài khoản</td></tr>
+      <tr><td>Nút SOS (SosButton)</td><td>Tròn 188px, nền đỏ, viền 4–5px màu chữ, icon khiên + “SOS” rất to.</td><td>An toàn</td></tr>
+      <tr><td>Thông báo trong trang (InlineMessage)</td><td>Icon + chữ; kiểu thông tin (nền cam nhạt), lỗi (chữ đỏ), thành công.</td><td>Dịch, Biên bản, An toàn, Hỗ trợ…</td></tr>
+      <tr><td>Nút chọn nhiều phần (Segmented)</td><td>Đăng nhập/Đăng ký; Nhỏ/Vừa/To.</td><td>Tài khoản, Hồ sơ</td></tr>
+      <tr><td>Thẻ chọn</td><td>Thẻ có tiêu đề + mô tả + icon; đang chọn: viền màu nhấn, nền nhạt, dấu ✓.</td><td>Hiển thị</td></tr>
+      <tr><td>Công tắc dạng pill</td><td>Pill xám “Tắt” / vàng “Bật”.</td><td>Hiển thị, Hồ sơ</td></tr>
+      <tr><td>Accordion</td><td>Tiêu đề có icon sách + mũi tên; mở ra hiện mô tả.</td><td>Hướng dẫn</td></tr>
+      <tr><td>Thẻ hoạt động</td><td>Icon + tên lệnh + pill trạng thái, thời gian, chi tiết.</td><td>Lịch sử</td></tr>
+      <tr><td>Thẻ ảnh</td><td>Khung ảnh cao ~180, tên, mô tả, thời gian kèm icon.</td><td>Album</td></tr>
+      <tr><td>Thẻ ngôn ngữ</td><td>Hai cột ngôn ngữ + icon đổi chiều ở giữa.</td><td>Dịch</td></tr>
+      <tr><td>Thẻ ghi âm</td><td>Icon micro, trạng thái, đồng hồ 32/800, gợi ý.</td><td>Biên bản</td></tr>
+      <tr><td>Thẻ hotline</td><td>Nền xanh đậm, chữ trắng, icon tai nghe.</td><td>Hỗ trợ</td></tr>
+      <tr><td>Thẻ người dùng</td><td>Avatar tròn nền nhạt + tên 20/800 + ID.</td><td>Hồ sơ, Tài khoản</td></tr>
+      <tr><td>Bộ icon</td><td>Icon nét đều (kiểu Feather/Lucide), 24–28px.</td><td>Khắp nơi</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="thiet-ke">
+  <h2><span class="n">5</span>Màu, chữ, khoảng cách, bo góc, lưới</h2>
+  <p class="sub">Lấy từ bảng màu khai báo trong mã (<code>lightColors</code>, <code>highContrastColors</code>) và đo trên giao diện. Đây là tham khảo cấu trúc; bước 2 sẽ thay bằng màu và font của SeeVia.</p>
+
+  <h3>Bảng màu sáng (mặc định), 20 vai trò</h3>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:linear-gradient(#ECFFFC,#E9FAFF)"></div><div class="t"><b>ground → groundEnd</b><code>#ECFFFC → #E9FAFF</code><br>nền trang (gradient)</div></div>
+    <div class="sw"><div class="chip" style="background:#FFFFFF"></div><div class="t"><b>surface</b><code>#FFFFFF</code><br>nền thẻ</div></div>
+    <div class="sw"><div class="chip" style="background:#F2F7FA"></div><div class="t"><b>surfaceSunken</b><code>#F2F7FA</code><br>nền lõm</div></div>
+    <div class="sw"><div class="chip" style="background:#0E1F33"></div><div class="t"><b>ink</b><code>#0E1F33</code><br>chữ chính</div></div>
+    <div class="sw"><div class="chip" style="background:#3D5670"></div><div class="t"><b>muted</b><code>#3D5670</code><br>chữ phụ</div></div>
+    <div class="sw"><div class="chip" style="background:#5E7186"></div><div class="t"><b>disabled</b><code>#5E7186</code></div></div>
+    <div class="sw"><div class="chip" style="background:#12BFE7"></div><div class="t"><b>accent</b><code>#12BFE7</code><br>nhấn sáng (ít dùng cho chữ)</div></div>
+    <div class="sw"><div class="chip" style="background:#0B6E86"></div><div class="t"><b>accentText</b><code>#0B6E86</code><br>nút chính, tab đang chọn</div></div>
+    <div class="sw"><div class="chip" style="background:#E9FFFA"></div><div class="t"><b>accentSoft</b><code>#E9FFFA</code><br>ô icon</div></div>
+    <div class="sw"><div class="chip" style="background:#B9D9DE"></div><div class="t"><b>border</b><code>#B9D9DE</code><br>viền thẻ, ô nhập</div></div>
+    <div class="sw"><div class="chip" style="background:#C9E3E6"></div><div class="t"><b>line</b><code>#C9E3E6</code><br>đường chia</div></div>
+    <div class="sw"><div class="chip" style="background:#0B7A45"></div><div class="t"><b>success</b><code>#0B7A45</code> / soft <code>#E3F6EC</code></div></div>
+    <div class="sw"><div class="chip" style="background:#9A5600"></div><div class="t"><b>warning</b><code>#9A5600</code> / soft <code>#FDF0DC</code></div></div>
+    <div class="sw"><div class="chip" style="background:#C0271F"></div><div class="t"><b>danger</b><code>#C0271F</code> / soft <code>#FCE8E6</code></div></div>
+    <div class="sw"><div class="chip" style="background:#5AA8B2"></div><div class="t"><b>shadow</b><code>#5AA8B2</code><br>có khai báo, gần như không dùng</div></div>
+  </div>
+
+  <h3>Bảng màu tương phản cao</h3>
+  <div class="two">
+    <div class="swatches" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))">
+      <div class="sw"><div class="chip" style="background:#05090D"></div><div class="t"><b>ground</b><code>#05090D</code></div></div>
+      <div class="sw"><div class="chip" style="background:#111A23"></div><div class="t"><b>surface</b><code>#111A23</code></div></div>
+      <div class="sw"><div class="chip" style="background:#FFFFFF"></div><div class="t"><b>ink</b><code>#FFFFFF</code></div></div>
+      <div class="sw"><div class="chip" style="background:#C7D5E2"></div><div class="t"><b>muted</b><code>#C7D5E2</code></div></div>
+      <div class="sw"><div class="chip" style="background:#FFC53D"></div><div class="t"><b>accent</b><code>#FFC53D</code></div></div>
+      <div class="sw"><div class="chip" style="background:#4A5F73"></div><div class="t"><b>border</b><code>#4A5F73</code></div></div>
+      <div class="sw"><div class="chip" style="background:#5BE39A"></div><div class="t"><b>success</b><code>#5BE39A</code></div></div>
+      <div class="sw"><div class="chip" style="background:#FF8A7A"></div><div class="t"><b>danger</b><code>#FF8A7A</code></div></div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <img src="assets/ban-goc/home-hc.jpg" alt="Trang chủ ở chế độ tương phản cao" style="width:50%;border-radius:12px;border:1px solid var(--line)" loading="lazy">
+      <img src="assets/ban-goc/display-hc.jpg" alt="Màn Hiển thị ở chế độ tương phản cao" style="width:50%;border-radius:12px;border:1px solid var(--line)" loading="lazy">
+    </div>
+  </div>
+
+  <h3>Font chữ: Be Vietnam Pro (4 độ đậm: 400 · 600 · 700 · 800)</h3>
+  <div class="panel">
+    <div class="type-row"><span class="spec">22 / 32 · 800</span><span class="sample" style="font:800 22px/32px var(--font)">Chào mừng đến với Your Eyes</span></div>
+    <div class="type-row"><span class="spec">~24 / 32 · 800</span><span class="sample" style="font:800 24px/32px var(--font)">Lịch sử hoạt động</span></div>
+    <div class="type-row"><span class="spec">20 / 29 · 800</span><span class="sample" style="font:800 20px/29px var(--font)">Trợ lý AI Kính Thông Minh</span></div>
+    <div class="type-row"><span class="spec">18 / 26 · 700</span><span class="sample" style="font:700 18px/26px var(--font)">Khám phá Tính Năng Kính</span></div>
+    <div class="type-row"><span class="spec">16 / 24 · 400</span><span class="sample" style="font:400 16px/24px var(--font)">Trợ lý AI thông minh giúp nghe, nhận biết…</span></div>
+    <div class="type-row"><span class="spec">16 / 23 · 700</span><span class="sample" style="font:700 16px/23px var(--font)">Lưu Số Khẩn Cấp (nhãn nút)</span></div>
+    <div class="type-row"><span class="spec">15 / 22 · 400</span><span class="sample" style="font:400 15px/22px var(--font);color:var(--muted)">Đặt xe, đọc chữ, điều hướng, mô tả cảnh…</span></div>
+    <div class="type-row"><span class="spec">14 / 20 · 700</span><span class="sample" style="font:700 14px/20px var(--font)">Mã kính: device-100 · AI đồng hành</span></div>
+    <div class="type-row"><span class="spec">14 / 19 · 600</span><span class="sample" style="font:600 14px/19px var(--font)">Trang chủ (nhãn tab)</span></div>
+    <div class="type-row"><span class="spec">13 / 19 · 600</span><span class="sample" style="font:600 13px/19px var(--font);color:var(--warn)">Bản mô phỏng UI độc lập…</span></div>
+    <div class="type-row"><span class="spec">32 · 800 / ~56–64</span><span class="sample" style="font:800 32px/1 var(--font)">00:00 <span style="font-size:15px;font-weight:400;color:var(--muted)">(đồng hồ ghi âm; “SOS” to hơn)</span></span></div>
+  </div>
+  <p class="sub" style="margin-top:10px">Cỡ chữ người dùng chọn nhân vào toàn bộ thang trên: Nhỏ ×0,88 · Vừa ×1 · To ×1,28. Chữ khá lớn so với app thường (thân bài 16px, tiêu đề thẻ 18px), hợp với người nhìn kém.</p>
+
+  <h3>Khoảng cách · bo góc · viền · lưới</h3>
+  <div class="two">
+    <div class="panel">
+      <b>Khoảng cách (px)</b>
+      <div class="space-demo" style="margin-top:10px">
+        <div><span style="width:8px"></span>8: giữa icon và chữ, trong pill</div>
+        <div><span style="width:12px"></span>12: giữa các thẻ trong danh sách</div>
+        <div><span style="width:16px"></span>16–18: đệm trong thẻ</div>
+        <div><span style="width:20px"></span>20: lề hai bên màn hình</div>
+        <div><span style="width:24px"></span>24: đệm dọc thẻ chào</div>
+        <div><span style="width:28px"></span>~28: trước tiêu đề mục</div>
+      </div>
+      <p style="margin:12px 0 0;font-size:13px;color:var(--muted)">Vùng chạm: 44 (nút ←, chip) và 52 (ô nhập, nút chính). Thanh tab cao 88.</p>
+    </div>
+    <div class="panel">
+      <b>Bo góc · viền · bóng</b>
+      <div class="radius-demo" style="margin-top:12px">
+        <div style="border-radius:8px">8</div>
+        <div style="border-radius:12px">12</div>
+        <div style="border-radius:999px">999</div>
+        <div style="border-radius:50%;width:52px">tròn</div>
+      </div>
+      <p style="margin:12px 0 0;font-size:13px;color:var(--muted)">Gần như mọi thứ bo 8; pill và chip bo tròn hẳn; nút SOS và avatar tròn. Viền 1px màu <code>border</code>. Không đổ bóng: giao diện phẳng, phân lớp bằng viền.</p>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <b>Lưới bố cục</b>
+    <p style="margin:6px 0 0;font-size:14px;color:var(--muted)">Một cột. Lề 20px mỗi bên, nội dung rộng 350px ở khung 390. Trên màn rộng, cột tối đa 520px canh giữa. Thẻ luôn rộng hết cột; bên trong thẻ dòng là lưới ngang: ô icon 54 | chữ co giãn | mũi tên 24. Nút trên Trang chủ chia 2 cột bằng nhau, cách 12.</p>
+  </div>
+</section>
+
+<section id="mobile">
+  <h2><span class="n">6</span>Đề xuất chuyển sang app mobile 390×844</h2>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Phần</th><th>Bản gốc</th><th>App con (đề xuất)</th></tr></thead>
+    <tbody>
+      <tr><td>Khung</td><td>Trang web, không có thanh trạng thái hay vùng an toàn.</td><td>Khung iPhone 14: thanh trạng thái 47px trên, vạch home 34px dưới; nội dung cuộn giữa header và thanh tab.</td></tr>
+      <tr><td>Thanh tab</td><td>5 tab, nhãn 14px, 3 nhãn bị xuống 2 dòng, cao 88.</td><td>Giữ 5 tab. Nhãn 12–13px một dòng, icon 24, ô nền sau icon cho tab đang chọn, cao 49 + 34 vùng an toàn.</td></tr>
+      <tr><td>Header tab</td><td>Không có; trang bắt đầu bằng banner rồi tới thẻ.</td><td>Tiêu đề lớn canh trái kiểu iOS, thu nhỏ khi cuộn; Trang chủ có logo SeeVia.</td></tr>
+      <tr><td>Header màn con</td><td>Nút ← + tiêu đề, lúc canh trái lúc canh giữa.</td><td>Thống nhất: ← bên trái, tiêu đề canh giữa, cao 44.</td></tr>
+      <tr><td>Banner mô phỏng</td><td>Khối 60px ở đầu mọi màn.</td><td>Thu gọn thành chip nhỏ “Bản mô phỏng” trên header, hoặc chỉ hiện ở Trang chủ và Hồ sơ.</td></tr>
+      <tr><td>Danh sách thẻ</td><td>Thẻ viền, cách nhau 12.</td><td>Giữ thẻ cho nội dung chính; danh sách cài đặt (Hồ sơ) dùng nhóm dòng liền nhau kiểu iOS.</td></tr>
+      <tr><td>Xác nhận</td><td>Không có modal.</td><td>Bottom sheet cho hành động khó đảo ngược (Hủy liên kết, Đăng xuất, SOS).</td></tr>
+      <tr><td>Bàn phím</td><td>Không xử lý.</td><td>Nút gửi dính trên bàn phím (Dịch, Hỗ trợ, OTP); dùng bàn phím số cho SĐT và OTP.</td></tr>
+      <tr><td>Trợ năng</td><td>Cỡ chữ 3 mức, tương phản cao, nhãn cho trình đọc màn hình.</td><td>Giữ nguyên cả ba; vùng chạm tối thiểu 48; báo thay đổi trạng thái qua aria-live.</td></tr>
+      <tr><td>Bản mock HTML</td><td>—</td><td>Mỗi màn một file trong <code>screens/</code>, mở trong khung điện thoại 390×844, bấm qua lại được; component dùng chung trong <code>components/</code>.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="van-de">
+  <h2><span class="n">7</span>Vấn đề UX ở bản gốc nên sửa trong app con</h2>
+  <ol class="issues">
+    <li><b>Logo Trang chủ lỗi tải <span class="sev hi">Cao</span></b><span>Ảnh logo PNG không tải được, để lại khoảng trống 92×72 ở đầu màn quan trọng nhất.</span></li>
+    <li><b>Thứ trông như nút nhưng không bấm được <span class="sev hi">Cao</span></b><span>7 ô Tính năng, 4 thẻ Cộng đồng, 2 thẻ trong Hỗ trợ, 2 chip ở Trang chủ đều có viền và icon như nút. Người dùng đọc màn hình sẽ tưởng bấm được.</span></li>
+    <li><b>Hành động khó đảo ngược chạy ngay, không hỏi <span class="sev md">Vừa</span></b><span>Hủy liên kết kính và Đăng xuất không có bước xác nhận.</span></li>
+    <li><b>Hồ sơ lặp nội dung <span class="sev md">Vừa</span></b><span>Hồ sơ chứa lại khối Số khẩn cấp (của An toàn) và Cỡ chữ / Tương phản (của Hiển thị), làm màn dài và dễ rối.</span></li>
+    <li><b>Nhãn tab xuống 2 dòng <span class="sev md">Vừa</span></b><span>“Trang chủ”, “Tính năng”, “Cộng đồng” bị ngắt dòng ở khổ 390px.</span></li>
+    <li><b>Màn trắng khi tải, 404 tiếng Anh <span class="sev md">Vừa</span></b><span>Không có màn chờ; đường dẫn sai hiện trang “Unmatched Route” mặc định.</span></li>
+    <li><b>Tiêu đề màn con không thống nhất <span class="sev lo">Thấp</span></b><span>Lịch sử, Hướng dẫn canh trái; các màn khác canh giữa.</span></li>
+    <li><b>Banner mô phỏng chiếm chỗ <span class="sev lo">Thấp</span></b><span>Khối ~60px lặp ở mọi màn, đẩy nội dung chính xuống.</span></li>
+    <li><b>Thiếu trạng thái rỗng <span class="sev lo">Thấp</span></b><span>Lịch sử, Album, Biên bản luôn có dữ liệu mẫu, chưa thiết kế lúc trống.</span></li>
+  </ol>
+</section>
+
+<section id="cau-hoi">
+  <h2><span class="n">8</span>Cần bạn trả lời trước bước 2</h2>
+  <p class="sub">Mình đã xem qua nguồn định danh và thấy vài chỗ thiếu hoặc mâu thuẫn. Theo yêu cầu, mình không tự đoán.</p>
+  <div class="qs">
+    <div class="q"><b>1. Tên app: “SeeVia” hay “SeeVie”?</b><p>Thư mục dự án tên <code>SeeVie</code>, nhưng README web, bộ nhận diện và logo đều ghi <b>SeeVia</b> (slogan “See a brighter way.”).</p><p class="pick">Mình đề xuất dùng SeeVia.</p></div>
+    <div class="q"><b>2. Bảng màu: theo logo (xanh navy – cyan) hay theo web (đỏ đô – đen than – kem)?</b><p>Bạn yêu cầu lấy màu từ thư mục <code>logo</code> (navy #041466, royal #0E36A8, sapphire #405FFA, cyan #09BBC8…), nhưng README web mô tả giao diện web “đỏ đô, đen than và kem”.</p><p class="pick">Mình đề xuất theo logo, đúng như yêu cầu.</p></div>
+    <div class="q"><b>3. Font: Montserrat (bộ logo) hay Be Vietnam Pro (web và bản gốc)?</b><p>Bộ logo dùng Montserrat cho chữ, Pinyon Script cho chữ ký logo, JetBrains Mono cho số. Web dùng Be Vietnam Pro / Lora / Playfair Display.</p><p class="pick">Mình đề xuất Montserrat cho toàn app, Pinyon Script chỉ dùng trong logo, đúng như yêu cầu.</p></div>
+    <div class="q"><b>4. Ngôn ngữ giao diện: chỉ tiếng Việt, hay song ngữ VI | EN như web?</b><p>Web SeeVia có nút chuyển VI | EN. Bản gốc chỉ có tiếng Việt.</p><p class="pick">Mình đề xuất chỉ tiếng Việt, nhưng để chữ trong một file nội dung để sau thêm tiếng Anh dễ.</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">Bước tiếp theo, sau khi bạn duyệt: chạy <code>/impeccable init</code> → tạo <code>tokens.css</code>, <code>brand/</code>, <code>DESIGN.md</code> và trang mẫu hệ thống thiết kế.</div>
+</footer>
+</body>
+</html>

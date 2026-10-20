@@ -1,0 +1,117 @@
+/* SeeVia · base.css: nền tảng chung. Chỉ dùng biến vai trò trong tokens.css. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--type-body-m-size);
+  line-height: var(--type-body-m-line);
+  font-weight: var(--type-body-weight);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
+}
+
+img, svg { display: block; max-width: 100%; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--color-text-link); text-underline-offset: 0.2em; text-decoration-thickness: 1.5px; }
+h1, h2, h3, h4, p, ul, ol, dl, dd, figure { margin: 0; }
+ul[role="list"], ol[role="list"] { list-style: none; padding: 0; }
+
+::selection { background: var(--color-primary-container); color: var(--color-on-primary-container); }
+:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+input, textarea { caret-color: var(--color-primary-strong); }
+
+* { scrollbar-width: thin; scrollbar-color: var(--color-outline) transparent; }
+
+/* ---------- Kiểu chữ theo vai trò ---------- */
+.t-display     { font: var(--type-display-weight) var(--type-display-size)/var(--type-display-line) var(--font-display); color: var(--color-on-surface); letter-spacing: -0.01em; }
+.t-headline-l  { font: var(--type-headline-weight) var(--type-headline-l-size)/var(--type-headline-l-line) var(--font-display); color: var(--color-on-surface); letter-spacing: -0.005em; }
+.t-headline-m  { font: var(--type-headline-weight) var(--type-headline-m-size)/var(--type-headline-m-line) var(--font-display); color: var(--color-on-surface); }
+.t-headline-s  { font: var(--type-headline-weight) var(--type-headline-s-size)/var(--type-headline-s-line) var(--font-display); color: var(--color-on-surface); }
+.t-title-l     { font: var(--type-title-weight) var(--type-title-l-size)/var(--type-title-l-line) var(--font-sans); color: var(--color-on-surface); }
+.t-title-m     { font: var(--type-title-weight) var(--type-title-m-size)/var(--type-title-m-line) var(--font-sans); color: var(--color-on-surface); }
+.t-title-s     { font: var(--type-title-weight) var(--type-title-s-size)/var(--type-title-s-line) var(--font-sans); color: var(--color-on-surface); }
+.t-body-l      { font: var(--type-body-weight) var(--type-body-l-size)/var(--type-body-l-line) var(--font-sans); }
+.t-body-m      { font: var(--type-body-weight) var(--type-body-m-size)/var(--type-body-m-line) var(--font-sans); }
+.t-body-s      { font: var(--type-body-weight) var(--type-body-s-size)/var(--type-body-s-line) var(--font-sans); }
+.t-label-l     { font: var(--type-label-weight) var(--type-label-l-size)/var(--type-label-l-line) var(--font-sans); letter-spacing: var(--type-label-tracking); }
+.t-label-m     { font: var(--type-label-weight) var(--type-label-m-size)/var(--type-label-m-line) var(--font-sans); letter-spacing: var(--type-label-tracking); }
+.t-label-s     { font: var(--type-label-weight) var(--type-label-s-size)/var(--type-label-s-line) var(--font-sans); letter-spacing: var(--type-label-tracking); }
+.t-muted       { color: var(--color-text-muted); }
+.t-strong      { color: var(--color-on-surface); }
+.t-balance     { text-wrap: balance; }
+
+/* ---------- Icon (Material Symbols Rounded) ---------- */
+.sv-icon {
+  font-family: var(--font-icon);
+  font-weight: normal;
+  font-style: normal;
+  font-size: var(--size-icon);
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  direction: ltr;
+  display: inline-grid;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  flex: none;
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "FILL" 0, "wght" 450, "GRAD" 0, "opsz" 24;
+  user-select: none;
+}
+.sv-icon--fill { font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24; }
+
+/* ---------- Bố cục dùng chung ---------- */
+.l-gutter  { padding-inline: var(--layout-gutter); }
+.l-stack   { display: flex; flex-direction: column; gap: var(--layout-stack); }
+.l-section { margin-top: var(--layout-section); }
+.l-section > .sv-section-title { margin-bottom: var(--layout-section-after); }
+.l-section--first { margin-top: var(--space-6); }
+.l-row     { display: flex; align-items: center; gap: var(--space-3); }
+.l-split   { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Màn con: khoảng đầu trang và giữa các khối */
+.sv-sub { padding-top: var(--space-2); }
+.sv-sub-intro { margin-bottom: var(--space-5); }
+.sv-sub-block { margin-top: var(--space-5); }
+
+/* Chữ To: hai nút cạnh nhau xếp dọc để không gãy chữ */
+html[data-font="lg"] .l-split { grid-template-columns: 1fr; }
+
+/* Ẩn với mắt nhưng hiện ra khi được focus (lối tắt cho bàn phím và trình đọc màn hình) */
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}

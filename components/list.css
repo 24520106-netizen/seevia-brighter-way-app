@@ -1,0 +1,103 @@
+/* Danh sách: nhóm dòng liền nhau kiểu Material. Dòng là <a> hoặc <button> khi bấm được, <div> khi chỉ để đọc. */
+
+.sv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+html[data-contrast="high"] .sv-list { gap: 0; border: var(--border-width) solid var(--color-outline-variant); }
+html[data-contrast="high"] .sv-list > li + li { border-top: var(--border-width) solid var(--color-outline-variant); }
+
+.sv-list-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 72px;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: start;
+  text-decoration: none;
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+}
+.sv-list-item--compact { min-height: 56px; }
+a.sv-list-item::before,
+button.sv-list-item::before,
+label.sv-list-item::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--color-on-surface); opacity: 0;
+  transition: opacity var(--dur-short) var(--ease-standard);
+}
+a.sv-list-item:hover::before, button.sv-list-item:hover::before, label.sv-list-item:hover::before { opacity: var(--state-hover); }
+a.sv-list-item:active::before, button.sv-list-item:active::before, label.sv-list-item:active::before { opacity: var(--state-pressed); }
+.sv-list-item:focus-visible { outline-offset: -3px; }
+
+.sv-list-item__lead {
+  display: grid; place-items: center; flex: none;
+  width: var(--size-icon-tile); height: var(--size-icon-tile);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+.sv-list-item__lead--plain { background: none; color: var(--color-text-muted); }
+html[data-contrast="high"] .sv-list-item__lead { border: var(--border-width) solid var(--color-primary-strong); }
+
+.sv-list-item__body { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.sv-list-item__title {
+  font: var(--type-title-weight) var(--type-title-s-size)/var(--type-title-s-line) var(--font-sans);
+  color: var(--color-on-surface);
+}
+.sv-list-item__sub {
+  font: var(--type-body-weight) var(--type-body-s-size)/var(--type-body-s-line) var(--font-sans);
+  color: var(--color-text-muted);
+}
+.sv-list-item__trail {
+  display: flex; align-items: center; gap: var(--space-2); flex: none;
+  color: var(--color-text-muted);
+  font: var(--type-body-weight) var(--type-body-m-size)/1 var(--font-sans);
+}
+.sv-list-item__trail .sv-icon { color: var(--color-text-muted); }
+button.sv-list-item:disabled { cursor: not-allowed; opacity: 0.55; }
+button.sv-list-item:disabled::before { display: none; }
+
+/* Dòng hoạt động: tên + nhãn trạng thái, chi tiết, thời gian */
+.sv-activity { align-items: flex-start; }
+.sv-activity .sv-list-item__lead { margin-top: 2px; }
+.sv-activity__meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-1) var(--space-2); margin-top: var(--space-1); }
+.sv-activity__time { font: var(--type-label-weight) var(--type-label-m-size)/var(--type-label-m-line) var(--font-sans); color: var(--color-text-muted); }
+
+/* Người thân khẩn cấp */
+.sv-contact__phone { font: var(--type-title-weight) var(--type-title-l-size)/var(--type-title-l-line) var(--font-sans); color: var(--color-on-surface); letter-spacing: 0.02em; white-space: nowrap; }
+.sv-contact { flex-wrap: wrap; row-gap: var(--space-2); }
+.sv-contact .sv-list-item__body { flex: 1 0 auto; }
+.sv-contact__edit { padding-inline: var(--space-4); flex: none; margin-inline-start: auto; }
+.sv-contact-edit { display: block; padding: var(--space-4); }
+.sv-contact-edit__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+
+/* Danh sách ghi chú chỉ để đọc: không viền, không mũi tên, để không trông như nút */
+.sv-notes { display: grid; gap: var(--space-5); margin: 0; padding: 0; list-style: none; }
+.sv-notes li { display: grid; grid-template-columns: var(--size-icon) 1fr; gap: 2px var(--space-3); }
+.sv-notes .sv-icon { grid-row: span 2; color: var(--color-primary-strong); margin-top: 2px; }
+.sv-notes__title { font: var(--type-title-weight) var(--type-title-s-size)/var(--type-title-s-line) var(--font-sans); color: var(--color-on-surface); }
+.sv-notes__body { color: var(--color-text-muted); }
+.sv-notes--compact { gap: var(--space-3); }
+.sv-notes--compact li { align-items: start; }
+.sv-notes--compact .sv-icon { grid-row: auto; }
+
+.sv-list-item__trail--action .sv-icon { color: var(--color-primary-strong); }
+.sv-feature { align-items: flex-start; }
+.sv-feature .sv-list-item__lead, .sv-feature .sv-list-item__trail { margin-top: 2px; }
+.sv-feature__say { display: flex; gap: var(--space-2); align-items: flex-start; margin-top: var(--space-1); font: var(--type-body-weight) var(--type-body-s-size)/var(--type-body-s-line) var(--font-sans); color: var(--color-text-muted); }
+.sv-feature__say .sv-icon { font-size: 18px; margin-top: 2px; color: var(--color-primary-strong); }
+.sv-feature__say b { font-weight: 600; color: var(--color-on-surface); }
+
+.sv-list--after { margin-top: var(--space-3); }

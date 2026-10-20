@@ -1,0 +1,21 @@
+/* SeeVia · nạp toàn bộ component. Màn hình chỉ cần link file này. */
+@import url("device.css");
+@import url("bars.css");
+@import url("button.css");
+@import url("card.css");
+@import url("list.css");
+@import url("chip.css");
+@import url("banner.css");
+@import url("field.css");
+@import url("controls.css");
+@import url("overlay.css");
+@import url("sos.css");
+@import url("misc.css");
+@import url("flows.css");
+
+sv-top-bar, sv-nav-bar, sv-list-item, sv-glasses-card, sv-sos-button, sv-activity-list, sv-emergency-contact,
+sv-feature-groups, sv-info-list, sv-accordion-list, sv-profile-card, sv-profile-settings, sv-version-tap,
+sv-activity-browser, sv-album, sv-translator, sv-recorder, sv-glasses-manager, sv-account,
+sv-support-form, sv-display-settings, sv-dev-handlers,
+sv-community-notify, sv-sos-status, sv-hotline { display: block; }
+sv-list-item > .sv-list-item { height: 100%; }
