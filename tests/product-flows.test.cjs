@@ -179,7 +179,7 @@ test('reading practice supports unclear image, retry, listen/stop/replay and exp
     await f.click('[data-read-action="read"]');
     await f.click('sv-read-practice sv-speech-control button');
     assert.equal(f.SV.speech.getState().status, 'playing');
-    assert.equal(f.calls.at(-1).text, f.SV.t('readPractice.sample'));
+    assert.equal(f.calls.at(-1).text, `${f.SV.t('readPractice.resultTitle')}. ${f.SV.t('readPractice.sample')}`);
     await f.click('sv-read-practice sv-speech-control button');
     assert.equal(f.SV.speech.getState().status, 'stopped');
     assert.equal(f.SV.state.get('firstReadDone'), false);
@@ -189,7 +189,7 @@ test('reading practice supports unclear image, retry, listen/stop/replay and exp
     await f.click('[data-read-action="read"]');
     await f.click('[data-read-action="confirm"]');
     assert.equal(f.SV.state.get('firstReadDone'), true);
-    assert.match(f.get('[data-read-heading]').textContent, /hoàn thành/);
+    assert.match(f.get('[data-read-heading]').textContent, /hoàn thành/i);
     f.check();
   } finally { f.close(); }
 });
@@ -224,13 +224,14 @@ test('navigation prioritizes guidance and every capability carries its implement
     const nav = [...f.w.document.querySelectorAll('sv-nav-bar a')].map(a => path.basename(new URL(a.href).pathname));
     assert.deepEqual(nav, ['home.html', 'activity.html', 'safety.html', 'features.html', 'profile.html']);
     assert.ok(f.get('#home-use').compareDocumentPosition(f.get('#home-recent')) & f.w.Node.DOCUMENT_POSITION_FOLLOWING);
+    await f.click('a[href="guide.html?from=home"]');
     assert.equal(f.get('details.sv-accordion').open, false);
     await f.click('sv-nav-bar a[href="features.html"]');
     const items = f.w.document.querySelectorAll('[data-g]');
     assert.ok(items.length > 0);
     for (const item of items) assert.match(item.querySelector('.sv-feature__phase').textContent, /mô phỏng|chưa triển khai/);
     await f.click('[data-g]');
-    assert.match(f.get('dialog[open]').textContent, /Chưa có kính thật/);
+    assert.match(f.get('dialog[open]').textContent, /Chưa thử với kính thật/);
     f.check();
   } finally { f.close(); }
 });

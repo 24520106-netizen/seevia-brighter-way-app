@@ -5,6 +5,8 @@
   /* Chạm bất kỳ chỗ nào = SeeVia tự đọc (kính tự nói). Nút Nghe chỉ để nghe lại. */
   var INTERACTIVE = 'a,button,input,select,textarea,summary,label,[role="button"],sv-speech-control';
   var gesture = 0, lastGesture = 0, claimed = -1, introDevice = null, backAt = 0;
+  var navigationVersion = 0, screenSpeechToken = 0, clickStart = new WeakMap();
+  var pendingSpeechKey = 'sv.pendingScreenSpeech';
   function recent() { return gesture > 0 && Date.now() - lastGesture < 3000; }
   function visible(control) { return control.isConnected && control.getClientRects().length > 0; }
   function onGesture(event) {
@@ -24,6 +26,10 @@
   /* Mọi nút bấm đều có tiếng: sau khi bấm, đọc tên điều khiển và trạng thái mới của nó.
      Chỉ đọc nhãn, không bao giờ đọc giá trị ô nhập (mật khẩu, OTP, số điện thoại). */
   var NAMED = 'a[href],button,summary,select,textarea,input,[role="button"],[role="radio"],[role="switch"],[role="tab"],[role="checkbox"]';
+  document.addEventListener('sv:navigate', function () { navigationVersion++; });
+  document.addEventListener('click', function (event) {
+    clickStart.set(event, { navigation: navigationVersion, speech: SV.speech.getState().id });
+  }, true);
   function textOf(node) {
     var copy = node.cloneNode(true);
     copy.querySelectorAll('[aria-hidden="true"],svg,.visually-hidden').forEach(function (n) { n.remove(); });
@@ -51,24 +57,71 @@
     if (SV.settings.get('speechFeedback') !== 'voice' || !event.target.closest) return;
     var el = event.target.closest(NAMED);
     if (!el || el.closest('sv-speech-control,sv-sos-button') || el.disabled) return;
-    // Back arrow: the screen swap cancels speech, so say "Quay lại" together with the screen name instead.
     var ic = el.querySelector('.sv-icon');
-    if (el.closest('sv-top-bar') && ic && ic.textContent === 'arrow_back') { backAt = Date.now(); return; }
+    var isBack = !!(el.closest('sv-top-bar') && ic && ic.textContent === 'arrow_back');
+    if (isBack) backAt = Date.now();
+    var before = clickStart.get(event);
+    // An action's own feedback or a route change already owns this gesture.
+    if (before && (before.navigation !== navigationVersion || before.speech !== SV.speech.getState().id)) return;
+    var anchor = el.closest('a[href]');
+    if (anchor && anchor.href !== location.href) {
+      var destination = new URL(anchor.href, location.href);
+      var sameDocumentAnchor = destination.pathname === location.pathname && destination.search === location.search && !!destination.hash;
+      var internalScreen = destination.protocol === location.protocol && destination.origin === location.origin && /\/screens\/[^/]+\.html$/.test(destination.pathname);
+      if (internalScreen && !sameDocumentAnchor) {
+        if (location.protocol === 'file:') {
+          var target = isBack && SV.backTarget && SV.backTarget() || anchor.href;
+          try { sessionStorage.setItem(pendingSpeechKey, JSON.stringify({ target: target, back: isBack })); } catch (e) { /* storage unavailable */ }
+        }
+        return;
+      }
+    }
+    if (isBack) return;
     if (el.matches('input[type="password"],input[type="hidden"]') && !controlName(el)) return;
     var text = [controlName(el), controlState(el)].filter(Boolean).join('. ');
-    if (text) SV.speech.speak(text, { owner: document });
+    if (text) SV.announce(text);
   });
   /* Chuyển màn (tab, liên kết): chỉ đọc tên màn mới. Nội dung bên trong chỉ đọc khi người dùng thao tác tiếp. */
   document.addEventListener('sv:screen', function () {
     claimed = gesture; // controls on the new screen must not start by themselves
-    if (!recent() || SV.settings.get('speechFeedback') !== 'voice') return;
+    var token = ++screenSpeechToken;
+    if (SV.settings.get('speechFeedback') !== 'voice') return;
     var h1 = document.querySelector('.sv-device h1');
     var name = h1 ? textOf(h1) : '';
     if (Date.now() - backAt < 3000) name = SV.t('common.back') + '. ' + name;
     backAt = 0;
-    // Engines can drop a speak() issued right after cancel(), so start a moment later.
-    if (name) setTimeout(function () { SV.speech.speak(name, { owner: document }); }, 150);
+    var speechId = SV.speech.getState().id;
+    // Give the previous engine session time to finish cancellation.
+    if (name) setTimeout(function () {
+      if (token === screenSpeechToken && speechId === SV.speech.getState().id && SV.settings.get('speechFeedback') === 'voice') {
+        SV.announce(name);
+      }
+    }, 150);
   });
+  var fileSpeechAnnounced = false;
+  function announcePendingFileScreen(event) {
+    if (location.protocol !== 'file:' || SV.settings.get('speechFeedback') !== 'voice') return;
+    var pending;
+    try {
+      pending = JSON.parse(sessionStorage.getItem(pendingSpeechKey) || 'null');
+      if (pending && pending.target === location.href) sessionStorage.removeItem(pendingSpeechKey);
+    } catch (e) { return; }
+    var requested = pending && pending.target === location.href;
+    if (!requested) {
+      if (!event || event.type !== 'pageshow' || fileSpeechAnnounced) return;
+      var navigation = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (!event.persisted && (!navigation || navigation.type !== 'back_forward')) return;
+    }
+    if (fileSpeechAnnounced) return;
+    fileSpeechAnnounced = true;
+    var h1 = document.querySelector('.sv-device h1');
+    var name = h1 ? textOf(h1) : '';
+    if (!requested || pending.back) name = SV.t('common.back') + '. ' + name;
+    if (name) setTimeout(function () { if (SV.settings.get('speechFeedback') === 'voice') SV.announce(name); }, 150);
+  }
+  document.addEventListener('DOMContentLoaded', announcePendingFileScreen);
+  window.addEventListener('pageshow', announcePendingFileScreen);
+  window.addEventListener('pagehide', function () { fileSpeechAnnounced = false; });
   // Opening a guide item by touch reads it.
   document.addEventListener('toggle', function (event) {
     var details = event.target;

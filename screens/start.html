@@ -7,6 +7,21 @@
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../base.css">
 <link rel="stylesheet" href="../components/index.css">
+<style>
+  /* Chỉ hiện chữ SeeVia (cắt bỏ ký hiệu SV bên trái ảnh logo), phóng to 1,2 lần; khung logo giữ nguyên 48px nên bố cục không đổi. */
+  .sv-setup-brand { --wm: 1.2; }
+  .sv-setup-brand sv-logo { position: relative; display: block; width: 90.67px; height: 48px !important; overflow: visible; }
+  .sv-setup-brand sv-logo img {
+    position: absolute;
+    top: 50%;
+    height: calc(84px * var(--wm));
+    width: auto;
+    max-width: none;
+    margin: 0;
+    transform: translate(calc(-82.83px * var(--wm)), -50%);
+    clip-path: inset(0 0 0 calc(82.83px * var(--wm)));
+  }
+</style>
 <script src="../brand/brand.js"></script>
 <script src="../content/vi.js"></script>
 <script src="../core/app.js"></script>

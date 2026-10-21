@@ -36,3 +36,4 @@
 .sv-reading-sample { display: grid; gap: var(--space-3); padding: var(--space-4); background: var(--color-surface-container); border-radius: var(--radius-md); }
 .sv-reading-stage .sv-btn { white-space: normal; line-height: var(--type-label-l-line); padding-block: var(--space-3); }
 .sv-feature__phase { display: block; color: var(--color-text-muted); font: var(--type-label-weight) var(--type-label-m-size)/1.5 var(--font-sans); margin-block: var(--space-2); }
+.sv-setup-badge { display: inline-block; margin: 0 0 var(--space-3); padding: var(--space-1) var(--space-3); border: var(--border-width) solid var(--color-outline-variant); border-radius: var(--radius-full); color: var(--color-text-muted); }

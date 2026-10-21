@@ -284,26 +284,49 @@
   }
 
   /* Vị trí cuộn của từng màn: quay lại (Back, mũi tên ←) thì trả về đúng chỗ đã cuộn */
-  var scrollAt = {};
+  /* Lưu trong sessionStorage để tải lại trang hay mở lại màn vẫn quay về đúng chỗ */
+  function readMap(key) { try { return JSON.parse(sessionStorage.getItem(key)) || {}; } catch (e) { return {}; } }
+  function writeMap(key, map) { try { sessionStorage.setItem(key, JSON.stringify(map)); } catch (e) { /* bỏ qua */ } }
+  var scrollAt = readMap("sv.scroll");   /* url -> vị trí cuộn */
+  var cameFrom = readMap("sv.from");     /* url -> màn người dùng vừa rời để vào đây */
   var here = location.href;
+  function saveScroll() {
+    var el = document.querySelector(".sv-device__screen");
+    if (el) { scrollAt[here] = el.scrollTop; writeMap("sv.scroll", scrollAt); }
+  }
+  window.addEventListener("pagehide", saveScroll);
+  window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+      scrollAt = readMap("sv.scroll");
+      if (scrollAt[here]) restoreScroll(scrollAt[here]);
+    }
+  });
+  (function () {
+    var ref = document.referrer;
+    if (ref && isScreen(ref) && pathOf(ref) !== pathOf(location.href) && !cameFrom[here]) { cameFrom[here] = ref; writeMap("sv.from", cameFrom); }
+  })();
   function screenScroller() { return document.querySelector(".sv-device__screen"); }
 
-  function render(url, push) {
+  function render(url, push, restore) {
+    document.dispatchEvent(new CustomEvent("sv:navigate"));
     if (SV.speech) SV.speech.reset();
-    var left = screenScroller();
-    if (left) scrollAt[here] = left.scrollTop;
+    saveScroll();
+    var leaving = here;
     var token = ++navToken;
     return load(url).then(function (text) {
       if (token !== navToken) return;
       /* Cập nhật địa chỉ trước khi gắn DOM: component đọc location.hash (guide.html#voice) */
-      if (push) history.pushState({ sv: true, from: location.href }, "", url);
+      if (push) {
+        history.pushState({ sv: true, from: location.href }, "", url);
+        cameFrom[new URL(url, location.href).href] = leaving; writeMap("sv.from", cameFrom);
+      }
       routed = true;
       shown = pathOf(url);
       here = location.href;
       var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
       var show = function () {
         swap(text);
-        if (!push && scrollAt[here]) restoreScroll(scrollAt[here]);
+        if ((!push || restore) && scrollAt[here]) restoreScroll(scrollAt[here]);
       };
       if (document.startViewTransition && !reduce) {
         return document.startViewTransition(show).updateCallbackDone;
@@ -314,17 +337,29 @@
     });
   }
 
+  /* Component dựng nội dung muộn nên màn chưa đủ cao ngay: thử lại tới khi cuộn tới đúng chỗ (tối đa ~1 giây) */
   function restoreScroll(top) {
-    var apply = function () { var el = screenScroller(); if (el) el.scrollTop = top; };
-    apply();
-    requestAnimationFrame(apply);  /* component dựng xong rồi mới có đủ chiều cao */
+    var tries = 0, token = navToken;
+    (function apply() {
+      var el = screenScroller();
+      if (!el || token !== navToken) return;
+      el.scrollTop = top;
+      if (Math.abs(el.scrollTop - top) > 1 && ++tries < 60) requestAnimationFrame(apply);
+    })();
   }
 
   /* Đi tới một màn (dùng thay cho location.href = "x.html") */
-  SV.go = function (url) {
+  SV.go = function (url, options) {
     url = new URL(url, location.href).href;
     if (location.protocol === "file:" || !isScreen(url)) { location.href = url; return; }
-    render(url, true);
+    render(url, true, !!(options && options.restore));
+  };
+
+  /* Màn mà nút ← phải quay về: màn người dùng vừa rời (nhớ cả khi tải lại trang) */
+  SV.backTarget = function () {
+    var st = history.state;
+    if (st && st.sv && st.from) return st.from;
+    return cameFrom[location.href] || null;
   };
 
   /* Nút ← của thanh trên: có màn trước trong app thì quay lại đúng màn đó */
@@ -344,7 +379,8 @@
       if (pathOf(a.href) === pathOf(location.href) && a.href.indexOf("#") > -1) return;
       event.preventDefault();
       if (a.href === location.href) return;
-      render(a.href, true);
+      /* Chuyển tab ở thanh dưới: mỗi tab nhớ chỗ người dùng đã cuộn */
+      render(a.href, true, !!a.closest(".sv-nav-bar"));
     });
     /* Nạp trước khi trỏ chuột / chạm vào liên kết */
     ["pointerover", "touchstart", "focusin"].forEach(function (type) {
@@ -355,7 +391,7 @@
     });
     shown = pathOf(location.href);
     window.addEventListener("popstate", function () {
-      if (!routed || pathOf(location.href) === shown) return; /* chỉ đổi #neo */
+      if (pathOf(location.href) === shown) return; /* chỉ đổi #neo */
       render(location.href, false);
     });
   }
@@ -399,6 +435,7 @@
     }
     SV.applyText(document);
     prepareAccessibility(document);
+    if (scrollAt[here]) restoreScroll(scrollAt[here]);
     // Mount empty live regions before the first asynchronous change.
     SV.prepareLiveRegions(document.body);
   });

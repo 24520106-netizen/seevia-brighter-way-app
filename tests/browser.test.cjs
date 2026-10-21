@@ -61,6 +61,19 @@ async function main() {
         assert.deepEqual(unnamed.map(n => n.role.value), [], file + ' unnamed controls');
       }
     });
+    await check('guide returns to its entry screen and preserves each screen scroll position', async () => {
+      for (const source of ['home', 'profile']) {
+        await goto(source);
+        const scroller = page.locator('.sv-device__screen');
+        const position = await scroller.evaluate(el => { el.scrollTop = el.scrollHeight; return el.scrollTop; });
+        assert.ok(position > 0, `${source} must be scrollable for this check`);
+        await page.locator(`a[href="guide.html?from=${source}"]`).click();
+        await page.waitForURL(`**/guide.html?from=${source}`);
+        await page.locator('sv-top-bar a.sv-icon-btn').click();
+        await page.waitForURL(`**/${source}.html`);
+        await page.waitForFunction(top => Math.abs(document.querySelector('.sv-device__screen').scrollTop - top) <= 2, position);
+      }
+    });
     await check('every feature sample reads its own command; sheet stays open, stop and close work', async () => {
       await goto('features');
       const count = await page.locator('[data-g]').count();
@@ -254,10 +267,22 @@ async function main() {
       await page.locator('[data-g]').first().click(); await page.locator('dialog sv-speech-control button').click();
       await page.waitForFunction(() => SV.speech.getState().status === 'playing');
       assert.equal(await page.locator('dialog[open]').count(), 1);
+      for (const source of ['home', 'profile']) {
+        await page.goto('file:///' + path.join(root, 'screens', `${source}.html`).replaceAll('\\', '/'), { waitUntil: 'domcontentloaded' });
+        const position = await page.locator('.sv-device__screen').evaluate(el => { el.scrollTop = el.scrollHeight; return el.scrollTop; });
+        assert.ok(position > 0);
+        await page.locator(`a[href="guide.html?from=${source}"]`).click();
+        await page.waitForURL(`**/guide.html?from=${source}`);
+        const savedPosition = await page.evaluate(source => JSON.parse(sessionStorage.getItem('sv.scroll'))[new URL(source + '.html', location.href).href], source);
+        assert.ok(savedPosition > 0);
+        await page.locator('sv-top-bar a.sv-icon-btn').click();
+        await page.waitForURL(`**/${source}.html`);
+        await page.waitForFunction(top => Math.abs(document.querySelector('.sv-device__screen').scrollTop - top) <= 2, savedPosition, { timeout: 5000 });
+      }
     });
     await check('settings render at large text, high contrast and desktop sizes', async () => {
       await goto('display');
-      await page.evaluate(() => { SV.settings.set('font', 'lg'); SV.settings.set('contrast', 'on'); });
+      await page.evaluate(() => { SV.settings.set('font', 'lg'); SV.settings.set('contrast', 'on'); SV.settings.set('speechFeedback', 'screenReader'); });
       await page.locator('sv-speech-settings').evaluate(el => el.scrollIntoView({ block: 'start' }));
       assert.equal(await page.locator('sv-speech-settings').evaluate(el => el.scrollWidth <= el.clientWidth + 1), true);
       fs.mkdirSync(path.join(root, 'tmp'), { recursive: true });

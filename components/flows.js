@@ -185,7 +185,7 @@
         ["safety.html", "contact_emergency", "profile.emergency", "emergency"],
         ["account.html", "account_circle", "profile.account", "account"],
         ["support.html", "support_agent", "profile.support", null],
-        ["guide.html", "menu_book", "profile.guide", null]
+        ["guide.html?from=profile", "menu_book", "profile.guide", null]
       ];
       this.innerHTML = '<ul class="sv-list" role="list">' + rows.map(function (r) {
         return '<li><a class="sv-list-item sv-list-item--compact" href="' + r[0] + '">' +
@@ -478,7 +478,9 @@
     connectedCallback() {
       if (!this.hasAttribute('always') && new URLSearchParams(location.search).get('setup') !== '1') { this.hidden = true; return; }
       var step = Number(this.getAttribute('step')) || 1;
-      this.innerHTML = '<ol class="sv-setup-progress" aria-label="' + esc(SV.t('setup.progress')) + '">' +
+      var keys = ['stepAccount', 'stepConnect', 'stepReady', 'stepFirstRead'];
+      this.innerHTML = '<p class="visually-hidden">' + esc(SV.t('setup.stepOf', { n: step, name: SV.t('setup.' + keys[step - 1]).replace(/^\d+\.\s*/, '') })) + '</p>' +
+        '<ol class="sv-setup-progress" aria-hidden="true">' +
         ['stepAccount', 'stepConnect', 'stepReady', 'stepFirstRead'].map(function (key, i) {
           return '<li' + (i + 1 === step ? ' aria-current="step"' : '') + '>' + esc(SV.t('setup.' + key)) + '</li>';
         }).join('') + '</ol>';
@@ -486,16 +488,17 @@
   });
   define('sv-setup-start', class extends HTMLElement {
     connectedCallback() {
+      var more = (SV.state.get('account').signedIn ? setupLink('resume', 'home.html', 'tonal') : '') +
+        '<p class="t-body-m t-muted">' + esc(SV.t('setup.startNote')) + '</p>' +
+        '<p class="t-body-m t-muted">' + esc(SV.t('setup.demoNote')) + '</p>' + setupLink('explore', 'home.html');
       this.innerHTML = '<div class="sv-setup-brand"><sv-logo variant="full" height="48"></sv-logo></div>' +
+        '<p class="t-label-m sv-setup-badge">' + esc(SV.t('setup.mockBadge')) + '</p>' +
         '<h1 class="t-headline-l sv-setup-heading">' + esc(SV.t('setup.welcomeTitle')) + '</h1>' +
         '<p class="t-body-l sv-setup-lead">' + esc(SV.t('setup.welcomeBody')) + '</p>' +
-        '<p class="t-body-m">' + esc(SV.t('setup.welcomeDetail')) + '</p>' +
-        '<div class="sv-setup-actions">' + setupLink('accessSettings', 'display.html?from=start', 'tonal') + setupButton('start', 'start') +
-        (SV.state.get('account').signedIn ? setupLink('resume', 'home.html', 'tonal') : '') + '</div>' +
-        '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.startNote')) + '</p>' +
-        '<section class="sv-setup-help"><h2 class="t-title-s">' + esc(SV.t('setup.accessTitle')) + '</h2><p class="t-body-m t-muted">' + esc(SV.t('setup.accessBody')) + '</p>' +
-        SV.speechControl(SV.t('setup.welcomeBody') + ' ' + SV.t('setup.welcomeDetail') + ' ' + SV.t('setup.accessBody') + ' ' + SV.t('setup.demoNote'), 'speech.welcomeListen') + '</section>' +
-        '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.demoNote')) + '</p>' + setupLink('explore', 'home.html');
+        '<div class="sv-setup-actions">' + setupButton('start', 'start') +
+        SV.speechControl(SV.t('setup.welcomeTitle') + '. ' + SV.t('setup.welcomeBody') + ' ' + SV.t('setup.demoNote'), 'speech.welcomeListen') +
+        setupLink('accessSettings', 'display.html?from=start', 'text') + '</div>' +
+        '<details class="sv-setup-scenario"><summary>' + esc(SV.t('setup.moreTitle')) + '</summary><div class="sv-setup-actions">' + more + '</div></details>';
       this.querySelector('[data-setup="start"]').addEventListener('click', function () {
         SV.state.set('account', { signedIn: false, name: '', phone: '' });
         SV.state.set('glasses', { linked: false, connection: 'unlinked', online: null, service: 'unknown', updatedAt: null, battery: null, version: '2.1.4', serial: 'SV-DEMO-2026' });
@@ -514,6 +517,7 @@
       this.scenario = 'success';
       this.findScenario = 'found';
       this.render();
+      this.speakPhase();
       var self = this;
       this._freshness = setInterval(function () {
         var kind = SV.glassesStatus().kind;
@@ -532,6 +536,19 @@
       this.render();
       var heading = this.querySelector('[data-stage-heading]');
       if (heading) heading.focus();
+      this.speakPhase();
+    }
+    /* Tự nói trạng thái mỗi khi vào bước mới, không cần chạm. Nếu trình duyệt chặn tiếng
+       (chưa có thao tác nào trên trang) thì rơi về vùng thông báo cho trình đọc màn hình. */
+    speakPhase() {
+      var p = this.phase, status = SV.glassesStatus();
+      var titles = { signin: 'signInTitle', find: 'findTitle', searching: 'searchingTitle', found: 'foundTitle', notFound: 'notFoundTitle', wifi: 'wifiTitle', connecting: 'connectingTitle', recovering: 'recoveringTitle', error: this.failure === 'password' ? 'wrongPasswordTitle' : 'serviceTitle' };
+      var bodies = { signin: 'signInBody', find: 'findBody', searching: 'searchingBody', found: 'foundBody', notFound: 'notFoundBody', wifi: 'wifiBody', connecting: 'connectingBody', recovering: 'recoveringBody', error: this.failure === 'password' ? 'wrongPasswordBody' : 'serviceBody' };
+      var text = titles[p] ? SV.t('setup.' + titles[p]) + '. ' + SV.t('setup.' + bodies[p]) : SV.glassesSpeech() + (p === 'ready' ? ' ' + SV.t('setup.readyBody') : '');
+      var chosen = SV.settings.get('speechChosen') && SV.settings.get('speechFeedback') === 'screenReader';
+      var done = false, fallback = function () { if (!done) { done = true; SV.announce(text, false, { speech: false }); } };
+      if (chosen || document.hidden) { fallback(); return; }
+      if (!SV.speech.speak(text, { owner: this, priority: 'feedback', onError: fallback })) fallback();
     }
     search() {
       var self = this;
@@ -571,8 +588,7 @@
         bodies.error = this.failure === 'password' ? 'wrongPasswordBody' : 'serviceBody';
       }
       var html = (!g.linked || p === 'ready') && p !== 'signin' ? '<sv-setup-progress always step="' + (p === 'ready' ? '3' : '2') + '"></sv-setup-progress>' : '';
-      html += '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.demoNote')) + '</p>' +
-        '<section class="sv-setup-stage"><h2 class="t-headline-s sv-setup-heading" tabindex="-1" data-stage-heading aria-describedby="sv-connection-description">' + esc(p === 'unknown' ? SV.glassesStatusText(status) : SV.t('setup.' + titles[p])) + '</h2>' +
+      html += '<section class="sv-setup-stage"><h2 class="t-headline-s sv-setup-heading" tabindex="-1" data-stage-heading aria-describedby="sv-connection-description">' + esc(p === 'unknown' ? SV.glassesStatusText(status) : SV.t('setup.' + titles[p])) + '</h2>' +
         '<p class="t-body-m" id="sv-connection-description">' + esc(p === 'unknown' ? SV.t('deviceStatus.' + status.kind + 'Help') : SV.t('setup.' + (p === 'ready' && this.recovered ? 'recovered' : bodies[p]))) + '</p>';
       if (busy) html += '<div class="sv-setup-busy" aria-hidden="true"></div>';
       if (p === 'signin') html += '<div class="sv-setup-actions">' + setupLink('signIn', 'account.html?setup=1', 'filled') + '</div>';
@@ -596,13 +612,13 @@
         html += '<div class="sv-setup-stage"><sv-glasses-card from-state compact></sv-glasses-card></div>' +
           (g.network ? '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.network', { name: g.network })) + '</p>' : '') +
           '<div class="sv-setup-actions">' + (p !== 'ready' ? setupButton('retry', 'recover') + setupButton('editWifi', 'editWifi', 'outlined') : '') +
-          speechControls() + (p === 'ready' ? setupLink('firstRead', 'read-practice.html?setup=1', 'filled') : '') +
+          (p === 'ready' ? setupLink('firstRead', 'read-practice.html?setup=1', 'filled') : '') + speechControls() +
           setupLink('home', 'home.html', 'text') + '</div>';
         html += scenarioDetails(deviceStateSelect(status.kind) + (p === 'ready' ? setupButton('lose', 'lose', 'outlined') : scenarioSelect('sv-connect-scenario', 'connectScenario', [['success', 'success'], ['service', 'serviceFailure']], this.scenario)) + setupLink('replay', 'start.html'));
         html += '<div class="sv-setup-help">' + '<button type="button" class="sv-btn sv-btn--text sv-btn--block" data-setup="unlink">' + esc(SV.t('glassesPage.unlink')) + '</button></div>';
       }
       if (p !== 'ready' && p !== 'lost' && p !== 'unknown') html += speechControls();
-      html += '</section><p class="t-body-s sv-setup-note">' + esc(SV.t('setup.privacyNote')) + '</p>';
+      html += '</section>' + (p === 'wifi' ? '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.privacyNote')) + '</p>' : '');
       this.innerHTML = html;
       this.querySelectorAll('[data-setup]').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -682,8 +698,7 @@
       var changed = this._kind && this._kind !== kind;
       this._kind = kind;
       this.innerHTML = '<section class="sv-connection-status" aria-label="' + esc(SV.t('setup.title')) + '">' +
-        '<div class="sv-setup-state' + (kind !== 'ready' ? ' sv-setup-state--lost' : '') + '"><p class="t-title-s">' + esc(SV.glassesStatusText(status)) + '</p></div>' +
-        '<p class="t-body-m t-muted">' + esc(SV.t('deviceStatus.' + kind + 'Help')) + ' ' + esc(SV.glassesUpdatedText(status)) + '</p>' +
+        '<sv-glasses-card from-state compact></sv-glasses-card>' +
         '<div class="sv-setup-actions">' + (kind === 'ready' ? setupLink('firstRead', 'read-practice.html', 'filled') : '') +
         setupLink(kind === 'ready' ? 'manage' : 'recoverTitle', 'glasses.html', kind === 'ready' ? 'text' : 'filled') + speechControls() + '</div></section>';
       bindStatusSpeech(this);
@@ -722,9 +737,9 @@
       this.innerHTML = '<section class="sv-reading-stage l-stack" aria-labelledby="sv-read-heading">' +
         '<h2 class="t-title-l" id="sv-read-heading" tabindex="-1" data-read-heading aria-describedby="sv-read-help">' + esc(SV.t('readPractice.' + title)) + '</h2>' +
         '<p class="t-body-m" id="sv-read-help">' + esc(SV.t('readPractice.' + text)) + '</p>' +
-        ((phase === 'prepare' || phase === 'result') ? '<div class="sv-reading-sample"><h3 class="t-title-s">' + esc(SV.t('readPractice.sampleLabel')) + '</h3><p class="t-body-l">' + esc(SV.t('readPractice.sample')) + '</p></div>' : '') +
+        (phase === 'result' ? SV.speechControl(SV.t('readPractice.sample'), 'readPractice.listen') + '<div class="sv-reading-sample"><h3 class="t-title-s">' + esc(SV.t('readPractice.sampleLabel')) + '</h3><p class="t-body-l">' + esc(SV.t('readPractice.sample')) + '</p></div>' : '') +
         (phase === 'prepare' ? button('read', 'read') + button('blur', 'blur', 'outlined') : '') +
-        (phase === 'result' ? SV.speechControl(SV.t('readPractice.sample'), 'readPractice.listen') + button('confirm', 'confirm') + button('retry', 'retry', 'text') : '') +
+        (phase === 'result' ? button('confirm', 'confirm') + button('retry', 'retry', 'text') : '') +
         (phase === 'blur' ? button('retryClear', 'read') + '<a class="sv-btn sv-btn--text sv-btn--block" href="display.html">' + esc(SV.t('readPractice.help')) + '</a>' : '') +
         (phase === 'done' ? '<a class="sv-btn sv-btn--filled sv-btn--block" href="home.html">' + esc(SV.t('readPractice.home')) + '</a>' + button('retry', 'retry', 'text') : '') +
         '</section>';

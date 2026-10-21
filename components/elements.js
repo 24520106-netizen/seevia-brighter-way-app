@@ -84,6 +84,10 @@
       this._done = true;
       var variant = this.getAttribute("variant") || "small";
       var back = this.getAttribute("back");
+      var from = new URLSearchParams(location.search).get("from");
+      var sourceBack = from && this.getAttribute("back-from-" + from);
+      if (sourceBack) back = sourceBack;
+      if (this.hasAttribute("back-setup") && new URLSearchParams(location.search).get("setup") === "1") back = this.getAttribute("back-setup");
       if (this.hasAttribute("back-from-start") && new URLSearchParams(location.search).get("from") === "start") back = "start.html";
       var heading = this.getAttribute("heading");
       var actions = Array.prototype.slice.call(this.childNodes);
@@ -111,7 +115,11 @@
         if (SV.canGoBack()) {
           event.preventDefault();
           history.back();
+          return;
         }
+        /* Không còn lịch sử (vừa tải lại, mở thẳng màn): quay về màn đã nhớ, rồi mới tới đích mặc định */
+        var target = sourceBack || (SV.backTarget && SV.backTarget());
+        if (target) { event.preventDefault(); SV.go(target, { restore: true }); }
       });
     }
   });
