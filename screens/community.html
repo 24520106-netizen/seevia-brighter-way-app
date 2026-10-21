@@ -10,19 +10,15 @@
 <script src="../brand/brand.js"></script>
 <script src="../content/vi.js"></script>
 <script src="../core/app.js"></script>
+<script src="../core/speech.js"></script>
 </head>
 <body class="sv-device-host">
 <div class="sv-device">
   <sv-status-bar></sv-status-bar>
-  <sv-top-bar heading="community.title" variant="collapsing">
-    <span class="sv-demo-tag"><span class="sv-icon" aria-hidden="true">science</span><span data-t="common.demoBadge"></span></span>
-  </sv-top-bar>
+  <sv-top-bar heading="community.title" back="features.html"></sv-top-bar>
   <main class="sv-device__screen">
-    <div class="sv-page-title">
-      <h1 class="t-headline-l" data-t="community.title"></h1>
-      <p class="t-body-m sv-page-title__lede" data-t="community.intro"></p>
-    </div>
-    <div class="l-gutter">
+    <div class="l-gutter sv-sub">
+      <p class="t-body-m t-muted sv-sub-intro" data-t="community.intro"></p>
       <section class="l-section l-section--first">
         <sv-community-notify></sv-community-notify>
         <ul class="sv-list sv-list--after" role="list">
@@ -36,10 +32,11 @@
       <p class="sv-page-note t-body-s"><span class="sv-icon" aria-hidden="true">info</span><span data-t="community.note"></span></p>
     </div>
   </main>
-  <sv-nav-bar active="community"></sv-nav-bar>
+  <sv-nav-bar active="features"></sv-nav-bar>
   <div class="sv-gesture-bar" aria-hidden="true"></div>
 </div>
 <script src="../components/elements.js"></script>
+<script src="../components/speech.js"></script>
 <script src="../components/flows.js"></script>
 </body>
 </html>

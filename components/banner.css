@@ -20,11 +20,11 @@ html[data-contrast="high"] .sv-banner { border: var(--border-width) solid curren
 /* Nhãn "Bản mô phỏng" gọn, đặt trên thanh tiêu đề */
 .sv-demo-tag {
   display: inline-flex; align-items: center; gap: 4px;
-  min-height: 28px; padding: 0 var(--space-3);
+  min-height: 28px; padding: var(--space-1) var(--space-3); min-width: 0;
   border-radius: var(--radius-full);
   background: var(--color-warning-container);
   color: var(--color-on-warning-container);
-  font: var(--type-label-weight) var(--type-label-m-size)/1 var(--font-sans);
+  font: var(--type-label-weight) var(--type-label-m-size)/1.35 var(--font-sans);
 }
 .sv-demo-tag .sv-icon { font-size: 16px; }
 html[data-contrast="high"] .sv-demo-tag { border: var(--border-width) solid currentColor; }

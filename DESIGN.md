@@ -67,7 +67,7 @@ typography:
     letterSpacing: "0.01em"
   label-m:
     fontFamily: "Be Vietnam Pro, system-ui, sans-serif"
-    fontSize: "14px"
+    fontSize: "16px"
     fontWeight: 600
     lineHeight: 1.35
   icon:
@@ -217,10 +217,10 @@ Sapphire dẫn hành động, Ink và Indigo giữ chữ, Pearl và trắng làm
 - **Display** (Playfair 600, 36px, 1.2): tiêu đề trang tài liệu; hiếm dùng trong app.
 - **Headline** (Playfair 600, 30 / 26 / 22px): lời chào Trang chủ, tiêu đề màn lớn, tiêu đề bottom sheet, tiêu đề trạng thái rỗng.
 - **Title** (Be Vietnam Pro 600, 20 / 18 / 16px): tiêu đề thanh trên, tiêu đề mục, tên dòng danh sách.
-- **Body** (Be Vietnam Pro 400, 18 / 16 / 15px, line-height 1.5–1.55): nội dung; 15px chỉ cho mô tả phụ và thời gian.
-- **Label** (Be Vietnam Pro 600, 16 / 14 / 13px): nút (16), nhãn tab và chip (14), badge (13).
+- **Body** (Be Vietnam Pro 400, 18 / 16 / 16px ở mặc định trình duyệt, line-height 1.5–1.55): dùng rem; chữ phụ cũng có sàn 1rem.
+- **Label** (Be Vietnam Pro 600, sàn 1rem): nút, tab, chip và badge. Phân cấp bằng độ đậm, màu và khoảng cách thay vì thu nhỏ chữ.
 
-Mọi cỡ nhân với `--font-scale` (×0,88 · ×1 · ×1,28) theo lựa chọn ở màn Hiển thị.
+Thang chữ dùng rem và nhân `--font-scale` (×0,88 · ×1 · ×1,28); body, label và title nhỏ có sàn 1rem. Vì vậy mức Nhỏ giảm tiêu đề lớn nhưng không thu chữ nội dung xuống dưới sàn. Cài đặt ở Trợ năng và âm thanh.
 
 ### Named Rules
 **The Serif-Only-Large Rule.** Playfair không bao giờ dưới 22px và không bao giờ cho nút, nhãn, nội dung.
@@ -261,7 +261,7 @@ Mềm như nét bo tròn hai đầu của logo, không góc nhọn. Nút, chip l
 - **FAB mở rộng:** nền primary container, bo 16, bóng elevation-2; tối đa một FAB mỗi màn.
 
 ### Chips
-- **Assist:** viền outline, icon Sapphire, chữ 14/600, cao 40 (vùng chạm 48).
+- **Assist:** viền outline, icon Sapphire, chữ tối thiểu 1rem/600, vùng chạm thực cao ít nhất 48px.
 - **Filter đã chọn:** nền Lilac, bỏ viền, hiện dấu ✓.
 - **Badge trạng thái:** viên thuốc cao 28, nền container của trạng thái + chữ cùng họ màu, luôn có chữ.
 
@@ -278,26 +278,38 @@ Mềm như nét bo tròn hai đầu của logo, không góc nhọn. Nút, chip l
 - **Error:** viền và chữ hỗ trợ Signal Red, có icon lỗi và câu nói rõ cách sửa; `aria-invalid`.
 
 ### Navigation
-- **Navigation bar:** 5 đích (Trang chủ, Tính năng, An toàn, Cộng đồng, Hồ sơ), nền Tint, icon 24 + nhãn label-m (tối đa 16px). Ở cỡ chữ To, nhãn được xuống 2 dòng thay vì bị cắt. Đích đang mở: ô chỉ báo Lilac 64×32 sau icon, icon chuyển dạng tô đặc, chữ Ink 800.
+- **Navigation bar:** 5 đích (Trang chủ, Hoạt động, An toàn, Khám phá, Hồ sơ), nền Tint, icon 24 + nhãn label-m. Nhãn tăng theo cỡ chữ và xuống dòng; không áp trần 16px. Cộng đồng là màn con trong Khám phá. Hướng dẫn là màn con của Hồ sơ (có mũi tên quay lại). Đích đang mở: ô chỉ báo Lilac 64×32 sau icon, icon chuyển dạng tô đặc, chữ Ink 800.
 - **Đầu mục có liên kết:** tiêu đề mục (h2) và liên kết "Xem tất cả" đứng cạnh nhau nhưng tách rời; liên kết cao 48, không nằm trong tiêu đề.
 - **Top app bar:** nút ← 48, tiêu đề 20/600 canh trái, hành động bên phải; biến thể lớn đặt tiêu đề Playfair bên dưới; biến thể Dusk trong suốt trên Trang chủ.
 
 ### Thẻ trạng thái kính (chữ ký)
 Nền gradient Dusk (Ink 800 với hai quầng Sapphire/Indigo), bo 28. Hàng đầu: ô icon kính tròn, tên "Kính SeeVia", trạng thái cyan có ngôi sao bốn cánh. Giữa: thanh pin cao 10 tô dải thủy tinh cyan → Sapphire → Iris. Cuối: mã serial và phiên bản bằng chữ phụ trên nền tối. Khi có đích đến, cả thẻ là một liên kết (một vùng chạm, một tên đọc đầy đủ cho trình đọc màn hình); mũi tên chỉ để báo hiệu.
 
-### Dòng trạng thái SOS (Trang chủ)
-Nằm ngay dưới thẻ kính trong vùng Dusk: tấm nền sáng hơn một bậc, icon SOS trong vòng tròn Signal Red, "SOS sẽ báo tới 0901 234 567" và gợi ý một dòng. Chạm để tới An toàn. Khi chưa có số người thân, đổi sang lời nhắc thêm số.
+### Ưu tiên Trang chủ và trạng thái kính
+Sau thẻ kính là hành động theo trạng thái: thiết lập/kiểm tra khi chưa sẵn sàng, hoặc bài đọc mẫu khi sẵn sàng. Tiếp theo là Hướng dẫn, Trợ năng và âm thanh, Hỗ trợ, rồi lịch sử mẫu. Album, dịch thuật, biên bản và cộng đồng nằm trong phần mở rộng thu gọn. SOS truy cập bằng tab An toàn; component `sv-sos-status` vẫn dùng được trong trang mẫu hệ thống.
+
+Liên kết tài khoản, kính online và dịch vụ xử lý được phân biệt. Thẻ ghi thời điểm cập nhật mẫu. Không có timestamp, dữ liệu quá 5 phút hoặc pin không xác định thì không hiện thanh pin cũ. Dữ liệu quá hạn đổi trạng thái khi đang mở trang; giữ focus nếu người dùng đang đứng trên thẻ. Mốc 5 phút chỉ thuộc mock.
+
+### Luồng đọc đầu tiên
+Tiến trình có 4 bước: Đăng nhập → Kết nối → Sẵn sàng → Đọc thử. Màn `read-practice.html` có đoạn chữ mẫu, nhánh ảnh mờ và thử lại, Nghe/Dừng và xác nhận do người dùng chọn. Không tự kết luận người dùng nghe được từ sự kiện engine. Hướng dẫn có lối mở lại bài này.
 
 ### Nút SOS
 Tròn 184px, nền Signal Red, quầng đỏ 8px, icon và chữ "SOS" trắng 40/700. Ba trạng thái:
 - **Nhấn:** 3 lần liên tiếp, mỗi lần cách nhau dưới 2 giây; ba chấm tiến độ cho người nhìn được, thông báo khẩn (assertive) cho trình đọc màn hình ở mỗi lần nhấn.
 - **Đếm ngược:** 5 giây, số lớn 64/700 và "Chạm để hủy" ngay trên nút; một vòng đỏ chạy quanh nút hết một vòng trong 5 giây. Chạm lần nữa là hủy.
 - **Chưa có số người thân:** không cho gửi. Nút nền trắng viền đỏ với icon thêm số và chữ "Thêm số trước"; chạm (hoặc nhấn 3 lần) sẽ báo khẩn lý do và đưa focus tới ô nhập số.
-- **Lối cho trình đọc màn hình:** nút "Gửi SOS ngay, vẫn có 5 giây để hủy" ẩn với mắt, hiện khi được focus.
+- **Lối trực tiếp:** nút "Bắt đầu SOS mẫu, có 5 giây để hủy" luôn hiển thị, dùng được bằng bàn phím và trình đọc màn hình.
 - **Đã gửi:** nút chuyển nền trắng viền đỏ với dấu ✓; thẻ kết quả nền error container ghi giờ gửi và người nhận, nút "Tôi an toàn". Focus chuyển tới tiêu đề thẻ kết quả.
+- **Chưa gửi:** tình huống mất mạng, thiếu quyền hoặc dịch vụ chưa phản hồi đưa tới thẻ lỗi có Thử lại/Quay lại. Không phát sự kiện gửi thành công. Thay đổi tình huống trong lúc đếm ngược sẽ hủy. Tất cả kết quả là mô phỏng.
 
 ### Bottom sheet và snackbar
-Sheet: nền Surface container high, bo 28 phía trên, tay nắm 32×4, tiêu đề Playfair, nút xác nhận và nút hủy xếp dọc rộng hết. Snackbar: nền Ink 800, chữ Pearl, một hành động chữ; tự ẩn sau 4 giây, hoặc 10 giây khi có hành động (Hoàn tác). Mỗi thông báo chỉ đi một kênh: snackbar đã là vùng đọc tự động thì không gọi thêm `SV.announce`.
+Sheet: nền Surface container high, bo 28 phía trên, tay nắm 32×4, tiêu đề Playfair, nút xác nhận và nút hủy xếp dọc rộng hết. Nút Nghe/Dừng không đóng sheet; đóng sheet dừng bài đọc thuộc sheet. Snackbar: nền Ink 800, chữ Pearl, một hành động chữ và nút Đóng thông báo; giữ tới khi đóng hoặc bị thay thế để người dùng có đủ thời gian đọc/chọn Hoàn tác. Snackbar không tự làm live region; `SV.announce` là nơi chọn duy nhất giữa thông báo ARIA và TTS tự động. Live region đặt trong dialog đang mở khi cần để vẫn nằm trong vùng truy cập của trình đọc màn hình.
+
+### Giọng đọc
+
+`sv-speech-control` dùng nút tonal rộng hết, icon âm lượng khi nghỉ và icon dừng khi đang chuẩn bị/đọc. Nội dung trạng thái nằm dưới nút, gắn bằng `aria-describedby`; lỗi có chữ giải thích và màu error, được thông báo một lần qua ARIA. Không đẩy cả bài đọc vào live region khi bấm Nghe. Một phiên đọc chung cho toàn app, đổi nội dung hoặc rời màn phải dừng bài cũ; SOS ưu tiên cao hơn.
+
+Thiết lập ở cùng một màn Trợ năng và âm thanh, có lối vào từ màn bắt đầu, Trang chủ, Hướng dẫn và Hồ sơ: cách đọc thông báo, giọng Việt, tốc độ, Nghe thử và tải lại danh sách giọng. Dùng select có nhãn thường trực và help text. Mặc định TTS thông báo tự động tắt, để trình đọc màn hình đọc các thay đổi. App không giả định phát hiện được TalkBack. Nghiệm thu trên Android thật vẫn là bước riêng.
 
 ### Danh sách chỉ để đọc (cộng đồng)
 Nền Tint phẳng, bo 16, không viền, không mũi tên, không hover: khác hẳn dòng danh sách bấm được (nền trắng, mũi tên). Icon trong vòng tròn trắng. Tương phản cao dùng viền nét đứt để vẫn tách khỏi thẻ bấm được.

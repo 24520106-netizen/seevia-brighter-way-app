@@ -5,7 +5,7 @@
  *   <sv-feature-groups>                 tab Tính năng (features.groups), mỗi mục mở sheet cách dùng
  *   <sv-community-notify>  <sv-sos-status>  <sv-hotline>
  *   <sv-info-list key="community.items"> danh sách chỉ để đọc
- *   <sv-accordion-list key="guide.items" open-first>
+ *   <sv-accordion-list key="guide.items">
  *   <sv-profile-card>  <sv-profile-settings>  <sv-version-tap>
  *   <sv-activity-browser>               lọc + nhóm lịch sử
  *   <sv-album>  <sv-translator>  <sv-recorder>  <sv-glasses-manager>
@@ -15,6 +15,7 @@
   var SV = window.SV;
   var icon = SV.icon, esc = SV.esc;
 
+  function selfFocus(el) { if (el) el.focus({ preventScroll: true }); }
   function define(name, cls) { if (!customElements.get(name)) customElements.define(name, cls); }
   function field(id, labelKey, opts) {
     opts = opts || {};
@@ -46,6 +47,7 @@
             return '<li><button class="sv-list-item sv-feature" type="button" data-g="' + gi + '" data-i="' + ii + '">' +
               '<span class="sv-list-item__lead">' + icon(it.icon) + "</span>" +
               '<span class="sv-list-item__body"><span class="sv-list-item__title">' + esc(it.title) + "</span>" +
+              '<span class="sv-feature__phase">' + esc(SV.t(it.phase === 'core' ? 'features.coreLabel' : 'features.conceptLabel')) + '</span>' +
               '<span class="sv-list-item__sub">' + esc(it.body) + "</span>" +
               '<span class="sv-feature__say">' + icon("record_voice_over") + "<span><b>" + esc(sayLabel) + ":</b> " + esc(it.say) + "</span></span>" +
               '</span><span class="sv-list-item__trail">' + icon("chevron_right") + "</span></button></li>";
@@ -58,18 +60,19 @@
         SV.openSheet(
           '<div class="sv-sheet__lead">' + icon(it.icon) + "</div>" +
           '<h2 class="sv-sheet__title t-headline-s" id="sv-feat-title">' + esc(it.title) + "</h2>" +
+          '<p class="sv-feature__phase">' + esc(SV.t(it.phase === 'core' ? 'features.coreLabel' : 'features.conceptLabel')) + '</p>' +
           '<p class="sv-sheet__body t-body-m" id="sv-feat-body">' + esc(it.body) + "</p>" +
+          '<p class="t-body-m t-muted">' + esc(SV.t('features.limit')) + '</p>' +
           '<p class="sv-sheet__say">' + icon("record_voice_over") + "<span><b>" + esc(sayLabel) + ":</b> " + esc(it.say) + "</span></p>" +
           '<h3 class="sv-sheet__subtitle">' + esc(SV.t("features.stepsTitle")) + "</h3>" +
           '<ol class="sv-steps">' + (it.steps || []).map(function (st) { return "<li>" + esc(st) + "</li>"; }).join("") + "</ol>" +
           '<div class="sv-sheet__actions">' +
-            '<button class="sv-btn sv-btn--filled sv-btn--block" value="listen">' + icon("volume_up") + esc(SV.t("features.listen")) + "</button>" +
+            SV.speechControl(it.say.replace(/[“”]/g, ''), 'features.listen') +
             '<a class="sv-btn sv-btn--text sv-btn--block" href="guide.html#voice">' + esc(SV.t("features.guide")) + "</a>" +
             '<button class="sv-btn sv-btn--text sv-btn--block" value="cancel">' + esc(SV.t("common.close")) + "</button>" +
           "</div>",
           {
-            labelledBy: "sv-feat-title", describedBy: "sv-feat-body", focus: "#sv-feat-title",
-            onClose: function (v) { if (v === "listen") SV.snackbar(SV.t("features.listenToast", { say: it.say.replace(/[“”]/g, "") })); }
+            labelledBy: "sv-feat-title", describedBy: "sv-feat-body", focus: "#sv-feat-title"
           }
         );
       });
@@ -88,7 +91,7 @@
         '<span class="sv-switch__handle">' + icon("check") + "</span></button></span></label></li></ul>";
       this.querySelector("#sv-notify").addEventListener("sv:change", function (e) {
         SV.state.set("communityNotify", e.detail.checked);
-        SV.snackbar(SV.t(e.detail.checked ? "community.notifyOn" : "community.notifyOff"));
+        SV.snackbar(SV.t(e.detail.checked ? "community.notifyOn" : "community.notifyOff"), null, { speech: true });
       });
     }
   });
@@ -112,7 +115,7 @@
         '<span class="sv-hotline__text"><span class="sv-hotline__title">' + esc(SV.t("support.hotlineTitle")) + "</span>" +
         '<span class="sv-hotline__body">' + esc(SV.t("support.hotlineBody")) + "</span></span>" +
         icon("call", "sv-icon--fill sv-hotline__call") + "</button>";
-      this.querySelector("button").addEventListener("click", function () { SV.snackbar(SV.t("support.hotlineToast")); });
+      this.querySelector("button").addEventListener("click", function () { SV.snackbar(SV.t("support.hotlineToast"), null, { speech: true }); });
     }
   });
 
@@ -140,8 +143,9 @@
         var open = target ? it.id === target : openFirst && i === 0;
         return '<details class="sv-accordion"' + (it.id ? ' id="' + it.id + '"' : "") + (open ? " open" : "") + ">" +
           "<summary>" + icon(it.icon || "help") + "<span>" + esc(it.q) + "</span>" + icon("expand_more") + "</summary>" +
-          '<p class="sv-accordion__body t-body-m">' + esc(it.a) + "</p></details>";
+          '<div class="sv-accordion__body"><p class="t-body-m">' + esc(it.a) + '</p>' + SV.speechControl(it.a, 'speech.guideListen') + '</div></details>';
       }).join("");
+      this.addEventListener('toggle', function (event) { if (event.target.matches('details') && !event.target.open) SV.speech.stop(event.target); }, true);
       if (target) {
         var el = this.querySelector("#" + target + " summary");
         setTimeout(function () { el.scrollIntoView({ block: "start" }); el.focus({ preventScroll: true }); }, 0);
@@ -241,6 +245,7 @@
           });
           var v = chip.getAttribute("data-filter");
           if (v) list.setAttribute("status", v); else list.removeAttribute("status");
+          SV.announce(SV.t('speech.filterResult', { count: list.querySelectorAll('[data-act]').length }));
         });
       });
     }
@@ -263,6 +268,7 @@
         this.querySelector("[data-restore]").addEventListener("click", function () {
           SV.state.set("albumRemoved", []);
           self.render();
+          var first = self.querySelector('.sv-photo'); if (first) first.focus();
         });
         return;
       }
@@ -285,14 +291,13 @@
         '<p class="sv-sheet__body t-body-l" id="sv-photo-desc">' + esc(it.desc) + '<br><span class="t-body-s t-muted">' + esc(it.time) + "</span></p>" +
         '<p class="sv-sheet__note t-body-s">' + icon("info") + "<span>" + esc(SV.t("album.verifyNote")) + "</span></p>" +
         '<div class="sv-sheet__actions">' +
-          '<button class="sv-btn sv-btn--filled sv-btn--block" value="listen">' + icon("volume_up") + esc(SV.t("album.listen")) + "</button>" +
+          SV.speechControl(it.desc, 'album.listen') +
           '<button class="sv-btn sv-btn--danger-text sv-btn--block" value="delete">' + icon("delete") + esc(SV.t("album.delete")) + "</button>" +
           '<button class="sv-btn sv-btn--text sv-btn--block" value="cancel">' + esc(SV.t("common.close")) + "</button>" +
         "</div>",
         {
           labelledBy: "sv-photo-title", describedBy: "sv-photo-desc", focus: "#sv-photo-title",
           onClose: function (value) {
-            if (value === "listen") SV.snackbar(SV.t("album.listenToast"));
             if (value === "delete") {
               SV.confirmSheet({
                 title: SV.t("album.deleteTitle"), body: SV.t("album.deleteBody"),
@@ -300,6 +305,8 @@
                 onConfirm: function () {
                   SV.state.set("albumRemoved", (SV.state.get("albumRemoved") || []).concat(index));
                   self.render();
+                  var remaining = self.querySelector('[data-index="' + (index + 1) + '"]') || self.querySelector('.sv-photo') || self.querySelector('.sv-empty__title');
+                  if (remaining) { remaining.setAttribute('tabindex', remaining.matches('button') ? '0' : '-1'); remaining.focus(); }
                   SV.snackbar(SV.t("album.deleted"), {
                     label: SV.t("common.undo"),
                     onClick: function () {
@@ -308,7 +315,7 @@
                       var back = self.querySelector('[data-index="' + index + '"]');
                       if (back) back.focus();
                     }
-                  });
+                  }, { speech: true });
                 }
               });
             }
@@ -319,56 +326,54 @@
   });
 
   /* ---------- Dịch thuật ---------- */
-  define("sv-translator", class extends HTMLElement {
-    connectedCallback() {
-      this.from = "en"; this.to = "vi";
-      this.render();
-    }
+  define('sv-translator', class extends HTMLElement {
+    connectedCallback() { this.from = 'en'; this.to = 'vi'; this.render(); }
     render(error) {
-      var self = this;
-      var text = this._text || "";
-      this.innerHTML =
-        '<div class="sv-langs">' +
-          '<div class="sv-langs__side"><span class="sv-langs__label">' + esc(SV.t("translation.from")) + '</span><span class="sv-langs__name">' + esc(SV.t("translation." + this.from)) + "</span></div>" +
-          '<button class="sv-icon-btn sv-icon-btn--tonal" type="button" data-swap aria-label="' + esc(SV.t("translation.swap")) + '">' + icon("swap_horiz") + "</button>" +
-          '<div class="sv-langs__side sv-langs__side--end"><span class="sv-langs__label">' + esc(SV.t("translation.to")) + '</span><span class="sv-langs__name">' + esc(SV.t("translation." + this.to)) + "</span></div>" +
-        "</div>" +
+      var self = this, samples = SV.data('translation.samples'), text = this._text || '';
+      this.innerHTML = '<div class="sv-langs">' +
+        '<div class="sv-langs__side"><span class="sv-langs__label">' + esc(SV.t('translation.from')) + '</span><span class="sv-langs__name">' + esc(SV.t('translation.' + this.from)) + '</span></div>' +
+        '<button class="sv-icon-btn sv-icon-btn--tonal" type="button" data-swap aria-label="' + esc(SV.t('translation.swap')) + '">' + icon('swap_horiz') + '</button>' +
+        '<div class="sv-langs__side sv-langs__side--end"><span class="sv-langs__label">' + esc(SV.t('translation.to')) + '</span><span class="sv-langs__name">' + esc(SV.t('translation.' + this.to)) + '</span></div></div>' +
         '<form class="l-stack sv-translator__form" novalidate>' +
-          field("sv-tr-input", "translation.inputLabel", { multiline: true, placeholder: "translation.inputPlaceholder", value: text, error: error }) +
-          '<div class="l-split">' +
-            '<button class="sv-btn sv-btn--tonal" type="button" data-speak>' + icon("mic") + esc(SV.t("translation.speak")) + "</button>" +
-            '<button class="sv-btn sv-btn--filled" type="submit">' + icon("translate") + esc(SV.t("translation.translate")) + "</button>" +
-          "</div>" +
-        "</form>" +
-        (this._result ? '<section class="sv-card sv-result" aria-live="polite"><h2 class="t-title-m">' + esc(SV.t("translation.resultTitle")) + "</h2>" +
-          '<p class="t-body-l">' + esc(this._result) + "</p>" +
-          '<button class="sv-btn sv-btn--outlined" type="button" data-listen>' + icon("volume_up") + esc(SV.t("translation.listen")) + "</button></section>" : "");
-
-      var input = this.querySelector("textarea");
-      input.addEventListener("input", function () { self._text = input.value; });
-      this.querySelector("[data-swap]").addEventListener("click", function () {
-        var t = self.from; self.from = self.to; self.to = t;
-        self._result = null;
-        self.render();
-        self.querySelector("[data-swap]").focus();
-        SV.announce(SV.t("translation.swapped", { from: SV.t("translation." + self.from), to: SV.t("translation." + self.to) }));
+        '<div class="sv-field"><label class="sv-field__label" for="sv-tr-sample">' + esc(SV.t('translation.sampleLabel')) + '</label>' +
+        '<select class="sv-field__control" id="sv-tr-sample" aria-describedby="sv-tr-sample-help"><option value="">' + esc(SV.t('translation.samplePlaceholder')) + '</option>' +
+        samples.map(function (sample, i) { return '<option value="' + i + '"' + (sample[self.from] === text ? ' selected' : '') + '>' + esc(sample[self.from]) + '</option>'; }).join('') + '</select>' +
+        '<p class="sv-field__help" id="sv-tr-sample-help">' + esc(SV.t('translation.sampleHint')) + '</p></div>' +
+        field('sv-tr-input', 'translation.inputLabel', { multiline: true, placeholder: 'translation.inputPlaceholder', value: text, error: error }) +
+        '<div class="l-split"><button class="sv-btn sv-btn--tonal" type="button" data-speak>' + icon('mic') + esc(SV.t('translation.speak')) + '</button>' +
+        '<button class="sv-btn sv-btn--filled" type="submit">' + icon('translate') + esc(SV.t('translation.translate')) + '</button></div></form>' +
+        (this._result ? '<section class="sv-card sv-result"><h2 class="t-title-m" tabindex="-1" id="sv-tr-result">' + esc(SV.t('translation.resultTitle')) + '</h2>' +
+          '<p class="t-body-l" lang="' + this.to + '">' + esc(this._result) + '</p>' +
+          SV.speechControl(this._result, 'translation.listen', this.to === 'vi' ? 'vi-VN' : 'en-US') + '</section>' : '');
+      var input = this.querySelector('textarea');
+      input.addEventListener('input', function () {
+        self._text = input.value;
+        // An edited source invalidates the old translation and its audio immediately.
+        if (self._result) { SV.speech.stop(self); self._result = null; var result = self.querySelector('.sv-result'); if (result) result.remove(); }
       });
-      this.querySelector("[data-speak]").addEventListener("click", function () { SV.snackbar(SV.t("translation.speakToast")); });
-      this.querySelector("form").addEventListener("submit", function (e) {
-        e.preventDefault();
+      this.querySelector('#sv-tr-sample').addEventListener('change', function (event) {
+        if (event.target.value === '') return;
+        SV.speech.stop(self); self._text = samples[Number(event.target.value)][self.from]; self._result = null;
+        self.render(); self.querySelector('#sv-tr-sample').focus();
+      });
+      this.querySelector('[data-swap]').addEventListener('click', function () {
+        SV.speech.stop(self);
+        var previous = samples.find(function (sample) { return sample[self.from] === self._text; });
+        var from = self.from; self.from = self.to; self.to = from;
+        self._text = previous ? previous[self.from] : ''; self._result = null; self.render();
+        self.querySelector('[data-swap]').focus();
+        SV.announce(SV.t('translation.swapped', { from: SV.t('translation.' + self.from), to: SV.t('translation.' + self.to) }));
+      });
+      this.querySelector('[data-speak]').addEventListener('click', function () { SV.snackbar(SV.t('translation.speakToast'), null, { speech: true }); });
+      this.querySelector('form').addEventListener('submit', function (event) {
+        event.preventDefault(); SV.speech.stop(self);
         var value = input.value.trim();
-        if (!value) {
-          self._result = null;
-          self.render(SV.t("translation.emptyError"));
-          self.querySelector("textarea").focus();
-          return;
-        }
-        self._result = SV.t("translation.resultBody", { to: SV.t("translation." + self.to + "Inline"), text: value });
-        self.render();
-        self.querySelector("[data-listen]").focus();
+        var sample = samples.find(function (item) { return item[self.from].toLocaleLowerCase() === value.toLocaleLowerCase(); });
+        self._result = sample ? sample[self.to] : null;
+        if (!sample) { self.render(SV.t(value ? 'translation.unsupportedInput' : 'translation.emptyError')); self.querySelector('textarea').focus(); return; }
+        self.render(); self.querySelector('sv-speech-control button').focus();
+        SV.announce(SV.t('translation.resultTitle'));
       });
-      var listen = this.querySelector("[data-listen]");
-      if (listen) listen.addEventListener("click", function () { SV.snackbar(SV.t("translation.listenToast")); });
     }
   });
 
@@ -386,7 +391,7 @@
           '<button class="sv-recorder__button" type="button">' +
             '<span class="sv-recorder__circle">' + icon(this.recording ? "stop" : "mic", "sv-icon--fill") + "</span>" +
             '<span class="sv-recorder__label">' + esc(SV.t(this.recording ? "meeting.stop" : "meeting.start")) + "</span></button>" +
-          '<p class="sv-recorder__status" aria-live="polite">' + esc(SV.t(this.recording ? "meeting.recording" : "meeting.ready")) + "</p>" +
+          '<p class="sv-recorder__status">' + esc(SV.t(this.recording ? "meeting.recording" : "meeting.ready")) + "</p>" +
           '<p class="sv-recorder__timer"><span class="visually-hidden">' + esc(SV.t("meeting.timerLabel")) + " </span><span data-timer>" + mmss(this.seconds) + "</span></p>" +
           '<p class="sv-recorder__hint t-body-m t-muted">' + esc(SV.t("meeting.hint")) + "</p>" +
         "</section>" +
@@ -409,7 +414,7 @@
             '<p class="sv-sheet__meta"><span class="t-body-s t-muted">' + esc(m.time) + "</span></p>" +
             '<h3 class="sv-sheet__subtitle">' + esc(SV.t("meeting.summaryTitle")) + "</h3>" +
             '<p class="sv-sheet__body t-body-l" id="sv-meet-body">' + esc(m.summary) + "</p>" +
-            '<div class="sv-sheet__actions"><button class="sv-btn sv-btn--tonal sv-btn--block" value="cancel">' + esc(SV.t("common.close")) + "</button></div>",
+            '<div class="sv-sheet__actions">' + SV.speechControl(m.summary, 'speech.meetingListen') + '<button class="sv-btn sv-btn--text sv-btn--block" value="cancel">' + esc(SV.t("common.close")) + "</button></div>",
             { labelledBy: "sv-meet-title", describedBy: "sv-meet-body", focus: "#sv-meet-title" }
           );
         });
@@ -431,10 +436,11 @@
         list.unshift({ title: SV.t("meeting.newTitle"), summary: SV.t("meeting.newSummary"), time: SV.t("meeting.newTime", { duration: mmss(this.seconds) }) });
         SV.state.set("meetings", list.slice(0, 5));
         this.seconds = 0;
-        SV.snackbar(SV.t("meeting.saved"));
+        SV.snackbar(SV.t("meeting.saved"), null, { speech: true });
       }
       this.render();
       this.querySelector(".sv-recorder__button").focus();
+      if (this.recording) SV.announce(SV.t('meeting.recording'));
     }
   });
 
@@ -454,52 +460,26 @@
   function scenarioDetails(content) {
     return '<details class="sv-setup-scenario"><summary>' + esc(SV.t('setup.scenarioTitle')) + '</summary>' + content + '</details>';
   }
-  function bindStatusSpeech(host, text) {
-    var button = host.querySelector('[data-setup="listen"]');
-    var output = host.querySelector('[data-speech-status]');
-    if (!button) return;
-    host._stopVoice = function () {
-      host._utterance = null;
-      if (SV.readingOwner === host) { window.speechSynthesis.cancel(); SV.readingOwner = null; }
-      button.textContent = SV.t('setup.listen');
-      button.setAttribute('aria-pressed', 'false');
-    };
-    button.setAttribute('aria-pressed', 'false');
-    button.addEventListener('click', function () {
-      if (host._utterance) { host._stopVoice(); output.textContent = ''; return; }
-      if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
-        output.textContent = SV.t('setup.speechUnavailable'); SV.announce(output.textContent); return;
-      }
-      if (SV.readingOwner && SV.readingOwner._stopVoice) SV.readingOwner._stopVoice();
-      var utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'vi-VN';
-      var voice = speechSynthesis.getVoices().find(function (v) { return /^vi(?:-|_)/i.test(v.lang) || v.lang === 'vi'; });
-      if (voice) utterance.voice = voice;
-      host._utterance = utterance;
-      SV.readingOwner = host;
-      button.textContent = SV.t('setup.stopSpeech'); button.setAttribute('aria-pressed', 'true');
-      output.textContent = SV.t('setup.speechPlaying');
-      function finish(failed) {
-        if (host._utterance !== utterance) return;
-        host._stopVoice();
-        output.textContent = SV.t(failed ? 'setup.speechUnavailable' : 'setup.speechFinished');
-        if (failed) SV.announce(output.textContent);
-      }
-      utterance.onend = function () { finish(false); };
-      utterance.onerror = function () { finish(true); };
-      try { speechSynthesis.speak(utterance); } catch (e) { finish(true); }
-    });
+  function deviceStateSelect(kind) {
+    return '<div class="sv-field"><label class="sv-field__label" for="sv-device-state">' + esc(SV.t('deviceStatus.scenarioLabel')) + '</label>' +
+      '<select class="sv-field__control" id="sv-device-state">' + ['ready', 'lost', 'serviceUnavailable', 'serviceUnknown', 'unknown', 'stale'].map(function (value) {
+        return '<option value="' + value + '"' + (kind === value ? ' selected' : '') + '>' + esc(SV.t('deviceStatus.' + value)) + '</option>';
+      }).join('') + '</select></div>';
+  }
+  function bindStatusSpeech(host) {
+    host._stopVoice = function () { SV.speech.stop(host); };
+    var control = host.querySelector('sv-speech-control');
+    if (control) control.setAttribute('text', SV.glassesSpeech());
   }
   function speechControls() {
-    return setupButton('listen', 'listen', 'tonal') + '<p class="t-body-s t-muted" data-speech-status></p>' +
-      '<p class="t-body-s t-muted">' + esc(SV.t('setup.speechNote')) + '</p>';
+    return SV.speechControl(SV.glassesSpeech(), 'setup.listen');
   }
   define('sv-setup-progress', class extends HTMLElement {
     connectedCallback() {
       if (!this.hasAttribute('always') && new URLSearchParams(location.search).get('setup') !== '1') { this.hidden = true; return; }
       var step = Number(this.getAttribute('step')) || 1;
       this.innerHTML = '<ol class="sv-setup-progress" aria-label="' + esc(SV.t('setup.progress')) + '">' +
-        ['stepAccount', 'stepConnect', 'stepReady'].map(function (key, i) {
+        ['stepAccount', 'stepConnect', 'stepReady', 'stepFirstRead'].map(function (key, i) {
           return '<li' + (i + 1 === step ? ' aria-current="step"' : '') + '>' + esc(SV.t('setup.' + key)) + '</li>';
         }).join('') + '</ol>';
     }
@@ -510,14 +490,16 @@
         '<h1 class="t-headline-l sv-setup-heading">' + esc(SV.t('setup.welcomeTitle')) + '</h1>' +
         '<p class="t-body-l sv-setup-lead">' + esc(SV.t('setup.welcomeBody')) + '</p>' +
         '<p class="t-body-m">' + esc(SV.t('setup.welcomeDetail')) + '</p>' +
-        '<div class="sv-setup-actions">' + setupButton('start', 'start') +
+        '<div class="sv-setup-actions">' + setupLink('accessSettings', 'display.html?from=start', 'tonal') + setupButton('start', 'start') +
         (SV.state.get('account').signedIn ? setupLink('resume', 'home.html', 'tonal') : '') + '</div>' +
         '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.startNote')) + '</p>' +
-        '<section class="sv-setup-help"><h2 class="t-title-s">' + esc(SV.t('setup.accessTitle')) + '</h2><p class="t-body-m t-muted">' + esc(SV.t('setup.accessBody')) + '</p></section>' +
+        '<section class="sv-setup-help"><h2 class="t-title-s">' + esc(SV.t('setup.accessTitle')) + '</h2><p class="t-body-m t-muted">' + esc(SV.t('setup.accessBody')) + '</p>' +
+        SV.speechControl(SV.t('setup.welcomeBody') + ' ' + SV.t('setup.welcomeDetail') + ' ' + SV.t('setup.accessBody') + ' ' + SV.t('setup.demoNote'), 'speech.welcomeListen') + '</section>' +
         '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.demoNote')) + '</p>' + setupLink('explore', 'home.html');
       this.querySelector('[data-setup="start"]').addEventListener('click', function () {
         SV.state.set('account', { signedIn: false, name: '', phone: '' });
-        SV.state.set('glasses', { linked: false, connection: 'unlinked', battery: 82, version: '2.1.4', serial: 'SV-DEMO-2026' });
+        SV.state.set('glasses', { linked: false, connection: 'unlinked', online: null, service: 'unknown', updatedAt: null, battery: null, version: '2.1.4', serial: 'SV-DEMO-2026' });
+        SV.state.set('firstReadDone', false);
         SV.go('account.html?setup=1');
       });
     }
@@ -525,14 +507,25 @@
   define('sv-glasses-manager', class extends HTMLElement {
     connectedCallback() {
       var g = SV.state.get('glasses');
-      this.phase = !SV.state.get('account').signedIn ? 'signin' : g.linked ? (g.connection === 'lost' ? 'lost' : 'ready') : 'find';
+      var status = SV.glassesStatus(g);
+      this.phase = !SV.state.get('account').signedIn ? 'signin' : !g.linked ? 'find' : status.kind === 'ready' ? 'ready' : status.kind === 'lost' ? 'lost' : 'unknown';
       this.network = g.network || '';
       this.password = '';
       this.scenario = 'success';
       this.findScenario = 'found';
       this.render();
+      var self = this;
+      this._freshness = setInterval(function () {
+        var kind = SV.glassesStatus().kind;
+        if (['ready', 'lost', 'unknown'].indexOf(self.phase) !== -1 && self._statusKind !== kind) {
+          var hadFocus = self.contains(document.activeElement);
+          self.phase = kind === 'ready' ? 'ready' : kind === 'lost' ? 'lost' : 'unknown'; self.render();
+          if (hadFocus) self.querySelector('[data-stage-heading]').focus();
+          else SV.announce(SV.glassesStatusText(SV.glassesStatus()));
+        }
+      }, 30000);
     }
-    disconnectedCallback() { clearTimeout(this.timer); if (this._stopVoice) this._stopVoice(); this.password = ''; }
+    disconnectedCallback() { clearTimeout(this.timer); clearInterval(this._freshness); if (this._stopVoice) this._stopVoice(); this.password = ''; }
     move(phase) {
       clearTimeout(this.timer);
       this.phase = phase;
@@ -551,9 +544,14 @@
       this.move(recovery ? 'recovering' : 'connecting');
       this.timer = setTimeout(function () {
         if (!self.isConnected) return;
-        if (self.scenario !== 'success') { self.failure = self.scenario; self.move('error'); return; }
+        if (self.scenario !== 'success') {
+          if (self.scenario === 'service' && SV.state.get('glasses').linked)
+            SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), { connection: 'linked', online: true, service: 'unavailable', battery: null, updatedAt: Date.now() }));
+          self.failure = self.scenario; self.move('error'); return;
+        }
         SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), {
-          linked: true, connection: 'ready', network: self.network || 'SeeVia Demo 2.4 GHz'
+          linked: true, connection: 'ready', online: true, service: 'ready', updatedAt: Date.now(), battery: 82,
+          network: self.network || 'SeeVia Demo 2.4 GHz'
         }));
         self.password = '';
         self.recovered = recovery;
@@ -563,7 +561,8 @@
     render(errors) {
       if (this._stopVoice) this._stopVoice();
       errors = errors || {};
-      var self = this, p = this.phase, g = SV.state.get('glasses');
+      var self = this, p = this.phase, g = SV.state.get('glasses'), status = SV.glassesStatus(g);
+      this._statusKind = status.kind;
       var busy = ['searching', 'connecting', 'recovering'].indexOf(p) !== -1;
       var titles = { signin: 'signInTitle', find: 'findTitle', searching: 'searchingTitle', found: 'foundTitle', notFound: 'notFoundTitle', wifi: 'wifiTitle', connecting: 'connectingTitle', ready: 'readyTitle', lost: 'lostTitle', recovering: 'recoveringTitle' };
       var bodies = { signin: 'signInBody', find: 'findBody', searching: 'searchingBody', found: 'foundBody', notFound: 'notFoundBody', wifi: 'wifiBody', connecting: 'connectingBody', ready: 'readyBody', lost: 'lostBody', recovering: 'recoveringBody' };
@@ -573,8 +572,8 @@
       }
       var html = (!g.linked || p === 'ready') && p !== 'signin' ? '<sv-setup-progress always step="' + (p === 'ready' ? '3' : '2') + '"></sv-setup-progress>' : '';
       html += '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.demoNote')) + '</p>' +
-        '<section class="sv-setup-stage"><h2 class="t-headline-s sv-setup-heading" tabindex="-1" data-stage-heading aria-describedby="sv-connection-description">' + esc(SV.t('setup.' + titles[p])) + '</h2>' +
-        '<p class="t-body-m" id="sv-connection-description">' + esc(SV.t('setup.' + (p === 'ready' && this.recovered ? 'recovered' : bodies[p]))) + '</p>';
+        '<section class="sv-setup-stage"><h2 class="t-headline-s sv-setup-heading" tabindex="-1" data-stage-heading aria-describedby="sv-connection-description">' + esc(p === 'unknown' ? SV.glassesStatusText(status) : SV.t('setup.' + titles[p])) + '</h2>' +
+        '<p class="t-body-m" id="sv-connection-description">' + esc(p === 'unknown' ? SV.t('deviceStatus.' + status.kind + 'Help') : SV.t('setup.' + (p === 'ready' && this.recovered ? 'recovered' : bodies[p]))) + '</p>';
       if (busy) html += '<div class="sv-setup-busy" aria-hidden="true"></div>';
       if (p === 'signin') html += '<div class="sv-setup-actions">' + setupLink('signIn', 'account.html?setup=1', 'filled') + '</div>';
       if (p === 'find' || p === 'notFound') {
@@ -593,14 +592,16 @@
       if (p === 'error') html += '<div class="sv-setup-actions">' +
         (this.failure === 'password' ? setupButton('editWifi', 'editWifi') : setupButton('retry', 'retry') + setupButton('editWifi', 'editWifi', 'text')) + '</div>' +
         scenarioDetails(scenarioSelect('sv-connect-scenario', 'connectScenario', [['success', 'success'], ['password', 'wrongPassword'], ['service', 'serviceFailure']], this.scenario));
-      if (p === 'ready' || p === 'lost') {
+      if (p === 'ready' || p === 'lost' || p === 'unknown') {
         html += '<div class="sv-setup-stage"><sv-glasses-card from-state compact></sv-glasses-card></div>' +
           (g.network ? '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.network', { name: g.network })) + '</p>' : '') +
-          '<div class="sv-setup-actions">' + (p === 'lost' ? setupButton('retry', 'recover') + setupButton('editWifi', 'editWifi', 'outlined') : '') +
-          speechControls() + setupLink('home', 'home.html', p === 'ready' ? 'filled' : 'text') + '</div>';
-        html += scenarioDetails((p === 'ready' ? setupButton('lose', 'lose', 'outlined') : scenarioSelect('sv-connect-scenario', 'connectScenario', [['success', 'success'], ['service', 'serviceFailure']], this.scenario)) + setupLink('replay', 'start.html'));
+          '<div class="sv-setup-actions">' + (p !== 'ready' ? setupButton('retry', 'recover') + setupButton('editWifi', 'editWifi', 'outlined') : '') +
+          speechControls() + (p === 'ready' ? setupLink('firstRead', 'read-practice.html?setup=1', 'filled') : '') +
+          setupLink('home', 'home.html', 'text') + '</div>';
+        html += scenarioDetails(deviceStateSelect(status.kind) + (p === 'ready' ? setupButton('lose', 'lose', 'outlined') : scenarioSelect('sv-connect-scenario', 'connectScenario', [['success', 'success'], ['service', 'serviceFailure']], this.scenario)) + setupLink('replay', 'start.html'));
         html += '<div class="sv-setup-help">' + '<button type="button" class="sv-btn sv-btn--text sv-btn--block" data-setup="unlink">' + esc(SV.t('glassesPage.unlink')) + '</button></div>';
       }
+      if (p !== 'ready' && p !== 'lost' && p !== 'unknown') html += speechControls();
       html += '</section><p class="t-body-s sv-setup-note">' + esc(SV.t('setup.privacyNote')) + '</p>';
       this.innerHTML = html;
       this.querySelectorAll('[data-setup]').forEach(function (button) {
@@ -619,20 +620,34 @@
             SV.announce(SV.t('setup.wifiFilled'));
           }
           if (action === 'lose') {
-            SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), { connection: 'lost' }));
+            SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), { connection: 'lost', online: false, service: 'unknown', battery: null, updatedAt: Date.now() }));
             self.scenario = 'success'; self.move('lost');
           }
           if (action === 'unlink') SV.confirmSheet({
             title: SV.t('glassesPage.unlinkTitle'), body: SV.t('glassesPage.unlinkBody'),
             confirm: SV.t('glassesPage.unlinkConfirm'), cancel: SV.t('glassesPage.unlinkCancel'), danger: true,
             onConfirm: function () {
-              SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), { linked: false, connection: 'unlinked', network: '' }));
+              SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), { linked: false, connection: 'unlinked', online: null, service: 'unknown', updatedAt: null, battery: null, network: '' }));
               self.network = ''; self.password = ''; self.move('find');
             }
           });
         });
       });
       var findSelect = this.querySelector('#sv-find-scenario');
+      var deviceSelect = this.querySelector('#sv-device-state');
+      if (deviceSelect) deviceSelect.addEventListener('change', function () {
+        var kind = deviceSelect.value;
+        SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), {
+          linked: true,
+          connection: kind === 'ready' ? 'ready' : kind === 'lost' ? 'lost' : 'linked',
+          online: kind === 'lost' ? false : kind === 'unknown' ? null : true,
+          service: kind === 'serviceUnavailable' ? 'unavailable' : kind === 'serviceUnknown' || kind === 'lost' || kind === 'unknown' ? 'unknown' : 'ready',
+          updatedAt: kind === 'unknown' ? null : Date.now() - (kind === 'stale' ? 6 * 60 * 1000 : 0),
+          battery: kind === 'ready' ? 82 : null
+        }));
+        self.scenario = 'success';
+        self.move(kind === 'ready' ? 'ready' : kind === 'lost' ? 'lost' : 'unknown');
+      });
       if (findSelect) findSelect.addEventListener('change', function () { self.findScenario = findSelect.value; });
       var connectSelect = this.querySelector('#sv-connect-scenario');
       if (connectSelect) connectSelect.addEventListener('change', function () { self.scenario = connectSelect.value; });
@@ -648,20 +663,71 @@
         if (Object.keys(errors).length) { self.render(errors); self.querySelector('[aria-invalid="true"]').focus(); return; }
         self.connect(!!g.linked);
       });
-      if (p === 'ready' || p === 'lost') bindStatusSpeech(this, SV.t(p === 'lost' ? 'setup.lostSpeech' : this.recovered ? 'setup.recovered' : 'setup.readySpeech'));
+      bindStatusSpeech(this);
     }
   });
   define('sv-connection-status', class extends HTMLElement {
-    connectedCallback() { this._stateListener = this.render.bind(this); document.addEventListener('sv:state', this._stateListener); this.render(); }
-    disconnectedCallback() { document.removeEventListener('sv:state', this._stateListener); if (this._stopVoice) this._stopVoice(); }
+    connectedCallback() {
+      this._stateListener = function (event) { if (event.detail.name === 'glasses') this.render(); }.bind(this);
+      document.addEventListener('sv:state', this._stateListener);
+      this._freshness = setInterval(function () { if (this._kind !== SV.glassesStatus().kind) this.render(); }.bind(this), 30000);
+      this.render();
+    }
+    disconnectedCallback() { document.removeEventListener('sv:state', this._stateListener); clearInterval(this._freshness); if (this._stopVoice) this._stopVoice(); }
     render() {
+      var restoreFocus = this.contains(document.activeElement);
+      var wasSpeech = restoreFocus && !!document.activeElement.closest('sv-speech-control');
       if (this._stopVoice) this._stopVoice();
-      var g = SV.state.get('glasses'), lost = g.linked && g.connection === 'lost';
+      var status = SV.glassesStatus(), kind = status.kind;
+      var changed = this._kind && this._kind !== kind;
+      this._kind = kind;
       this.innerHTML = '<section class="sv-connection-status" aria-label="' + esc(SV.t('setup.title')) + '">' +
-        '<div class="sv-setup-state' + (lost || !g.linked ? ' sv-setup-state--lost' : '') + '"><p class="t-title-s">' + esc(SV.t(!g.linked ? 'setup.unlinked' : lost ? 'setup.lostTitle' : 'setup.readyShort')) + '</p></div>' +
-        (lost ? '<p class="t-body-m t-muted">' + esc(SV.t('setup.lostBody')) + '</p>' : '') +
-        '<div class="sv-setup-actions">' + (g.linked && !lost ? speechControls() : '') + setupLink(lost ? 'recoverTitle' : 'manage', 'glasses.html', lost ? 'filled' : 'text') + '</div></section>';
-      if (g.linked && !lost) bindStatusSpeech(this, SV.t('setup.readySpeech'));
+        '<div class="sv-setup-state' + (kind !== 'ready' ? ' sv-setup-state--lost' : '') + '"><p class="t-title-s">' + esc(SV.glassesStatusText(status)) + '</p></div>' +
+        '<p class="t-body-m t-muted">' + esc(SV.t('deviceStatus.' + kind + 'Help')) + ' ' + esc(SV.glassesUpdatedText(status)) + '</p>' +
+        '<div class="sv-setup-actions">' + (kind === 'ready' ? setupLink('firstRead', 'read-practice.html', 'filled') : '') +
+        setupLink(kind === 'ready' ? 'manage' : 'recoverTitle', 'glasses.html', kind === 'ready' ? 'text' : 'filled') + speechControls() + '</div></section>';
+      bindStatusSpeech(this);
+      if (restoreFocus) this.querySelector(wasSpeech ? 'sv-speech-control button' : 'a').focus();
+      else if (changed) SV.announce(SV.glassesStatusText(status));
+    }
+  });
+
+  /* Bài đọc có thể thử độc lập; người dùng tự xác nhận đã đọc/nghe nội dung. */
+  define('sv-read-practice', class extends HTMLElement {
+    connectedCallback() {
+      this.phase = 'prepare';
+      this.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-read-action]');
+        if (!button) return;
+        var action = button.getAttribute('data-read-action');
+        if (action === 'confirm') SV.state.set('firstReadDone', true);
+        this.move(action === 'confirm' ? 'done' : action === 'read' ? 'result' : action === 'blur' ? 'blur' : 'prepare');
+      }.bind(this));
+      this.render();
+    }
+    disconnectedCallback() { SV.speech.stop(this); }
+    move(phase) {
+      SV.speech.stop(this);
+      this.phase = phase;
+      this.render();
+      this.querySelector('[data-read-heading]').focus();
+    }
+    render() {
+      var phase = this.phase;
+      var title = phase === 'prepare' ? 'prepareTitle' : phase === 'result' ? 'resultTitle' : phase === 'blur' ? 'blurTitle' : 'doneTitle';
+      var text = phase === 'prepare' ? 'prepareBody' : phase === 'result' ? 'resultHelp' : phase === 'blur' ? 'blurBody' : 'doneBody';
+      function button(key, action, kind) {
+        return '<button type="button" class="sv-btn sv-btn--' + (kind || 'filled') + ' sv-btn--block" data-read-action="' + action + '">' + esc(SV.t('readPractice.' + key)) + '</button>';
+      }
+      this.innerHTML = '<section class="sv-reading-stage l-stack" aria-labelledby="sv-read-heading">' +
+        '<h2 class="t-title-l" id="sv-read-heading" tabindex="-1" data-read-heading aria-describedby="sv-read-help">' + esc(SV.t('readPractice.' + title)) + '</h2>' +
+        '<p class="t-body-m" id="sv-read-help">' + esc(SV.t('readPractice.' + text)) + '</p>' +
+        ((phase === 'prepare' || phase === 'result') ? '<div class="sv-reading-sample"><h3 class="t-title-s">' + esc(SV.t('readPractice.sampleLabel')) + '</h3><p class="t-body-l">' + esc(SV.t('readPractice.sample')) + '</p></div>' : '') +
+        (phase === 'prepare' ? button('read', 'read') + button('blur', 'blur', 'outlined') : '') +
+        (phase === 'result' ? SV.speechControl(SV.t('readPractice.sample'), 'readPractice.listen') + button('confirm', 'confirm') + button('retry', 'retry', 'text') : '') +
+        (phase === 'blur' ? button('retryClear', 'read') + '<a class="sv-btn sv-btn--text sv-btn--block" href="display.html">' + esc(SV.t('readPractice.help')) + '</a>' : '') +
+        (phase === 'done' ? '<a class="sv-btn sv-btn--filled sv-btn--block" href="home.html">' + esc(SV.t('readPractice.home')) + '</a>' + button('retry', 'retry', 'text') : '') +
+        '</section>';
     }
   });
 
@@ -690,7 +756,8 @@
             onConfirm: function () {
               SV.state.set("account", Object.assign({}, acc, { signedIn: false }));
               self.mode = "signIn"; self.step = "form"; self.render();
-              SV.snackbar(SV.t("account.signedOut"));
+              self.querySelector('#sv-phone').focus();
+              SV.snackbar(SV.t("account.signedOut"), null, { speech: true });
             }
           });
         });
@@ -765,7 +832,8 @@
       this.step = "form";
       if (new URLSearchParams(location.search).get('setup') === '1') { SV.go('glasses.html?setup=1'); return; }
       this.render();
-      SV.snackbar(SV.t("account.welcome", { name: acc.name || SV.t("account.name") }));
+      selfFocus(this.querySelector('[data-signout]'));
+      SV.snackbar(SV.t("account.welcome", { name: acc.name || SV.t("account.name") }), null, { speechText: SV.t('speech.accountWelcome') });
     }
   });
 
@@ -779,7 +847,7 @@
           field("sv-feedback", "support.formLabel", { multiline: true, placeholder: "support.formPlaceholder", help: "support.formHelp", error: error, value: this._text }) +
           '<button class="sv-btn sv-btn--filled sv-btn--block" type="submit">' + icon("send") + esc(SV.t("support.submit")) + "</button>" +
         "</form>" +
-        (this._code ? '<div class="sv-banner sv-banner--success l-section l-section--first" role="status">' + icon("check_circle") +
+        (this._code ? '<div class="sv-banner sv-banner--success l-section l-section--first" tabindex="-1">' + icon("check_circle") +
           '<div><p class="sv-banner__title">' + esc(SV.t("support.sentTitle")) + "</p><p>" + esc(SV.t("support.sentBody", { code: this._code })) + "</p></div></div>" : "");
       var ta = this.querySelector("textarea");
       ta.addEventListener("input", function () { self._text = ta.value; });
@@ -789,6 +857,8 @@
         self._code = "SV-" + String(Math.floor(1000 + Math.random() * 9000));
         self._text = "";
         self.render();
+        selfFocus(self.querySelector('.sv-banner'));
+        if (SV.settings.get('speechFeedback') === 'voice') SV.announce(SV.t('speech.feedbackSent'));
       });
     }
   });

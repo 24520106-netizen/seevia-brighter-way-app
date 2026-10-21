@@ -10,6 +10,7 @@
 <script src="../brand/brand.js"></script>
 <script src="../content/vi.js"></script>
 <script src="../core/app.js"></script>
+<script src="../core/speech.js"></script>
 </head>
 <body class="sv-device-host">
 <div class="sv-device">
@@ -23,7 +24,17 @@
       <p class="t-body-m sv-page-title__lede" data-t="features.intro"></p>
     </div>
     <div class="l-gutter">
+      <a class="sv-btn sv-btn--tonal sv-btn--block l-section" href="read-practice.html" data-t="readPractice.title"></a>
       <sv-feature-groups></sv-feature-groups>
+      <section class="l-section" aria-labelledby="explore-more">
+        <h2 class="sv-section-title" id="explore-more" data-t="features.moreTitle"></h2>
+        <ul class="sv-list" role="list">
+          <li><sv-list-item href="album.html" icon="photo_library" heading="home.album" sub="home.albumSub"></sv-list-item></li>
+          <li><sv-list-item href="translation.html" icon="translate" heading="home.translation" sub="home.translationSub"></sv-list-item></li>
+          <li><sv-list-item href="meeting.html" icon="mic" heading="home.meeting" sub="home.meetingSub"></sv-list-item></li>
+          <li><sv-list-item href="community.html" icon="diversity_3" heading="home.community" sub="home.communitySub"></sv-list-item></li>
+        </ul>
+      </section>
       <p class="sv-page-note t-body-s"><span class="sv-icon" aria-hidden="true">info</span><span data-t="features.note"></span></p>
     </div>
   </main>
@@ -31,6 +42,7 @@
   <div class="sv-gesture-bar" aria-hidden="true"></div>
 </div>
 <script src="../components/elements.js"></script>
+<script src="../components/speech.js"></script>
 <script src="../components/flows.js"></script>
 </body>
 </html>

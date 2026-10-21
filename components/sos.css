@@ -117,4 +117,7 @@ html[data-contrast="high"] .sv-sos-sent { border: var(--border-width) solid curr
   box-shadow: inset 0 0 0 3px var(--color-sos);
 }
 .sv-sos.is-nophone .sv-sos__dots { visibility: hidden; }
-.sv-sos__direct { min-height: var(--size-touch); padding: 0 var(--space-4); border: var(--border-width) solid var(--color-sos); border-radius: var(--radius-full); background: var(--color-surface); color: var(--color-sos); font: var(--type-label-weight) var(--type-label-l-size)/1 var(--font-sans); }
+.sv-sos__direct { min-height: var(--size-touch); padding: var(--space-3) var(--space-4); border: var(--border-width) solid var(--color-sos); border-radius: var(--radius-full); background: var(--color-surface); color: var(--color-sos); font: var(--type-label-weight) var(--type-label-l-size)/1.4 var(--font-sans); }
+.sv-sos__scenario { width: 100%; text-align: start; }
+.sv-sos.is-failed .sv-sos__dots { visibility: hidden; }
+.sv-sos.is-failed .sv-sos-sent__body { grid-column: 1 / -1; }

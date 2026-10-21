@@ -33,9 +33,13 @@ App đồng hành của một chiếc kính được thiết kế trước hết
 
 ## Capabilities and Constraints
 
-- **Giữ nguyên tính năng của bản tham khảo** ("Your Eyes", innostar-demo.vercel.app/main; phân tích trong `docs/01-phan-tich-ban-goc.html`): 5 tab Trang chủ · Tính năng · An toàn · Cộng đồng · Hồ sơ; các màn Lịch sử hoạt động, Ảnh và video, Hướng dẫn, Dịch thuật (demo), Biên bản họp (demo), Quản lý kính, Hiển thị, Tài khoản (đăng nhập / đăng ký / OTP), Hỗ trợ & góp ý, Kiểm thử action (ẩn).
+- **Phạm vi mock sau vòng chỉnh 21/10/2026:** theo yêu cầu sửa 5 điểm yếu khi đối chiếu Product Brief, điều hướng ưu tiên Trang chủ · Hướng dẫn · An toàn · Khám phá · Hồ sơ. Các màn demo trước đây vẫn có; Cộng đồng, Ảnh và video, Dịch thuật, Biên bản họp nằm trong Khám phá và phần mở rộng thu gọn ở Trang chủ. Nội dung tham khảo gốc được lưu ở `docs/01-phan-tich-ban-goc.html`.
+- **Luồng chính:** trợ năng từ màn đầu → đăng nhập mẫu → tìm/cấp mạng → xác nhận trạng thái → thử đọc một đoạn chữ. Bài đọc có nhánh ảnh mờ, thử lại, Nghe/Dừng và tự xác nhận hoàn thành; không dùng camera hoặc kính thật.
+- **Trạng thái mẫu:** tách liên kết tài khoản, kính online và dịch vụ sẵn sàng; hiển thị thời điểm cập nhật. Dữ liệu thiếu hoặc quá 5 phút không được coi là sẵn sàng và không hiện pin cũ. Mốc 5 phút là quy tắc của mock, chưa phải yêu cầu firmware/backend.
+- **SOS:** vẫn là mô phỏng có điều kiện triển khai; có đếm ngược/hủy, kết quả mẫu và lỗi thiếu mạng, thiếu quyền, dịch vụ không phản hồi. Không xác nhận người thân đã nhận hoặc có người tới hỗ trợ.
 - Chức năng kính: đặt xe, điều hướng âm thanh, phát nhạc, đọc chữ, mô tả cảnh, tìm đồ thất lạc, chatbot AI, SOS. Web SeeVia gom thành các nhóm: See & Read, Find & Understand, Connect, Go, Community & Ecosystem.
 - Mọi dữ liệu là dữ liệu giả; không có cuộc gọi, ghi âm, camera hay kết nối kính thật.
+- Nút Nghe phát giọng thực trên thiết bị mở app qua Web Speech API. Có giọng đọc câu mẫu, nội dung mẫu và trạng thái kính; giọng phù hợp phải có trên thiết bị, có thể cần mạng. Chưa phát ra loa kính thật. Dịch thuật dùng các cặp câu Anh–Việt mẫu đã biên soạn, chưa dịch đầu vào tự do bằng AI.
 - Chỉ tiếng Việt ở bản này; chữ tách ra một file nội dung.
 - Tên thiết bị trong app: kính SeeVia (thay "Your Eyes" của bản tham khảo).
 
@@ -65,7 +69,8 @@ App đồng hành của một chiếc kính được thiết kế trước hết
 ## Accessibility & Inclusion
 
 - Chữ đạt tối thiểu WCAG AA 4,5:1 (theo bảng cặp màu trong bộ nhận diện); cặp dưới 4,5 chỉ cho trang trí hoặc chữ ≥ 24px.
-- Chữ đọc tối thiểu 16px; 3 mức cỡ chữ (×0,88 · ×1 · ×1,28) và chế độ tương phản cao áp dụng cho toàn app.
+- Chữ nội dung/nhãn có sàn 1rem (16px ở cỡ mặc định trình duyệt); thang chữ dùng rem. 3 mức cỡ chữ (×0,88 · ×1 · ×1,28) giữ sàn này cho body/label/title nhỏ; tương phản cao áp dụng toàn app. Nhãn tab và tiêu đề được xuống dòng. Cỡ chữ hệ thống và TalkBack vẫn cần nghiệm thu Android thật.
 - Vùng chạm tối thiểu 48dp (Android).
 - Thay đổi trạng thái (lỗi, thành công, SOS kích hoạt) được báo qua vùng aria-live.
+- Thông báo mặc định đi qua trình đọc màn hình; người dùng có thể chọn TTS tự động cho phản hồi ngắn tại Hiển thị và giọng đọc. Không tự đọc giá trị mật khẩu/OTP. Khả năng phối hợp với TalkBack phải nghiệm thu trên Android thật, không suy ra chỉ từ kiểm thử trình duyệt.
 - Tôn trọng prefers-reduced-motion.

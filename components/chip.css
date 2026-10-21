@@ -5,7 +5,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 40px;
+  min-height: var(--size-touch);
   padding: 0 var(--space-4);
   border: var(--border-width) solid var(--color-outline);
   border-radius: var(--radius-sm);
@@ -16,8 +16,7 @@
   isolation: isolate;
   overflow: hidden;
 }
-/* Vùng chạm 48 dù chip cao 40 */
-.sv-chip::after { content: ""; position: absolute; inset: -4px 0; }
+/* Vùng chạm thật 48px, không phụ thuộc phần tử giả bị overflow cắt. */
 .sv-chip .sv-icon { font-size: 18px; color: var(--color-primary-strong); }
 button.sv-chip::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; z-index: -1; transition: opacity var(--dur-short) var(--ease-standard); }
 button.sv-chip:hover::before { opacity: var(--state-hover); }

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi" data-title-key="home.title">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title></title>
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../base.css">
+<link rel="stylesheet" href="../components/index.css">
+<style>
+  .sv-dusk-head__bar sv-logo[data-wordmark] {
+    width: 68px;
+    overflow: hidden;
+  }
+  .sv-dusk-head__bar sv-logo[data-wordmark] img {
+    margin-inline-start: -35.5px;
+    max-width: none;
+  }
+</style>
+<script src="../brand/brand.js"></script>
+<script src="../content/vi.js"></script>
+<script src="../core/app.js"></script>
+<style>
+.sv-dusk-head__bar { position: relative; }
+.sv-dusk-head__bar sv-logo[data-wordmark] { flex: 0 0 68px; width: 68px; height: 36px !important; overflow: visible; }
+.sv-dusk-head__bar sv-logo[data-wordmark] img { position: absolute; top: 50%; height: 54px; width: auto; max-width: none; margin: 0; transform: translate(-53.25px, -50%); clip-path: inset(0 0 0 53.25px); }
+</style></head>
+<body class="sv-device-host">
+<div class="sv-device sv-device--dusk">
+  <sv-status-bar></sv-status-bar>
+
+  <main class="sv-device__screen">
+    <header class="sv-dusk-head">
+      <div class="sv-dusk-head__bar">
+        <sv-logo variant="full" tone="light" height="36" data-wordmark></sv-logo>
+        <sv-logo variant="white" height="36" data-wordmark></sv-logo>
+        <span class="sv-demo-tag"><span class="sv-icon" aria-hidden="true">science</span><span data-t="common.demoBadge"></span></span>
+        <a class="sv-icon-btn" href="account.html" data-t-aria="home.account"><span class="sv-icon" aria-hidden="true">account_circle</span></a>
+      </div>
+      <div class="sv-dusk-head__intro">
+        <h1 class="t-headline-l sv-dusk-head__greeting" data-t="home.greeting"></h1>
+        <p class="t-body-m sv-dusk-head__lede" data-t="home.intro"></p>
+      </div>
+      <sv-glasses-card from-state compact href="glasses.html"></sv-glasses-card>
+      <sv-sos-status></sv-sos-status>
+    </header>
+
+    <div class="l-gutter">
+      <section class="l-section" aria-labelledby="home-recent">
+        <div class="sv-section-head">
+          <h2 class="sv-section-title" id="home-recent" data-t="home.recentTitle"></h2>
+          <a class="sv-section-link" href="activity.html" data-t="home.recentAll" data-t-aria="home.recentAllAria"></a>
+        </div>
+        <sv-activity-list limit="2"></sv-activity-list>
+      </section>
+
+      <section class="l-section" aria-labelledby="home-use">
+        <h2 class="sv-section-title" id="home-use" data-t="home.useTitle"></h2>
+        <ul class="sv-list" role="list">
+          <li><sv-list-item href="album.html" icon="photo_library" heading="home.album" sub="home.albumSub"></sv-list-item></li>
+          <li><sv-list-item href="translation.html" icon="translate" heading="home.translation" sub="home.translationSub"></sv-list-item></li>
+          <li><sv-list-item href="meeting.html" icon="mic" heading="home.meeting" sub="home.meetingSub"></sv-list-item></li>
+          <li><sv-list-item href="guide.html" icon="menu_book" heading="home.guide" sub="home.guideSub"></sv-list-item></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <sv-nav-bar active="home"></sv-nav-bar>
+  <div class="sv-gesture-bar" aria-hidden="true"></div>
+</div>
+<script src="../components/elements.js"></script>
+<script src="../components/flows.js"></script>
+</body>
+</html>

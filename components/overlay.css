@@ -55,6 +55,11 @@ html[data-contrast="high"] .sv-sheet { border-top: var(--border-width) solid var
   transition: transform var(--dur-medium) var(--ease-emphasized-decel), opacity var(--dur-medium) var(--ease-standard);
 }
 .sv-snackbar.is-visible { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.sv-snackbar[hidden] { display: none; }
+.sv-snackbar { flex-wrap: wrap; }
+.sv-snackbar__text { min-width: 0; overflow-wrap: anywhere; flex-basis: 50%; }
+.sv-snackbar .sv-icon-btn { color: inherit; }
+.sv-sheet > .sv-snackbar { position: sticky; inset: auto; width: 100%; transform: none; margin-top: var(--space-3); }
 .sv-snackbar__text { flex: 1; }
 .sv-snackbar .sv-btn--text { --btn-fg: var(--color-primary-container); min-height: 40px; margin: -8px -8px -8px 0; }
 .sv-device .sv-snackbar { position: absolute; width: calc(100% - 2 * var(--layout-gutter)); }

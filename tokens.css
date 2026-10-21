@@ -148,43 +148,42 @@
      --------------------------------------------------------------- */
   --font-scale: 1;              /* 0.88 · 1 · 1.28, đặt qua html[data-font] */
 
-  --type-display-size: calc(36px * var(--font-scale));
+  --type-display-size: calc(2.25rem * var(--font-scale));
   --type-display-line: 1.2;
   --type-display-weight: 600;
-  --type-headline-l-size: calc(30px * var(--font-scale));
+  --type-headline-l-size: calc(1.875rem * var(--font-scale));
   --type-headline-l-line: 1.25;
-  --type-headline-m-size: calc(26px * var(--font-scale));
+  --type-headline-m-size: calc(1.625rem * var(--font-scale));
   --type-headline-m-line: 1.3;
-  --type-headline-s-size: calc(22px * var(--font-scale));
+  --type-headline-s-size: calc(1.375rem * var(--font-scale));
   --type-headline-s-line: 1.32;
   --type-headline-weight: 600;
 
-  --type-title-l-size: calc(20px * var(--font-scale));
+  --type-title-l-size: calc(1.25rem * var(--font-scale));
   --type-title-l-line: 1.4;
-  --type-title-m-size: calc(18px * var(--font-scale));
+  --type-title-m-size: max(1rem, calc(1.125rem * var(--font-scale)));
   --type-title-m-line: 1.42;
-  --type-title-s-size: calc(16px * var(--font-scale));
+  --type-title-s-size: max(1rem, calc(1rem * var(--font-scale)));
   --type-title-s-line: 1.45;
   --type-title-weight: 600;
 
-  --type-body-l-size: calc(18px * var(--font-scale));
+  --type-body-l-size: max(1rem, calc(1.125rem * var(--font-scale)));
   --type-body-l-line: 1.55;
-  --type-body-m-size: calc(16px * var(--font-scale));
+  --type-body-m-size: max(1rem, calc(1rem * var(--font-scale)));
   --type-body-m-line: 1.55;
-  --type-body-s-size: calc(15px * var(--font-scale));
+  --type-body-s-size: max(1rem, calc(1rem * var(--font-scale)));
   --type-body-s-line: 1.5;
   --type-body-weight: 400;
 
-  --type-label-l-size: calc(16px * var(--font-scale));
+  --type-label-l-size: max(1rem, calc(1rem * var(--font-scale)));
   --type-label-l-line: 1.35;
-  --type-label-m-size: calc(14px * var(--font-scale));
+  --type-label-m-size: max(1rem, calc(1rem * var(--font-scale)));
   --type-label-m-line: 1.35;
-  --type-label-s-size: calc(13px * var(--font-scale));
+  --type-label-s-size: max(1rem, calc(1rem * var(--font-scale)));
   --type-label-s-line: 1.3;
   --type-label-weight: 600;
   --type-label-tracking: 0.01em;
   --type-system-size: 14px;
-  --type-nav-label-max: 16px;   /* trần cỡ nhãn thanh điều hướng (chữ To xuống 2 dòng) */     /* chữ thanh trạng thái hệ thống, không phóng theo cỡ chữ app */
 
   /* ---------------------------------------------------------------
      4. KHOẢNG CÁCH, LƯỚI, KÍCH THƯỚC

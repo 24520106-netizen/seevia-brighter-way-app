@@ -8,7 +8,7 @@
 .sv-setup-help { padding-block: var(--space-5); margin-top: var(--space-6); border-top: var(--border-width) solid var(--color-outline-variant); }
 .sv-setup-help h2 { margin-bottom: var(--space-2); }
 .sv-setup-note { margin-block: var(--space-4); color: var(--color-text-muted); }
-.sv-setup-progress { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); list-style: none; padding: 0; margin: 0 0 var(--space-6); }
+.sv-setup-progress { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); list-style: none; padding: 0; margin: 0 0 var(--space-6); }
 .sv-setup-progress li { padding-top: var(--space-2); border-top: 2px solid var(--color-outline-variant); color: var(--color-text-muted); font: var(--type-label-weight) var(--type-label-m-size)/1.5 var(--font-sans); overflow-wrap: anywhere; }
 .sv-setup-progress [aria-current="step"] { border-color: var(--color-primary-strong); color: var(--color-primary-strong); }
 .sv-setup-stage { margin-top: var(--space-6); }
@@ -30,3 +30,9 @@
 .sv-setup-busy::before { content: ""; display: block; width: 40%; height: 100%; background: var(--color-primary-strong); animation: sv-setup-progress 1s ease-in-out infinite alternate; }
 @keyframes sv-setup-progress { to { transform: translateX(150%); } }
 @media (prefers-reduced-motion: reduce) { .sv-setup-busy::before { animation: none; width: 100%; } }
+
+.sv-setup-help > .sv-btn, .sv-setup-help > sv-speech-control { margin-top: var(--space-3); }
+.sv-reading-stage { margin-block: var(--space-6); }
+.sv-reading-sample { display: grid; gap: var(--space-3); padding: var(--space-4); background: var(--color-surface-container); border-radius: var(--radius-md); }
+.sv-reading-stage .sv-btn { white-space: normal; line-height: var(--type-label-l-line); padding-block: var(--space-3); }
+.sv-feature__phase { display: block; color: var(--color-text-muted); font: var(--type-label-weight) var(--type-label-m-size)/1.5 var(--font-sans); margin-block: var(--space-2); }

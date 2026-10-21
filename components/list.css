@@ -101,3 +101,6 @@ button.sv-list-item:disabled::before { display: none; }
 .sv-feature__say b { font-weight: 600; color: var(--color-on-surface); }
 
 .sv-list--after { margin-top: var(--space-3); }
+
+/* Màn Hoạt động là màn gốc của tab: hàng lọc cách dòng mô tả của tiêu đề trang */
+.sv-page-title + .l-gutter > sv-activity-browser > .sv-chip-row { margin-top: var(--space-4); }

@@ -84,6 +84,7 @@
       this._done = true;
       var variant = this.getAttribute("variant") || "small";
       var back = this.getAttribute("back");
+      if (this.hasAttribute("back-from-start") && new URLSearchParams(location.search).get("from") === "start") back = "start.html";
       var heading = this.getAttribute("heading");
       var actions = Array.prototype.slice.call(this.childNodes);
       var bar = document.createElement("header");
@@ -118,9 +119,9 @@
   /* ---------- Navigation bar: 5 đích của app ---------- */
   var DESTINATIONS = [
     { id: "home", icon: "home", href: "home.html" },
-    { id: "features", icon: "auto_awesome", href: "features.html" },
+    { id: "activity", icon: "history", href: "activity.html" },
     { id: "safety", icon: "emergency_home", href: "safety.html" },
-    { id: "community", icon: "diversity_3", href: "community.html" },
+    { id: "features", icon: "auto_awesome", href: "features.html" },
     { id: "profile", icon: "person", href: "profile.html" }
   ];
   SV.destinations = DESTINATIONS;
@@ -180,47 +181,51 @@
     connectedCallback() {
       this.render();
       if (this.hasAttribute("from-state")) {
-        this._onState = this.render.bind(this);
+        this._onState = function (event) { if (!event || event.detail.name === 'glasses') this.render(); }.bind(this);
         document.addEventListener("sv:state", this._onState);
+        this._freshness = setInterval(function () { if (this._statusKind !== SV.glassesStatus().kind) this.render(); }.bind(this), 30000);
       }
     }
-    disconnectedCallback() { if (this._onState) document.removeEventListener("sv:state", this._onState); }
+    disconnectedCallback() { if (this._onState) document.removeEventListener("sv:state", this._onState); clearInterval(this._freshness); }
     render() {
       var g = this.hasAttribute("from-state") ? SV.state.get("glasses") : null;
-      var lost = g && g.linked && g.connection === "lost";
-      var connected = g ? g.linked && !lost : this.hasAttribute("connected");
-      var battery = g ? String(g.battery) : this.getAttribute("battery") || "0";
+      this._restoreLinkFocus = this.querySelector('a.sv-glasses') === document.activeElement;
+      var status = g ? SV.glassesStatus(g) : { kind: this.hasAttribute("connected") ? "ready" : "unlinked", battery: Number(this.getAttribute("battery")) };
+      this._statusKind = status.kind;
+      var connected = status.kind === "ready";
+      var battery = status.battery === null ? null : String(status.battery);
       var version = g ? g.version : this.getAttribute("version") || "";
       var href = this.getAttribute("href");
       if (!connected) {
+        var stateText = SV.glassesStatusText(status);
+        var description = SV.t("deviceStatus." + status.kind + "Help");
         this.innerHTML = '<section class="sv-glasses" aria-label="' + esc(SV.t("glasses.title")) + '">' +
           '<div class="sv-glasses__head"><span class="sv-glasses__icon">' + icon("eyeglasses") + "</span>" +
           '<div><p class="sv-glasses__name">' + esc(SV.t("glasses.name")) + '</p><span class="sv-glasses__state sv-glasses__state--off">' +
-          icon("link_off") + esc(SV.t(lost ? "setup.lostTitle" : "status.disconnected")) + "</span></div>" +
+          icon("link_off") + esc(stateText) + "</span></div>" +
           (href ? '<span class="sv-glasses__chevron">' + icon("chevron_right") + "</span>" : "") +
-          '</div><p class="sv-glasses__meta">' + esc(SV.t(lost ? "setup.lostBody" : href ? "glasses.notLinkedHint" : "glasses.notLinkedHere")) + "</p></section>";
-        if (href) this.wrapLink(href, SV.t("glasses.name") + ". " + SV.t(lost ? "setup.lostTitle" : "status.disconnected") + ". " + SV.t(lost ? "setup.lostBody" : "glasses.notLinkedHint"));
+          '</div><p class="sv-glasses__meta">' + esc(description) + " " + esc(SV.glassesUpdatedText(status)) + "</p></section>";
+        if (href) this.wrapLink(href, SV.t("glasses.name") + ". " + stateText + ". " + description + " " + SV.glassesUpdatedText(status));
         return;
       }
-      var state = connected
-        ? '<span class="sv-glasses__state">' + SV.sparkSvg() + esc(SV.t("status.connected")) + "</span>"
-        : '<span class="sv-glasses__state sv-glasses__state--off">' + icon("link_off") + esc(SV.t("status.disconnected")) + "</span>";
+      var state = '<span class="sv-glasses__state">' + SV.sparkSvg() + esc(SV.glassesStatusText(status)) + "</span>";
       var html =
         '<div class="sv-glasses__head">' +
           '<span class="sv-glasses__icon">' + icon("eyeglasses") + "</span>" +
           '<div><p class="sv-glasses__name">' + esc(SV.t("glasses.name")) + "</p>" + state + "</div>" +
           (href ? '<span class="sv-glasses__chevron">' + icon("chevron_right") + "</span>" : "") +
         "</div>" +
-        '<div class="sv-meter">' +
+        (battery === null ? '<p class="sv-glasses__meta">' + esc(SV.t("deviceStatus.batteryUnknown")) + '</p>' : '<div class="sv-meter">' +
           '<div class="sv-meter__row" aria-hidden="true"><span>' + esc(SV.t("glasses.batteryLabel")) + '</span><span class="sv-meter__value">' + esc(battery) + "%</span></div>" +
           '<div class="sv-meter__track" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + esc(battery) + '" aria-valuetext="' + esc(battery) + '%" aria-label="' + esc(SV.t("glasses.batteryLabel")) + '">' +
             '<span class="sv-meter__fill" style="--value:' + esc(battery) + '%"></span></div>' +
-        "</div>" +
+        "</div>") +
+        '<p class="sv-glasses__meta">' + esc(SV.glassesUpdatedText(status)) + '</p>' +
         (this.hasAttribute("compact") ? "" :
         '<p class="sv-glasses__meta"><span>' + esc(SV.t("glasses.serialLabel")) + " <b>" + esc(SV.keepTogether(g ? g.serial : SV.t("glasses.serial"))) + "</b></span>" +
           "<span>" + esc(SV.t("glasses.version", { value: version })) + "</span></p>");
       this.innerHTML = '<section class="sv-glasses" aria-label="' + esc(SV.t("glasses.title")) + '">' + html + "</section>";
-      if (href) this.wrapLink(href, SV.t("glasses.name") + ". " + SV.t("glasses.connectedSummary", { battery: battery, version: version }) + ". " + SV.t("glasses.openHint"));
+      if (href) this.wrapLink(href, SV.t("glasses.name") + ". " + SV.glassesStatusText(status) + ". " + (battery === null ? SV.t("deviceStatus.batteryUnknown") : SV.t("glasses.battery", { value: battery })) + ". " + SV.glassesUpdatedText(status) + ". " + SV.t("glasses.openHint"));
     }
     /* Cả thẻ là một liên kết: một vùng chạm lớn, một tên đọc rõ cho trình đọc màn hình */
     wrapLink(href, label) {
@@ -232,6 +237,7 @@
       while (section.firstChild) a.appendChild(section.firstChild);
       section.replaceWith(a);
       a.querySelectorAll("[role=meter]").forEach(function (m) { m.removeAttribute("role"); m.setAttribute("aria-hidden", "true"); });
+      if (this._restoreLinkFocus) a.focus({ preventScroll: true });
     }
   });
 
@@ -249,11 +255,16 @@
         '<div class="sv-sos">' +
           '<button class="sv-sos__button" type="button">' +
             '<svg class="sv-sos__ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="47"/></svg>' +
-            '<span class="sv-sos__face"></span></button>' +
+            '<span class="sv-sos__face" aria-hidden="true"></span></button>' +
           '<div class="sv-sos__dots" aria-hidden="true">' + new Array(SOS_TAPS + 1).join('<span class="sv-sos__dot"></span>') + "</div>" +
           '<p class="sv-sos__hint"></p>' +
-          (this.full ? '<button class="sv-sos__direct visually-hidden-focusable" type="button">' + esc(SV.t("safety.directSos")) + "</button>" +
-            '<p class="sv-sos__recipient t-body-m t-muted"></p><div class="sv-sos__result" hidden></div>' : "") +
+          (this.full ? '<button class="sv-sos__direct" type="button">' + esc(SV.t("safety.directSos")) + "</button>" +
+            '<p class="sv-sos__recipient t-body-m t-muted"></p><div class="sv-sos__result" hidden></div>' +
+            '<details class="sv-setup-scenario sv-sos__scenario"><summary>' + esc(SV.t('safety.scenarioTitle')) + '</summary>' +
+            '<div class="sv-field"><label class="sv-field__label" for="sv-sos-scenario">' + esc(SV.t('safety.scenarioLabel')) + '</label>' +
+            '<select class="sv-field__control" id="sv-sos-scenario">' + [['success', 'scenarioSuccess'], ['offline', 'scenarioOffline'], ['permission', 'scenarioPermission'], ['failed', 'scenarioFailed']].map(function (item) {
+              return '<option value="' + item[0] + '"' + (SV.state.get('sosScenario') === item[0] ? ' selected' : '') + '>' + esc(SV.t('safety.' + item[1])) + '</option>';
+            }).join('') + '</select></div></details>' : "") +
         "</div>";
       this.wrap = this.querySelector(".sv-sos");
       this.button = this.querySelector(".sv-sos__button");
@@ -261,15 +272,25 @@
       this.taps = 0;
       this.button.addEventListener("click", function () { self.press(); });
       var direct = this.querySelector(".sv-sos__direct");
-      if (direct) direct.addEventListener("click", function () { if (self.mode === "idle") self.start(); });
-      this._onState = function () { if (self.mode === "idle") self.paint(); else self.paintRecipient(); };
+      if (direct) direct.addEventListener("click", function () {
+        if (self.mode === 'counting') self.cancel(); else if (self.mode === 'idle') self.start(); else self.focusResult();
+      });
+      var scenario = this.querySelector('#sv-sos-scenario');
+      if (scenario) scenario.addEventListener('change', function () { SV.state.set('sosScenario', scenario.value); });
+      this._onState = function (event) {
+        if (self.mode === 'counting' && event.detail.name === 'emergencyPhone') { self.cancel(SV.t('speech.recipientChanged')); return; }
+        if (self.mode === 'counting' && event.detail.name === 'sosScenario') { self.cancel(SV.t('safety.scenarioChanged')); return; }
+        if (self.mode === "idle") self.paint(); else self.paintRecipient();
+      };
       document.addEventListener("sv:state", this._onState);
       this.paint();
     }
     disconnectedCallback() {
       clearTimeout(this.tapTimer);
       clearInterval(this.tick);
+      clearTimeout(this._resultTimer);
       document.removeEventListener("sv:state", this._onState);
+      SV.speech.release(this); SV.speech.stop(this);
     }
     phone() { return SV.state.get("emergencyPhone"); }
     paintRecipient() {
@@ -289,8 +310,12 @@
       dots.forEach(function (d, i) { d.classList.toggle("is-on", i < taps); });
       if (this.mode === "counting") {
         face.innerHTML = '<span class="sv-sos__count">' + this.left + '</span><span class="sv-sos__sub">' + esc(SV.t("safety.countdownLabel")) + "</span>";
-        this.button.setAttribute("aria-label", SV.t("safety.countdownAria", { n: this.left }));
+        this.button.setAttribute("aria-label", SV.t("speech.cancelSos"));
         hint.textContent = SV.t("safety.countdownHint");
+      } else if (this.mode === "failed") {
+        face.innerHTML = icon("error") + '<span class="sv-sos__sub">' + esc(SV.t("safety.failedLabel")) + '</span>';
+        this.button.setAttribute('aria-label', SV.t('safety.failedTitle'));
+        hint.textContent = SV.t('safety.failedTitle');
       } else if (this.mode === "sent") {
         face.innerHTML = icon("check", "sv-icon--fill") + '<span class="sv-sos__sub">' + esc(SV.t("safety.sentLabel")) + "</span>";
         this.button.setAttribute("aria-label", SV.t("safety.sentAria", { time: this.sentAt }));
@@ -305,11 +330,13 @@
         hint.textContent = SV.t("demo.sos.hint");
       }
       this.paintRecipient();
+      var direct = this.querySelector('.sv-sos__direct');
+      if (direct) direct.textContent = SV.t(this.mode === 'counting' ? 'speech.cancelSos' : (this.mode === 'sent' || this.mode === 'failed') ? 'speech.sosResult' : 'safety.directSos');
     }
     press() {
       var self = this;
       if (this.mode === "counting") return this.cancel();
-      if (this.mode === "sent") { this.focusResult(); return; }
+      if (this.mode === "sent" || this.mode === "failed") { this.focusResult(); return; }
       if (!this.phone()) { this.needPhone(); return; }
       clearTimeout(this.tapTimer);
       this.taps += 1;
@@ -330,26 +357,33 @@
     start() {
       var self = this;
       if (!this.phone()) { this.needPhone(); return; }
+      var result = this.querySelector('.sv-sos__result');
+      if (result) result.hidden = true;
+      SV.speech.hold(this);
       clearTimeout(this.tapTimer);
       this.taps = 0;
       this.mode = "counting";
       this.left = SOS_COUNTDOWN;
       this.paint();
-      SV.announce(SV.t("safety.countdownStart"), true);
+      SV.announce(SV.t("safety.countdownStart"), true, { owner: this });
       this.tick = setInterval(function () {
         self.left -= 1;
         if (self.left <= 0) { clearInterval(self.tick); self.send(); return; }
         self.paint();
       }, 1000);
     }
-    cancel() {
+    cancel(message) {
       clearInterval(this.tick);
+      SV.speech.release(this); SV.speech.stop(this);
       this.mode = "idle";
       this.paint();
-      SV.snackbar(SV.t("safety.cancelled"));
+      SV.snackbar(message || SV.t("safety.cancelled"), null, { speech: true, urgent: true });
     }
     send() {
       var self = this;
+      SV.speech.release(this); SV.speech.stop(this);
+      var scenario = SV.state.get('sosScenario') || 'success';
+      if (scenario !== 'success') { this.fail(scenario); return; }
       var now = new Date();
       this.sentAt = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
       this.mode = "sent";
@@ -359,8 +393,8 @@
       var result = this.querySelector(".sv-sos__result");
       if (!result) {
         /* Không có thẻ kết quả: báo bằng lời. Có thẻ kết quả: focus chuyển tới thẻ (một kênh duy nhất) */
-        SV.announce(SV.t("safety.sentTitle") + ". " + SV.t("safety.sentMeta", { time: this.sentAt, phone: phone }), true);
-        setTimeout(function () { self.mode = "idle"; self.paint(); }, 4000);
+        SV.announce(SV.t("safety.sentTitle") + ". " + SV.t("safety.sentMeta", { time: this.sentAt, phone: phone }), true, { speechText: SV.t('speech.sosSent') });
+        this._resultTimer = setTimeout(function () { self.mode = "idle"; self.paint(); }, 4000);
         return;
       }
       result.innerHTML =
@@ -379,12 +413,32 @@
         self.mode = "idle";
         self.paint();
         /* Không đưa focus về nút SOS sau lúc căng thẳng: về tiêu đề màn */
-        var heading = document.querySelector("main h1") || self.button;
+        var heading = document.querySelector("h1") || self.button;
         if (heading !== self.button) heading.setAttribute("tabindex", "-1");
         heading.focus();
-        SV.snackbar(SV.t("safety.safeDone"));
+        SV.snackbar(SV.t("safety.safeDone"), null, { speech: true });
       });
       this.focusResult();
+      if (SV.settings.get('speechFeedback') === 'voice') SV.announce(SV.t('speech.sosSent'), true);
+    }
+    fail(scenario) {
+      var self = this;
+      var message = SV.t('safety.' + (scenario === 'offline' ? 'offlineBody' : scenario === 'permission' ? 'permissionBody' : 'failedBody'));
+      this.mode = 'failed'; this.paint();
+      var result = this.querySelector('.sv-sos__result');
+      if (!result) { SV.announce(message, true); this._resultTimer = setTimeout(function () { self.mode = 'idle'; self.paint(); }, 4000); return; }
+      result.innerHTML = '<section class="sv-sos-sent"><div class="sv-sos-sent__body">' +
+        '<h2 class="sv-sos-sent__title" tabindex="-1" aria-describedby="sv-sos-failure">' + esc(SV.t('safety.failedTitle')) + '</h2>' +
+        '<p id="sv-sos-failure">' + esc(message) + '</p></div>' +
+        '<button type="button" class="sv-btn sv-btn--filled sv-btn--block" data-sos-retry>' + esc(SV.t('safety.retry')) + '</button>' +
+        '<button type="button" class="sv-btn sv-btn--text sv-btn--block" data-sos-reset>' + esc(SV.t('safety.reset')) + '</button></section>';
+      result.hidden = false;
+      result.querySelector('[data-sos-retry]').addEventListener('click', function () { self.start(); self.button.focus(); });
+      result.querySelector('[data-sos-reset]').addEventListener('click', function () {
+        result.hidden = true; self.mode = 'idle'; self.paint(); self.querySelector('.sv-sos__direct').focus();
+      });
+      this.focusResult();
+      if (SV.settings.get('speechFeedback') === 'voice') SV.announce(message, true);
     }
     focusResult() {
       var title = this.querySelector(".sv-sos-sent__title");
@@ -421,6 +475,7 @@
         '<span class="t-body-s t-muted">' + esc(it.time) + "</span></p>" +
       '<p class="sv-sheet__body t-body-l" id="sv-act-body">' + esc(it.detail) + "</p>" +
       (ok ? "" : '<p class="sv-sheet__note t-body-m">' + esc(SV.t("activityPage.failedNote")) + "</p>") +
+      SV.speechControl(it.detail, 'speech.activityListen') +
       '<div class="sv-sheet__actions"><button class="sv-btn sv-btn--tonal sv-btn--block" value="cancel">' + esc(SV.t("common.close")) + "</button></div>",
       { labelledBy: "sv-act-title", describedBy: "sv-act-body", focus: "#sv-act-title" }
     );
@@ -524,7 +579,7 @@
           self.editing = false;
           self.render();
           self.querySelector("[data-edit]").focus();
-          SV.snackbar(SV.t("safety.contactSaved"));
+          SV.snackbar(SV.t("safety.contactSaved"), null, { speech: true });
         });
         var cancel = form.querySelector("[data-cancel]");
         if (cancel) cancel.addEventListener("click", function () {
@@ -540,7 +595,7 @@
         self.querySelector("input").focus();
       });
       this.querySelector("[data-call]").addEventListener("click", function () {
-        SV.snackbar(SV.t("safety.callToast", { phone: SV.state.get("emergencyPhone") }));
+        SV.snackbar(SV.t("safety.callToast", { phone: SV.state.get("emergencyPhone") }), null, { speechText: SV.t('speech.callDemo') });
       });
     }
     fail(message, typed) {
@@ -597,24 +652,34 @@
   });
 
   /* ---------- Snackbar ---------- */
-  SV.snackbar = function (text, action) {
-    var host = document.querySelector(".sv-device") || document.body;
+  SV.snackbar = function (text, action, options) {
+    options = options || {};
+    var host = document.querySelector('dialog[open]') || document.querySelector(".sv-device") || document.body;
     var bar = host.querySelector(":scope > .sv-snackbar");
     if (!bar) {
       bar = document.createElement("div");
       bar.className = "sv-snackbar";
-      bar.setAttribute("role", "status");
-      bar.setAttribute("aria-live", "polite");
+      bar.hidden = true;
       host.appendChild(bar);
     }
     bar.innerHTML = '<span class="sv-snackbar__text">' + esc(text) + "</span>" +
-      (action ? '<button class="sv-btn sv-btn--text" type="button">' + esc(action.label) + "</button>" : "");
-    if (action) bar.querySelector("button").addEventListener("click", function () { action.onClick(); bar.classList.remove("is-visible"); });
+      (action ? '<button class="sv-btn sv-btn--text" type="button" data-action>' + esc(action.label) + "</button>" : "") +
+      '<button class="sv-icon-btn" type="button" data-dismiss aria-label="' + esc(SV.t('speech.dismissNotice')) + '">' + icon('close') + '</button>';
+    var opener = document.activeElement;
+    function dismiss(restore) {
+      if (restore && bar.contains(document.activeElement)) {
+        var target = opener && opener.isConnected && !bar.contains(opener) ? opener : document.querySelector('h1, main');
+        if (target) { if (!target.matches('button,a,input,textarea,select')) target.setAttribute('tabindex', '-1'); target.focus(); }
+      }
+      bar.hidden = true; bar.classList.remove('is-visible');
+    }
+    if (action) bar.querySelector('[data-action]').addEventListener('click', function () { action.onClick(); dismiss(true); });
+    bar.querySelector('[data-dismiss]').addEventListener('click', function () { dismiss(true); });
+    bar.hidden = false;
     void bar.offsetWidth; /* buộc tính lại bố cục để hiệu ứng hiện ra chạy, không phụ thuộc khung hình */
     bar.classList.add("is-visible");
-    clearTimeout(bar._timer);
-    /* Có nút hành động (Hoàn tác…): giữ 10 giây để người dùng trình đọc màn hình kịp tới */
-    bar._timer = setTimeout(function () { bar.classList.remove("is-visible"); }, action ? 10000 : 4000);
+    // Keep messages/actions reachable until dismissed or replaced, including with TalkBack.
+    SV.announce(text, !!options.urgent, { speech: !!(options.speech || options.speechText), speechText: options.speechText });
   };
 
   /* ---------- Bottom sheet (nội dung tự do) ---------- */
@@ -645,8 +710,10 @@
     function finish(value) {
       if (done) return;
       done = true;
+      SV.speech.stop(dialog);
       if (dialog.open) dialog.close(value);
       dialog.remove();
+      SV.prepareLiveRegions(document.body);
       if (opener && opener.isConnected && opener.focus) opener.focus();
       if (opts.onClose) opts.onClose(value);
     }
@@ -661,6 +728,7 @@
     dialog.addEventListener("cancel", function (event) { event.preventDefault(); finish("cancel"); });
     dialog.addEventListener("close", function () { finish(dialog.returnValue || "cancel"); });
     dialog.showModal();
+    SV.prepareLiveRegions(dialog);
     var first = opts.focus ? dialog.querySelector(opts.focus) : dialog.querySelector("[autofocus], button[value='cancel'], button");
     if (first) {
       if (!first.matches("button, a, input, textarea")) first.setAttribute("tabindex", "-1");

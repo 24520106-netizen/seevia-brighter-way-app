@@ -21,3 +21,11 @@ sv-support-form, sv-display-settings, sv-dev-handlers,
 sv-community-notify, sv-sos-status, sv-hotline { display: block; }
 sv-list-item > .sv-list-item { height: 100%; }
 sv-setup-start, sv-setup-progress, sv-connection-status { display: block; }
+sv-read-practice { display: block; }
+sv-speech-control, sv-speech-settings, sv-speech-diagnostics { display: block; min-width: 0; }
+sv-speech-control > .sv-btn { width: 100%; }
+.sv-speech__status:not(:empty) { margin-top: var(--space-2); }
+.sv-speech__error { color: var(--color-error); }
+.sv-accordion__body > sv-speech-control { margin-top: var(--space-3); }
+.sv-field select { min-width: 0; text-overflow: ellipsis; }
+.sv-skip { position: absolute; z-index: 100; top: var(--space-2); left: var(--space-2); padding: var(--space-3); background: var(--color-surface); color: var(--color-primary-strong); }

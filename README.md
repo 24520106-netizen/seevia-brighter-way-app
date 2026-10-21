@@ -7,6 +7,24 @@ Bản mô phỏng giao diện app đồng hành của kính SeeVia. HTML/CSS/JS 
 - Báo cáo phân tích bản tham khảo: `docs/01-phan-tich-ban-goc.html`
 - Bối cảnh sản phẩm: `PRODUCT.md` · hệ thống thiết kế: `DESIGN.md`
 
+## Điều chỉnh theo Product Brief · 21/10/2026
+
+- Điều hướng chính: **Trang chủ · Hướng dẫn · An toàn · Khám phá · Hồ sơ**. Trang chủ ưu tiên trạng thái và việc tiếp theo, hướng dẫn, trợ năng, hỗ trợ; các demo mở rộng được thu gọn. Cộng đồng vẫn mở được trong Khám phá.
+- **Trợ năng và âm thanh** mở trực tiếp ở màn bắt đầu, trước đăng nhập. Cài đặt được giữ khi bắt đầu phiên mô phỏng mới. Chữ nội dung/nhãn dùng rem với sàn 1rem và tab được xuống dòng.
+- Sau kết nối, chọn **Thử đọc một đoạn chữ**: đọc/nghe mẫu, dừng/nghe lại, thử ảnh mờ và tự xác nhận hoàn thành. Màn mới: `screens/read-practice.html`, không dùng camera/micro.
+- **Kính của bạn → Thử tình huống mô phỏng → Trạng thái mẫu** có online+sẵn sàng, mất mạng, dịch vụ chưa phản hồi, dịch vụ chưa rõ, chưa cập nhật và dữ liệu cũ. Dữ liệu quá 5 phút được ẩn pin và yêu cầu kiểm tra lại; đây chỉ là mốc của mock. Liên kết đã lưu từ phiên bản cũ sẽ yêu cầu kiểm tra lại, không tự được coi là đang online.
+- **An toàn → Thử tình huống gửi SOS** có thành công mẫu, mất mạng, thiếu quyền và lỗi dịch vụ. Thay người nhận/tình huống khi đang đếm ngược sẽ hủy. Nút bắt đầu SOS truy cập trực tiếp luôn hiện.
+- Tính năng có nhãn mức triển khai ngay trong danh sách và sheet. Không có lệnh đặt xe, điều hướng hoặc SOS thật được gửi.
+
+### Kiểm thử thay đổi
+
+```text
+npm.cmd install --prefix tmp/dom-test --no-save --package-lock=false --ignore-scripts jsdom
+node --test tests/product-flows.test.cjs tests/speech.test.cjs
+```
+
+Kiểm thử DOM chạy trực tiếp mã app với DOM và engine giọng giả; không mở trình duyệt hoặc gọi mạng. Bao phủ thiết lập → đọc thử, trợ năng trước đăng nhập, dữ liệu cũ, lỗi dịch vụ, SOS lỗi/hủy/thử lại, đích điều hướng và khóa nội dung. Kết quả không thay thế kiểm tra bố cục, chất lượng âm thanh và TalkBack trên Android thật. Xem `docs/KIEM-THU-PRODUCT-BRIEF.md`.
+
 ## Xem trên máy tính
 
 - Khung điện thoại **tự thu nhỏ vừa chiều cao cửa sổ**, không cần dùng `Ctrl + −`.
@@ -84,7 +102,8 @@ app/
 ├── base.css            # Nền tảng chung, lớp kiểu chữ .t-*, icon .sv-icon, bố cục .l-*
 ├── brand/              # Logo SVG (đầy đủ, nền tối, biểu tượng, app icon, wordmark, trắng, đen, favicon) + brand.js
 ├── content/vi.js       # Toàn bộ chữ tiếng Việt và dữ liệu mẫu
-├── core/app.js         # Chữ (SV.t), cài đặt hiển thị, dữ liệu mô phỏng (SV.state), logo, thông báo cho trình đọc màn hình
+├── core/app.js         # Chữ, cài đặt, dữ liệu mô phỏng, router, focus và thông báo cho trình đọc màn hình
+├── core/speech.js      # Một phiên giọng đọc chung: chọn giọng, chia đoạn, dừng, ưu tiên SOS, xử lý lỗi
 ├── components/         # index.css nạp mọi file .css; elements.js (dùng chung) + flows.js (theo luồng)
 ├── screens/            # Mỗi màn hình một file
 ├── docs/               # Báo cáo phân tích, CSS/JS của trang mẫu
@@ -105,7 +124,45 @@ Trình duyệt chặn đọc file `.json` khi mở trang trực tiếp từ ổ 
 <script src="../brand/brand.js"></script>
 <script src="../content/vi.js"></script>
 <script src="../core/app.js"></script>
+<script src="../core/speech.js"></script>
 …
 <script src="../components/elements.js"></script>  <!-- cuối <body> -->
+<script src="../components/speech.js"></script>
 <script src="../components/flows.js"></script>
 ```
+
+## Giọng đọc và TalkBack
+
+- **Nghe thật trên thiết bị mở app:** câu lệnh mẫu, mô tả ảnh, trạng thái kính, bản dịch mẫu, tóm tắt họp, chi tiết hoạt động, hướng dẫn và FAQ. Bấm **Dừng đọc** để dừng; đóng sheet, thu gọn hướng dẫn, đổi màn hoặc đưa app xuống nền cũng dừng bài đọc tương ứng.
+- **Thiết lập:** Hồ sơ → **Hiển thị và giọng đọc** → Giọng đọc và trợ năng. Có chọn giọng Việt, tốc độ và Nghe thử. Mặc định thông báo dùng trình đọc màn hình; muốn SeeVia tự đọc các thông báo ngắn, chọn **SeeVia tự đọc**.
+- **TalkBack:** bật trong cài đặt trợ năng Android. App không tự bật, phát hiện hay điều khiển TalkBack. Khi dùng TalkBack, giữ lựa chọn **Trình đọc màn hình** để tránh thêm một giọng tự động. Nút Nghe vẫn hoạt động theo yêu cầu.
+- **Thiếu giọng hoặc phát lỗi:** thông báo còn trên màn và có thể đọc bằng TalkBack. Thêm giọng Việt trong phần chuyển văn bản thành giọng nói của thiết bị, quay lại bấm **Tải lại danh sách giọng**, rồi Nghe thử. Một số giọng cần mạng; không đảm bảo ngoại tuyến trên mọi thiết bị.
+- **Dịch thuật:** chọn một trong bốn cặp câu Anh–Việt mẫu, rồi bấm Dịch → Nghe bản dịch mẫu. Nội dung ngoài mẫu có báo giới hạn; chưa dùng dịch AI hoặc micro.
+- **SOS:** ngắt bài đọc thường, có lối kích hoạt bằng bàn phím/trình đọc màn hình và 5 giây để hủy. Thay đổi người nhận trong lúc đếm ngược sẽ hủy. Kết quả vẫn là mô phỏng, không gửi/gọi thật.
+- **Thông báo:** giữ trên màn tới khi đóng hoặc thay bằng thông báo mới để có thời gian đọc và chọn Hoàn tác. Lỗi nhập liệu ở ngay trường tương ứng; mật khẩu, OTP và giá trị trường không được tự phát bằng TTS.
+- **Giới hạn:** giọng phát trên điện thoại/máy tính, chưa có đầu ra loa kính thật. Trình duyệt cung cấp danh sách giọng và tín hiệu bắt đầu/kết thúc; cần nghe trực tiếp để xác nhận chất lượng và âm lượng.
+
+| Muốn đổi… | Sửa file… |
+|---|---|
+| Nhãn, lời đọc, câu dịch mẫu và hướng dẫn lỗi | `content/vi.js` → `speech`, `translation.samples` |
+| Chọn giọng, timeout, chia đoạn, ưu tiên và vòng đời | `core/speech.js` |
+| Bộ Nghe/Dừng, thiết lập và chẩn đoán giọng | `components/speech.js` |
+| Kênh thông báo, chuyển màn và focus lỗi | `core/app.js`, `components/elements.js` |
+| Nối nội dung từng luồng vào giọng đọc | `components/flows.js` |
+
+Màn nội bộ `screens/dev-test.html` có danh sách giọng, trạng thái engine và nút Nghe thử; phần kiểm thử lệnh kính ở trên vẫn là mô phỏng riêng.
+
+## Kiểm thử phần giọng đọc
+
+Không cần bước build hay thư viện chạy app mới. Các bài kiểm thử dành cho phát triển:
+
+```text
+node --test tests/speech.test.cjs
+node tests/browser.test.cjs
+```
+
+Bài đầu dùng Node.js và engine giả để kiểm tra các tình huống tranh chấp, tải giọng muộn, hủy, lỗi và ưu tiên. Bài trình duyệt cần module `playwright` truy cập được qua `node_modules` hoặc `NODE_PATH` và Chrome đã cài; tự mở server localhost tạm thời rồi đóng khi xong. Không dùng hồ sơ Chrome cá nhân. Ảnh kiểm tra được ghi vào `tmp/talkback-*.png`.
+
+Bộ trình duyệt dùng engine giả cho các luồng, sau đó chạy một phép thử engine thật riêng. Đặt `SEEVIA_VERIFY_REAL_SPEECH=1` để bắt buộc phép thử giọng Việt thật phải hoàn tất khi thiết bị có giọng Việt. Sandbox Windows có thể liệt kê giọng nhưng chặn phát (`synthesis-failed`); kiểm thử thật cần môi trường cho phép truy cập Windows Speech. Các bài tự động không chứng minh chất lượng âm thanh hoặc khả năng dùng TalkBack Android.
+
+Xem [biên bản kiểm tra và checklist Android](docs/KIEM-THU-TALKBACK.md), [kế hoạch](docs/KE-HOACH-TALKBACK.md).
