@@ -7,6 +7,25 @@
 <link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../base.css">
 <link rel="stylesheet" href="../components/index.css">
+<style>
+  .sv-dusk-head__bar { position: relative; }
+  .sv-dusk-head__bar sv-logo[data-wordmark] {
+    flex: 0 0 68px;
+    width: 68px;
+    height: 36px !important;
+    overflow: visible;
+  }
+  .sv-dusk-head__bar sv-logo[data-wordmark] img {
+    position: absolute;
+    top: 50%;
+    height: 63px;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    transform: translate(-62.125px, -50%);
+    clip-path: inset(0 0 0 62.125px);
+  }
+</style>
 <script src="../brand/brand.js"></script>
 <script src="../content/vi.js"></script>
 <script src="../core/app.js"></script>
@@ -18,8 +37,8 @@
   <main class="sv-device__screen">
     <header class="sv-dusk-head">
       <div class="sv-dusk-head__bar">
-        <sv-logo variant="full" tone="light" height="36"></sv-logo>
-        <sv-logo variant="white" height="36"></sv-logo>
+        <sv-logo variant="full" tone="light" height="36" data-wordmark></sv-logo>
+        <sv-logo variant="white" height="36" data-wordmark></sv-logo>
         <span class="sv-demo-tag"><span class="sv-icon" aria-hidden="true">science</span><span data-t="common.demoBadge"></span></span>
         <a class="sv-icon-btn" href="account.html" data-t-aria="home.account"><span class="sv-icon" aria-hidden="true">account_circle</span></a>
       </div>
@@ -32,6 +51,7 @@
     </header>
 
     <div class="l-gutter">
+      <sv-connection-status></sv-connection-status>
       <section class="l-section" aria-labelledby="home-recent">
         <div class="sv-section-head">
           <h2 class="sv-section-title" id="home-recent" data-t="home.recentTitle"></h2>

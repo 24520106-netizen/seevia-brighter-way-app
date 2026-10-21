@@ -1,0 +1,32 @@
+/* Luồng thiết lập dùng cùng token và control với app hiện có. */
+.sv-device--setup { grid-template-rows: auto 1fr auto; }
+.sv-setup-brand { margin-block: var(--space-6) var(--space-10); }
+.sv-setup-heading { margin-bottom: var(--space-3); text-wrap: balance; font-family: var(--font-sans); }
+.sv-setup-lead { margin-bottom: var(--space-6); }
+.sv-setup-actions { display: grid; gap: var(--space-3); margin-top: var(--space-6); }
+.sv-setup-actions .sv-btn { padding-block: var(--space-3); white-space: normal; line-height: var(--type-label-l-line); }
+.sv-setup-help { padding-block: var(--space-5); margin-top: var(--space-6); border-top: var(--border-width) solid var(--color-outline-variant); }
+.sv-setup-help h2 { margin-bottom: var(--space-2); }
+.sv-setup-note { margin-block: var(--space-4); color: var(--color-text-muted); }
+.sv-setup-progress { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); list-style: none; padding: 0; margin: 0 0 var(--space-6); }
+.sv-setup-progress li { padding-top: var(--space-2); border-top: 2px solid var(--color-outline-variant); color: var(--color-text-muted); font: var(--type-label-weight) var(--type-label-m-size)/1.5 var(--font-sans); overflow-wrap: anywhere; }
+.sv-setup-progress [aria-current="step"] { border-color: var(--color-primary-strong); color: var(--color-primary-strong); }
+.sv-setup-stage { margin-top: var(--space-6); }
+.sv-setup-state { display: flex; gap: var(--space-3); align-items: center; padding-block: var(--space-4); }
+.sv-setup-state::before { content: ""; flex: 0 0 10px; height: 10px; border-radius: var(--radius-full); background: var(--color-success); }
+.sv-setup-state--lost::before { background: var(--color-error); }
+.sv-setup-state p { margin: 0; }
+.sv-setup-scenario { margin-top: var(--space-6); border-top: var(--border-width) solid var(--color-outline-variant); }
+.sv-setup-scenario summary { min-height: var(--size-touch); display: flex; align-items: center; padding-block: var(--space-3); color: var(--color-primary-strong); font-weight: var(--type-title-weight); cursor: pointer; list-style: revert; }
+.sv-setup-scenario summary::after { content: "+"; margin-inline-start: auto; font-size: var(--type-title-l-size); padding-inline-start: var(--space-3); }
+.sv-setup-scenario[open] summary::after { content: "−"; }
+.sv-setup-scenario .sv-field { margin-block: var(--space-3); }
+.sv-setup-scenario select { max-width: 100%; color: var(--color-on-surface); }
+.sv-setup-scenario .sv-btn { margin-block: var(--space-2); }
+.sv-connection-status { margin-top: var(--space-5); }
+.sv-connection-status .sv-setup-actions { margin-top: var(--space-3); }
+.sv-connection-status .sv-setup-state { padding-bottom: 0; }
+.sv-setup-busy { height: 4px; border-radius: var(--radius-full); background: var(--color-primary-container); overflow: hidden; margin-block: var(--space-5); }
+.sv-setup-busy::before { content: ""; display: block; width: 40%; height: 100%; background: var(--color-primary-strong); animation: sv-setup-progress 1s ease-in-out infinite alternate; }
+@keyframes sv-setup-progress { to { transform: translateX(150%); } }
+@media (prefers-reduced-motion: reduce) { .sv-setup-busy::before { animation: none; width: 100%; } }

@@ -2,7 +2,7 @@
 
 Bản mô phỏng giao diện app đồng hành của kính SeeVia. HTML/CSS/JS thuần: mở thẳng file `.html` bằng trình duyệt, không cần cài hay build gì. Cần có mạng để tải font Be Vietnam Pro, Playfair Display và bộ icon Material Symbols từ Google Fonts.
 
-- **Bắt đầu:** mở `index.html` (tự chuyển tới `screens/home.html`)
+- **Bắt đầu:** mở `index.html` (tự chuyển tới `screens/start.html`)
 - Trang mẫu hệ thống thiết kế: `design-system.html`
 - Báo cáo phân tích bản tham khảo: `docs/01-phan-tich-ban-goc.html`
 - Bối cảnh sản phẩm: `PRODUCT.md` · hệ thống thiết kế: `DESIGN.md`
@@ -13,6 +13,20 @@ Bản mô phỏng giao diện app đồng hành của kính SeeVia. HTML/CSS/JS 
 - Nếu trước đó đã lỡ `Ctrl + −`/`Ctrl + +`: Chrome nhớ mức thu phóng **riêng cho từng file** khi mở từ ổ đĩa, nên mỗi màn to nhỏ khác nhau. Nhấn `Ctrl + 0` một lần ở mỗi màn bị lệch để về 100%.
 - **Chuyển màn mượt, không tải lại trang:** chỉ có khi mở qua server (xem dòng dưới). Mở thẳng file `.html` thì mỗi lần chuyển màn vẫn tải lại cả trang, vì trình duyệt chặn đọc file khác từ ổ đĩa.
 - Muốn mọi màn dùng chung một mức thu phóng: mở qua server nhỏ (`python -m http.server 5510 --directory app` ở thư mục `ui`, rồi vào `http://localhost:5510`).
+
+## Thử luồng đăng nhập và kết nối kính
+
+Không cần backend, tài khoản, kính hay Bluetooth thật. Nên mở qua một server tĩnh (Live Server hoặc lệnh ở trên) để các màn dùng chung origin và dữ liệu trình duyệt. Server tĩnh chỉ phục vụ file HTML/CSS/JS, không thực hiện xác thực hoặc kết nối thiết bị.
+
+1. Mở `index.html`, chọn **Bắt đầu mô phỏng**. Thao tác này đặt lại tài khoản và liên kết mẫu của luồng, giữ nguyên cài đặt hiển thị và các dữ liệu mô phỏng khác.
+2. Chọn **Điền thông tin mẫu**, rồi **Đăng nhập**. Không dùng số điện thoại hoặc mật khẩu thật.
+3. Chọn **Tìm kính mẫu** → **Kết nối kính này** → **Điền mạng mẫu** → **Kết nối kính**.
+4. Ở trạng thái sẵn sàng, chọn **Nghe trạng thái** hoặc đọc trực tiếp bằng TalkBack. Nút Nghe dùng Web Speech API của trình duyệt theo yêu cầu; không tự phát tiếng khi mở màn. Có nút dừng và thông báo khi trình duyệt chưa phát được tiếng. Giọng tiếng Việt phụ thuộc thiết bị/trình duyệt.
+5. Mở **Thử tình huống mô phỏng** → **Thử mất kết nối** → **Thử kết nối lại**. Liên kết và phiên đăng nhập được giữ. Trang chủ cũng phản ánh mất kết nối và có lối khôi phục.
+
+Mục **Thử tình huống mô phỏng** ở bước tìm/cấp mạng cho phép chọn không tìm thấy kính, mật khẩu sai hoặc dịch vụ chưa phản hồi. Tình huống giữ nguyên đến khi đổi lựa chọn, nên hãy chọn **Kết nối thành công** trước khi thử khôi phục thành công. Tìm/kết nối đang chạy có thể dừng; rời màn sẽ hủy tác vụ đang chờ. Không lưu mật khẩu; chỉ lưu trạng thái, tài khoản mẫu và tên mạng mẫu vào `seevia.demo` trong localStorage. Nếu trình duyệt không cho lưu dữ liệu, phiên chỉ tồn tại trong trang đang mở.
+
+Các màn dùng ngữ nghĩa HTML, nhãn trường nhập, thứ tự bước và focus tới tiêu đề trạng thái kèm mô tả khi chuyển bước. Kiểm tra DOM/bàn phím hoặc phát tiếng trình duyệt không thay thế nghiệm thu TalkBack trên điện thoại Android.
 
 ## Muốn đổi… → sửa file…
 
@@ -35,6 +49,7 @@ Bản mô phỏng giao diện app đồng hành của kính SeeVia. HTML/CSS/JS 
 | **Hình dạng một component** (nút, thẻ, ô nhập…) | `components/<tên>.css` | Ví dụ nút: `components/button.css`. |
 | **Component dùng chung** (thanh điều hướng, thẻ kính, SOS, danh sách…) | `components/elements.js` | Đích của thanh điều hướng: `DESTINATIONS`. |
 | **Component riêng từng luồng** (ghi âm, dịch, tài khoản, kính…) | `components/flows.js` + `components/flows.css` | |
+| **Luồng bắt đầu, tìm/cấp mạng và khôi phục kính** | `screens/start.html`, `components/flows.js`, `components/onboarding.css` | Chữ ở `content/vi.js` → `setup`; trạng thái kính có `connection: unlinked / ready / lost`. |
 | **Bố cục một màn hình** | `screens/<tên-màn>.html` | Chỉ ghép component; không chứa mã màu. |
 | **Lưu cài đặt, nạp chữ, logo** | `core/app.js` | |
 
@@ -42,6 +57,7 @@ Bản mô phỏng giao diện app đồng hành của kính SeeVia. HTML/CSS/JS 
 
 | File | Màn hình | Vào từ |
 |---|---|---|
+| `screens/start.html` | Bắt đầu luồng mô phỏng, tiếp tục phiên trước, hướng dẫn TalkBack | `index.html` |
 | `screens/home.html` | Trang chủ: vùng Dusk, thẻ kính, hoạt động gần đây, lối tắt | Tab 1 |
 | `screens/features.html` | Tính năng của kính, kèm câu lệnh mẫu | Tab 2 |
 | `screens/safety.html` | An toàn và SOS, người thân khẩn cấp, gọi thử | Tab 3 |
@@ -51,7 +67,7 @@ Bản mô phỏng giao diện app đồng hành của kính SeeVia. HTML/CSS/JS 
 | `screens/album.html` | Ảnh và video, xem chi tiết, xóa, trạng thái rỗng | Trang chủ |
 | `screens/translation.html` | Dịch thuật (trình diễn) | Trang chủ |
 | `screens/meeting.html` | Biên bản họp, ghi âm mô phỏng | Trang chủ |
-| `screens/glasses.html` | Kính của bạn: liên kết / hủy liên kết | Trang chủ, Hồ sơ |
+| `screens/glasses.html` | Tìm kính mẫu, cấp mạng, nghe trạng thái, thử mất kết nối và khôi phục, hủy liên kết | Sau đăng nhập, Trang chủ, Hồ sơ |
 | `screens/guide.html` | Hướng dẫn sử dụng | Trang chủ, Hồ sơ, Hỗ trợ |
 | `screens/account.html` | Tài khoản: đăng nhập, đăng ký, OTP (mã 123456), đăng xuất | Hồ sơ |
 | `screens/support.html` | Hỗ trợ và góp ý, câu hỏi thường gặp | Hồ sơ |

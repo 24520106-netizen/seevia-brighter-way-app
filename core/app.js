@@ -50,9 +50,9 @@
   /* ---------- Dữ liệu mô phỏng dùng chung giữa các màn (lưu trong trình duyệt) ---------- */
   var STATE_KEY = "seevia.demo";
   var stateDefaults = {
-    glasses: { linked: true, battery: 82, version: "2.1.4", serial: "SV-DEMO-2026" },
+    glasses: { linked: false, connection: "unlinked", battery: 82, version: "2.1.4", serial: "SV-DEMO-2026" },
     emergencyPhone: "0901 234 567",
-    account: { signedIn: true, name: "", phone: "0912 345 678" },
+    account: { signedIn: false, name: "", phone: "" },
     albumRemoved: [],      /* chỉ số ảnh mẫu đã xóa */
     meetings: [],          /* biên bản ghi trong phiên mô phỏng */
     devUnlocked: false

@@ -187,7 +187,8 @@
     disconnectedCallback() { if (this._onState) document.removeEventListener("sv:state", this._onState); }
     render() {
       var g = this.hasAttribute("from-state") ? SV.state.get("glasses") : null;
-      var connected = g ? g.linked : this.hasAttribute("connected");
+      var lost = g && g.linked && g.connection === "lost";
+      var connected = g ? g.linked && !lost : this.hasAttribute("connected");
       var battery = g ? String(g.battery) : this.getAttribute("battery") || "0";
       var version = g ? g.version : this.getAttribute("version") || "";
       var href = this.getAttribute("href");
@@ -195,10 +196,10 @@
         this.innerHTML = '<section class="sv-glasses" aria-label="' + esc(SV.t("glasses.title")) + '">' +
           '<div class="sv-glasses__head"><span class="sv-glasses__icon">' + icon("eyeglasses") + "</span>" +
           '<div><p class="sv-glasses__name">' + esc(SV.t("glasses.name")) + '</p><span class="sv-glasses__state sv-glasses__state--off">' +
-          icon("link_off") + esc(SV.t("status.disconnected")) + "</span></div>" +
+          icon("link_off") + esc(SV.t(lost ? "setup.lostTitle" : "status.disconnected")) + "</span></div>" +
           (href ? '<span class="sv-glasses__chevron">' + icon("chevron_right") + "</span>" : "") +
-          '</div><p class="sv-glasses__meta">' + esc(SV.t(href ? "glasses.notLinkedHint" : "glasses.notLinkedHere")) + "</p></section>";
-        if (href) this.wrapLink(href, SV.t("glasses.name") + ". " + SV.t("status.disconnected") + ". " + SV.t("glasses.notLinkedHint"));
+          '</div><p class="sv-glasses__meta">' + esc(SV.t(lost ? "setup.lostBody" : href ? "glasses.notLinkedHint" : "glasses.notLinkedHere")) + "</p></section>";
+        if (href) this.wrapLink(href, SV.t("glasses.name") + ". " + SV.t(lost ? "setup.lostTitle" : "status.disconnected") + ". " + SV.t(lost ? "setup.lostBody" : "glasses.notLinkedHint"));
         return;
       }
       var state = connected

@@ -438,54 +438,230 @@
     }
   });
 
-  /* ---------- Kính của bạn: liên kết / hủy liên kết ---------- */
-  var SERIAL_RE = /^SV-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
-  define("sv-glasses-manager", class extends HTMLElement {
-    connectedCallback() { this.render(); }
-    render(error, typed) {
-      var self = this;
-      var g = SV.state.get("glasses");
-      var html = '<sv-glasses-card from-state></sv-glasses-card>';
-      if (g.linked) {
-        html += '<section class="l-section"><h2 class="sv-section-title">' + esc(SV.t("glassesPage.detailsTitle")) + "</h2>" +
-          '<p class="t-body-m t-muted">' + esc(SV.t("glassesPage.unlinkBody")) + "</p>" +
-          '<button class="sv-btn sv-btn--outlined sv-btn--block sv-glasses-manager__unlink" type="button" data-unlink>' + icon("link_off") + esc(SV.t("glassesPage.unlink")) + "</button></section>";
-      } else {
-        html += '<section class="l-section"><h2 class="sv-section-title">' + esc(SV.t("glassesPage.linkTitle")) + "</h2>" +
-          '<form class="sv-card l-stack" novalidate><p class="t-body-m">' + esc(SV.t("glassesPage.linkIntro")) + "</p>" +
-          field("sv-serial", "glassesPage.serialLabel", { placeholder: "glassesPage.serialPlaceholder", help: "glassesPage.serialHelp", value: typed || "", error: error, autocomplete: "off" }) +
-          '<button class="sv-btn sv-btn--filled sv-btn--block" type="submit">' + icon("link") + esc(SV.t("glassesPage.link")) + "</button></form></section>";
+  /* ---------- Thiết lập và khôi phục kính: chỉ mô phỏng, không gọi thiết bị/API ---------- */
+  function setupButton(key, action, kind) {
+    return '<button type="button" class="sv-btn sv-btn--' + (kind || 'filled') + ' sv-btn--block" data-setup="' + action + '">' + esc(SV.t('setup.' + key)) + '</button>';
+  }
+  function setupLink(key, href, kind) {
+    return '<a class="sv-btn sv-btn--' + (kind || 'text') + ' sv-btn--block" href="' + href + '">' + esc(SV.t('setup.' + key)) + '</a>';
+  }
+  function scenarioSelect(id, label, options, selected) {
+    return '<div class="sv-field"><label class="sv-field__label" for="' + id + '">' + esc(SV.t('setup.' + label)) + '</label>' +
+      '<select class="sv-field__control" id="' + id + '">' + options.map(function (o) {
+        return '<option value="' + o[0] + '"' + (selected === o[0] ? ' selected' : '') + '>' + esc(SV.t('setup.' + o[1])) + '</option>';
+      }).join('') + '</select></div>';
+  }
+  function scenarioDetails(content) {
+    return '<details class="sv-setup-scenario"><summary>' + esc(SV.t('setup.scenarioTitle')) + '</summary>' + content + '</details>';
+  }
+  function bindStatusSpeech(host, text) {
+    var button = host.querySelector('[data-setup="listen"]');
+    var output = host.querySelector('[data-speech-status]');
+    if (!button) return;
+    host._stopVoice = function () {
+      host._utterance = null;
+      if (SV.readingOwner === host) { window.speechSynthesis.cancel(); SV.readingOwner = null; }
+      button.textContent = SV.t('setup.listen');
+      button.setAttribute('aria-pressed', 'false');
+    };
+    button.setAttribute('aria-pressed', 'false');
+    button.addEventListener('click', function () {
+      if (host._utterance) { host._stopVoice(); output.textContent = ''; return; }
+      if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
+        output.textContent = SV.t('setup.speechUnavailable'); SV.announce(output.textContent); return;
       }
-      html += '<div class="l-section"><ul class="sv-notes sv-notes--compact" role="list">' +
-        '<li><span class="sv-icon" aria-hidden="true">lock</span><span class="sv-notes__body">' + esc(SV.t("glassesPage.noteStorage")) + "</span></li>" +
-        '<li><span class="sv-icon" aria-hidden="true">science</span><span class="sv-notes__body">' + esc(SV.t("glassesPage.noteDemo")) + "</span></li></ul></div>";
+      if (SV.readingOwner && SV.readingOwner._stopVoice) SV.readingOwner._stopVoice();
+      var utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'vi-VN';
+      var voice = speechSynthesis.getVoices().find(function (v) { return /^vi(?:-|_)/i.test(v.lang) || v.lang === 'vi'; });
+      if (voice) utterance.voice = voice;
+      host._utterance = utterance;
+      SV.readingOwner = host;
+      button.textContent = SV.t('setup.stopSpeech'); button.setAttribute('aria-pressed', 'true');
+      output.textContent = SV.t('setup.speechPlaying');
+      function finish(failed) {
+        if (host._utterance !== utterance) return;
+        host._stopVoice();
+        output.textContent = SV.t(failed ? 'setup.speechUnavailable' : 'setup.speechFinished');
+        if (failed) SV.announce(output.textContent);
+      }
+      utterance.onend = function () { finish(false); };
+      utterance.onerror = function () { finish(true); };
+      try { speechSynthesis.speak(utterance); } catch (e) { finish(true); }
+    });
+  }
+  function speechControls() {
+    return setupButton('listen', 'listen', 'tonal') + '<p class="t-body-s t-muted" data-speech-status></p>' +
+      '<p class="t-body-s t-muted">' + esc(SV.t('setup.speechNote')) + '</p>';
+  }
+  define('sv-setup-progress', class extends HTMLElement {
+    connectedCallback() {
+      if (!this.hasAttribute('always') && new URLSearchParams(location.search).get('setup') !== '1') { this.hidden = true; return; }
+      var step = Number(this.getAttribute('step')) || 1;
+      this.innerHTML = '<ol class="sv-setup-progress" aria-label="' + esc(SV.t('setup.progress')) + '">' +
+        ['stepAccount', 'stepConnect', 'stepReady'].map(function (key, i) {
+          return '<li' + (i + 1 === step ? ' aria-current="step"' : '') + '>' + esc(SV.t('setup.' + key)) + '</li>';
+        }).join('') + '</ol>';
+    }
+  });
+  define('sv-setup-start', class extends HTMLElement {
+    connectedCallback() {
+      this.innerHTML = '<div class="sv-setup-brand"><sv-logo variant="full" height="48"></sv-logo></div>' +
+        '<h1 class="t-headline-l sv-setup-heading">' + esc(SV.t('setup.welcomeTitle')) + '</h1>' +
+        '<p class="t-body-l sv-setup-lead">' + esc(SV.t('setup.welcomeBody')) + '</p>' +
+        '<p class="t-body-m">' + esc(SV.t('setup.welcomeDetail')) + '</p>' +
+        '<div class="sv-setup-actions">' + setupButton('start', 'start') +
+        (SV.state.get('account').signedIn ? setupLink('resume', 'home.html', 'tonal') : '') + '</div>' +
+        '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.startNote')) + '</p>' +
+        '<section class="sv-setup-help"><h2 class="t-title-s">' + esc(SV.t('setup.accessTitle')) + '</h2><p class="t-body-m t-muted">' + esc(SV.t('setup.accessBody')) + '</p></section>' +
+        '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.demoNote')) + '</p>' + setupLink('explore', 'home.html');
+      this.querySelector('[data-setup="start"]').addEventListener('click', function () {
+        SV.state.set('account', { signedIn: false, name: '', phone: '' });
+        SV.state.set('glasses', { linked: false, connection: 'unlinked', battery: 82, version: '2.1.4', serial: 'SV-DEMO-2026' });
+        SV.go('account.html?setup=1');
+      });
+    }
+  });
+  define('sv-glasses-manager', class extends HTMLElement {
+    connectedCallback() {
+      var g = SV.state.get('glasses');
+      this.phase = !SV.state.get('account').signedIn ? 'signin' : g.linked ? (g.connection === 'lost' ? 'lost' : 'ready') : 'find';
+      this.network = g.network || '';
+      this.password = '';
+      this.scenario = 'success';
+      this.findScenario = 'found';
+      this.render();
+    }
+    disconnectedCallback() { clearTimeout(this.timer); if (this._stopVoice) this._stopVoice(); this.password = ''; }
+    move(phase) {
+      clearTimeout(this.timer);
+      this.phase = phase;
+      this.render();
+      var heading = this.querySelector('[data-stage-heading]');
+      if (heading) heading.focus();
+    }
+    search() {
+      var self = this;
+      this.move('searching');
+      this.timer = setTimeout(function () { if (self.isConnected) self.move(self.findScenario === 'missing' ? 'notFound' : 'found'); }, 1100);
+    }
+    connect(recovery) {
+      var self = this;
+      this.recovery = recovery;
+      this.move(recovery ? 'recovering' : 'connecting');
+      this.timer = setTimeout(function () {
+        if (!self.isConnected) return;
+        if (self.scenario !== 'success') { self.failure = self.scenario; self.move('error'); return; }
+        SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), {
+          linked: true, connection: 'ready', network: self.network || 'SeeVia Demo 2.4 GHz'
+        }));
+        self.password = '';
+        self.recovered = recovery;
+        self.move('ready');
+      }, 1200);
+    }
+    render(errors) {
+      if (this._stopVoice) this._stopVoice();
+      errors = errors || {};
+      var self = this, p = this.phase, g = SV.state.get('glasses');
+      var busy = ['searching', 'connecting', 'recovering'].indexOf(p) !== -1;
+      var titles = { signin: 'signInTitle', find: 'findTitle', searching: 'searchingTitle', found: 'foundTitle', notFound: 'notFoundTitle', wifi: 'wifiTitle', connecting: 'connectingTitle', ready: 'readyTitle', lost: 'lostTitle', recovering: 'recoveringTitle' };
+      var bodies = { signin: 'signInBody', find: 'findBody', searching: 'searchingBody', found: 'foundBody', notFound: 'notFoundBody', wifi: 'wifiBody', connecting: 'connectingBody', ready: 'readyBody', lost: 'lostBody', recovering: 'recoveringBody' };
+      if (p === 'error') {
+        titles.error = this.failure === 'password' ? 'wrongPasswordTitle' : 'serviceTitle';
+        bodies.error = this.failure === 'password' ? 'wrongPasswordBody' : 'serviceBody';
+      }
+      var html = (!g.linked || p === 'ready') && p !== 'signin' ? '<sv-setup-progress always step="' + (p === 'ready' ? '3' : '2') + '"></sv-setup-progress>' : '';
+      html += '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.demoNote')) + '</p>' +
+        '<section class="sv-setup-stage"><h2 class="t-headline-s sv-setup-heading" tabindex="-1" data-stage-heading aria-describedby="sv-connection-description">' + esc(SV.t('setup.' + titles[p])) + '</h2>' +
+        '<p class="t-body-m" id="sv-connection-description">' + esc(SV.t('setup.' + (p === 'ready' && this.recovered ? 'recovered' : bodies[p]))) + '</p>';
+      if (busy) html += '<div class="sv-setup-busy" aria-hidden="true"></div>';
+      if (p === 'signin') html += '<div class="sv-setup-actions">' + setupLink('signIn', 'account.html?setup=1', 'filled') + '</div>';
+      if (p === 'find' || p === 'notFound') {
+        html += '<div class="sv-setup-actions">' + setupButton(p === 'find' ? 'find' : 'searchAgain', 'find') + '</div>' +
+          scenarioDetails(scenarioSelect('sv-find-scenario', 'findScenario', [['found', 'findSuccess'], ['missing', 'findFailure']], this.findScenario));
+      }
+      if (p === 'found') html += '<div class="sv-setup-actions">' + setupButton('choose', 'choose') + setupButton('searchAgain', 'find', 'text') + '</div>';
+      if (busy) html += '<div class="sv-setup-actions">' + setupButton('cancel', 'cancel', 'outlined') + '</div>';
+      if (p === 'wifi') {
+        html += '<form class="l-stack sv-setup-stage" novalidate>' +
+          field('sv-wifi-name', 'setup.wifiLabel', { value: this.network, help: 'setup.wifiHelp', error: errors.network, autocomplete: 'off' }) +
+          field('sv-wifi-pass', 'setup.wifiPassword', { value: this.password, type: 'password', help: 'setup.passwordHelp', error: errors.password, autocomplete: 'off' }) +
+          '<button class="sv-btn sv-btn--filled sv-btn--block" type="submit">' + esc(SV.t('setup.connect')) + '</button>' + setupButton('fillWifi', 'fillWifi', 'tonal') + '</form>' +
+          scenarioDetails(scenarioSelect('sv-connect-scenario', 'connectScenario', [['success', 'success'], ['password', 'wrongPassword'], ['service', 'serviceFailure']], this.scenario));
+      }
+      if (p === 'error') html += '<div class="sv-setup-actions">' +
+        (this.failure === 'password' ? setupButton('editWifi', 'editWifi') : setupButton('retry', 'retry') + setupButton('editWifi', 'editWifi', 'text')) + '</div>' +
+        scenarioDetails(scenarioSelect('sv-connect-scenario', 'connectScenario', [['success', 'success'], ['password', 'wrongPassword'], ['service', 'serviceFailure']], this.scenario));
+      if (p === 'ready' || p === 'lost') {
+        html += '<div class="sv-setup-stage"><sv-glasses-card from-state compact></sv-glasses-card></div>' +
+          (g.network ? '<p class="t-body-s sv-setup-note">' + esc(SV.t('setup.network', { name: g.network })) + '</p>' : '') +
+          '<div class="sv-setup-actions">' + (p === 'lost' ? setupButton('retry', 'recover') + setupButton('editWifi', 'editWifi', 'outlined') : '') +
+          speechControls() + setupLink('home', 'home.html', p === 'ready' ? 'filled' : 'text') + '</div>';
+        html += scenarioDetails((p === 'ready' ? setupButton('lose', 'lose', 'outlined') : scenarioSelect('sv-connect-scenario', 'connectScenario', [['success', 'success'], ['service', 'serviceFailure']], this.scenario)) + setupLink('replay', 'start.html'));
+        html += '<div class="sv-setup-help">' + '<button type="button" class="sv-btn sv-btn--text sv-btn--block" data-setup="unlink">' + esc(SV.t('glassesPage.unlink')) + '</button></div>';
+      }
+      html += '</section><p class="t-body-s sv-setup-note">' + esc(SV.t('setup.privacyNote')) + '</p>';
       this.innerHTML = html;
-
-      var unlink = this.querySelector("[data-unlink]");
-      if (unlink) unlink.addEventListener("click", function () {
-        SV.confirmSheet({
-          title: SV.t("glassesPage.unlinkTitle"), body: SV.t("glassesPage.unlinkBody"),
-          confirm: SV.t("glassesPage.unlinkConfirm"), cancel: SV.t("glassesPage.unlinkCancel"), danger: true,
-          onConfirm: function () {
-            SV.state.set("glasses", Object.assign({}, SV.state.get("glasses"), { linked: false }));
+      this.querySelectorAll('[data-setup]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var action = button.getAttribute('data-setup');
+          if (action === 'find') self.search();
+          if (action === 'choose' || action === 'editWifi') self.move('wifi');
+          if (action === 'cancel') self.move(p === 'searching' ? 'find' : p === 'recovering' ? 'lost' : 'wifi');
+          if (action === 'retry') self.connect(!!self.recovery);
+          if (action === 'recover') self.connect(true);
+          if (action === 'fillWifi') {
+            self.network = 'SeeVia Demo 2.4 GHz';
+            self.password = 'seevia-demo';
             self.render();
-            SV.snackbar(SV.t("glassesPage.unlinked"));
-            var input = self.querySelector("input");
-            if (input) input.focus();
+            self.querySelector('[data-setup="fillWifi"]').focus();
+            SV.announce(SV.t('setup.wifiFilled'));
           }
+          if (action === 'lose') {
+            SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), { connection: 'lost' }));
+            self.scenario = 'success'; self.move('lost');
+          }
+          if (action === 'unlink') SV.confirmSheet({
+            title: SV.t('glassesPage.unlinkTitle'), body: SV.t('glassesPage.unlinkBody'),
+            confirm: SV.t('glassesPage.unlinkConfirm'), cancel: SV.t('glassesPage.unlinkCancel'), danger: true,
+            onConfirm: function () {
+              SV.state.set('glasses', Object.assign({}, SV.state.get('glasses'), { linked: false, connection: 'unlinked', network: '' }));
+              self.network = ''; self.password = ''; self.move('find');
+            }
+          });
         });
       });
-      var form = this.querySelector("form");
-      if (form) form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        var raw = form.querySelector("input").value;
-        var value = raw.trim().toUpperCase();
-        var err = !value ? SV.t("glassesPage.serialEmpty") : !SERIAL_RE.test(value) ? SV.t("glassesPage.serialInvalid") : null;
-        if (err) { self.render(err, raw); self.querySelector("input").focus(); return; }
-        SV.state.set("glasses", Object.assign({}, SV.state.get("glasses"), { linked: true, serial: value }));
-        self.render();
-        SV.snackbar(SV.t("glassesPage.linked"));
+      var findSelect = this.querySelector('#sv-find-scenario');
+      if (findSelect) findSelect.addEventListener('change', function () { self.findScenario = findSelect.value; });
+      var connectSelect = this.querySelector('#sv-connect-scenario');
+      if (connectSelect) connectSelect.addEventListener('change', function () { self.scenario = connectSelect.value; });
+      var form = this.querySelector('form');
+      if (form) form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        self.network = self.querySelector('#sv-wifi-name').value.trim();
+        self.password = self.querySelector('#sv-wifi-pass').value;
+        var errors = {};
+        if (!self.network) errors.network = SV.t('setup.wifiEmpty');
+        else if (/5\s*g(?:hz)?\b/i.test(self.network)) errors.network = SV.t('setup.wifiBand');
+        if (self.password.length < 8) errors.password = SV.t('setup.passwordEmpty');
+        if (Object.keys(errors).length) { self.render(errors); self.querySelector('[aria-invalid="true"]').focus(); return; }
+        self.connect(!!g.linked);
       });
+      if (p === 'ready' || p === 'lost') bindStatusSpeech(this, SV.t(p === 'lost' ? 'setup.lostSpeech' : this.recovered ? 'setup.recovered' : 'setup.readySpeech'));
+    }
+  });
+  define('sv-connection-status', class extends HTMLElement {
+    connectedCallback() { this._stateListener = this.render.bind(this); document.addEventListener('sv:state', this._stateListener); this.render(); }
+    disconnectedCallback() { document.removeEventListener('sv:state', this._stateListener); if (this._stopVoice) this._stopVoice(); }
+    render() {
+      if (this._stopVoice) this._stopVoice();
+      var g = SV.state.get('glasses'), lost = g.linked && g.connection === 'lost';
+      this.innerHTML = '<section class="sv-connection-status" aria-label="' + esc(SV.t('setup.title')) + '">' +
+        '<div class="sv-setup-state' + (lost || !g.linked ? ' sv-setup-state--lost' : '') + '"><p class="t-title-s">' + esc(SV.t(!g.linked ? 'setup.unlinked' : lost ? 'setup.lostTitle' : 'setup.readyShort')) + '</p></div>' +
+        (lost ? '<p class="t-body-m t-muted">' + esc(SV.t('setup.lostBody')) + '</p>' : '') +
+        '<div class="sv-setup-actions">' + (g.linked && !lost ? speechControls() : '') + setupLink(lost ? 'recoverTitle' : 'manage', 'glasses.html', lost ? 'filled' : 'text') + '</div></section>';
+      if (g.linked && !lost) bindStatusSpeech(this, SV.t('setup.readySpeech'));
     }
   });
 
@@ -546,12 +722,20 @@
           '<button class="sv-segmented__item" role="radio" value="register" aria-checked="' + reg + '" tabindex="' + (reg ? 0 : -1) + '">' + icon("check") + esc(SV.t("account.register")) + "</button>" +
         "</div>" +
         '<form class="sv-card l-stack l-section l-section--first" novalidate>' +
+          '<button class="sv-btn sv-btn--tonal sv-btn--block" type="button" data-fill-account>' + esc(SV.t('account.fillDemo')) + '</button>' +
           (reg ? field("sv-name", "account.nameLabel", { autocomplete: "name", value: this.draft.name, error: errors.name }) : "") +
           field("sv-phone", "account.phoneLabel", { type: "tel", inputmode: "tel", autocomplete: "tel", value: this.draft.phone, error: errors.phone }) +
           field("sv-pass", "account.passwordLabel", { type: "password", autocomplete: reg ? "new-password" : "current-password", help: "account.passwordHelp", error: errors.password }) +
           '<button class="sv-btn sv-btn--filled sv-btn--block" type="submit">' + esc(SV.t(reg ? "account.submitRegister" : "account.submitSignIn")) + "</button>" +
         "</form>" +
         '<p class="sv-demo-note t-body-s t-muted">' + esc(SV.t("account.demoNote")) + "</p>";
+      this.querySelector('[data-fill-account]').addEventListener('click', function () {
+        self.draft = { name: self.mode === 'register' ? SV.t('account.name') : '', phone: '0912345678' };
+        self.render();
+        self.querySelector('#sv-pass').value = 'seevia-demo';
+        self.querySelector('[data-fill-account]').focus();
+        SV.announce(SV.t('account.demoFilled'));
+      });
       this.querySelector(".sv-segmented").addEventListener("sv:change", function (e) {
         self.mode = e.detail.value; self.render();
         self.querySelector('.sv-segmented [aria-checked="true"]').focus();
@@ -579,6 +763,7 @@
       var acc = { signedIn: true, name: this.draft.name || "", phone: this.draft.phone };
       SV.state.set("account", acc);
       this.step = "form";
+      if (new URLSearchParams(location.search).get('setup') === '1') { SV.go('glasses.html?setup=1'); return; }
       this.render();
       SV.snackbar(SV.t("account.welcome", { name: acc.name || SV.t("account.name") }));
     }

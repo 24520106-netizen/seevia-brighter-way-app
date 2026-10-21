@@ -12,6 +12,7 @@
 @import url("sos.css");
 @import url("misc.css");
 @import url("flows.css");
+@import url("onboarding.css");
 
 sv-top-bar, sv-nav-bar, sv-list-item, sv-glasses-card, sv-sos-button, sv-activity-list, sv-emergency-contact,
 sv-feature-groups, sv-info-list, sv-accordion-list, sv-profile-card, sv-profile-settings, sv-version-tap,
@@ -19,3 +20,4 @@ sv-activity-browser, sv-album, sv-translator, sv-recorder, sv-glasses-manager, s
 sv-support-form, sv-display-settings, sv-dev-handlers,
 sv-community-notify, sv-sos-status, sv-hotline { display: block; }
 sv-list-item > .sv-list-item { height: 100%; }
+sv-setup-start, sv-setup-progress, sv-connection-status { display: block; }
