@@ -166,3 +166,4 @@ Bài đầu dùng Node.js và engine giả để kiểm tra các tình huống t
 Bộ trình duyệt dùng engine giả cho các luồng, sau đó chạy một phép thử engine thật riêng. Đặt `SEEVIA_VERIFY_REAL_SPEECH=1` để bắt buộc phép thử giọng Việt thật phải hoàn tất khi thiết bị có giọng Việt. Sandbox Windows có thể liệt kê giọng nhưng chặn phát (`synthesis-failed`); kiểm thử thật cần môi trường cho phép truy cập Windows Speech. Các bài tự động không chứng minh chất lượng âm thanh hoặc khả năng dùng TalkBack Android.
 
 Xem [biên bản kiểm tra và checklist Android](docs/KIEM-THU-TALKBACK.md), [kế hoạch](docs/KE-HOACH-TALKBACK.md).
+# seevia-brighter-way-app
