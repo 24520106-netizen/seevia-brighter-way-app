@@ -44,7 +44,7 @@
 .sv-status-bar__icons .sv-icon { font-size: 17px; font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 20; }
 /* Màn có đầu trang Dusk (Trang chủ): nội dung tràn lên dưới thanh trạng thái trong suốt */
 .sv-device--dusk { grid-template-rows: 1fr auto auto; }
-.sv-device--dusk > .sv-status-bar { position: absolute; inset: 0 0 auto 0; z-index: 2; color: var(--color-on-dusk); }
+.sv-device--dusk > .sv-status-bar { position: absolute; inset: 0 0 auto 0; z-index: 2; color: var(--color-on-head); }
 .sv-device--dusk .sv-dusk-head { padding-top: var(--size-status-bar); }
 .sv-device--dusk > .sv-status-bar { transition: background var(--dur-medium) var(--ease-standard), color var(--dur-medium) var(--ease-standard); }
 .sv-device--dusk.is-scrolled > .sv-status-bar { background: var(--color-surface-container); color: var(--color-on-surface); }

@@ -83,13 +83,13 @@ html[data-contrast="high"] .sv-glasses { border: var(--border-width) solid var(-
 }
 .sv-glasses__meta b { font-weight: 600; color: var(--color-on-dusk); }
 
-/* ---------- Vùng Dusk đầu Trang chủ ---------- */
+/* ---------- Vùng đầu Trang chủ (Aurora, màu theo token --*-head) ---------- */
 .sv-dusk-head {
   padding-bottom: var(--space-5);
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  background: var(--gradient-dusk);
-  color: var(--color-on-dusk);
-  box-shadow: inset 0 calc(var(--border-width) * -1) 0 var(--color-dusk-edge);
+  background: var(--gradient-head);
+  color: var(--color-on-head);
+  box-shadow: inset 0 calc(var(--border-width) * -1) 0 var(--color-dusk-edge), var(--shadow-head);
 }
 html[data-contrast="high"] .sv-dusk-head { border-bottom: var(--border-width) solid var(--color-outline); }
 .sv-dusk-head__bar {
@@ -100,16 +100,33 @@ html[data-contrast="high"] .sv-dusk-head { border-bottom: var(--border-width) so
   padding: var(--space-2) var(--space-2) var(--space-2) var(--layout-gutter);
 }
 .sv-dusk-head__bar .sv-logo { margin-inline-end: auto; }
-.sv-dusk-head__bar .sv-icon-btn { color: var(--color-on-dusk); }
-.sv-dusk-head__intro { display: grid; gap: var(--space-2); padding: var(--space-2) var(--layout-gutter) var(--space-5); }
-.sv-dusk-head__greeting { color: var(--color-on-dusk); }
-.sv-dusk-head__lede { color: var(--color-on-dusk-muted); max-width: 34ch; }
-/* Thẻ kính nằm trong vùng Dusk: một tấm nền sáng hơn một bậc */
-.sv-dusk-head .sv-glasses {
-  margin: 0 var(--layout-gutter);
-  background: color-mix(in oklab, var(--color-on-dusk) 8%, transparent);
-  border: var(--border-width) solid color-mix(in oklab, var(--color-on-dusk) 14%, transparent);
+/* Hai logo: bản màu cho nền sáng, bản trắng cho nền tối / tương phản cao */
+.sv-dusk-head__bar sv-logo[variant="white"] { display: none; }
+html[data-theme="dark"] .sv-dusk-head__bar sv-logo[variant="full"],
+html[data-contrast="high"] .sv-dusk-head__bar sv-logo[variant="full"] { display: none; }
+html[data-theme="dark"] .sv-dusk-head__bar sv-logo[variant="white"],
+html[data-contrast="high"] .sv-dusk-head__bar sv-logo[variant="white"] { display: inline-block; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .sv-dusk-head__bar sv-logo[variant="full"] { display: none; }
+  html:not([data-theme="light"]) .sv-dusk-head__bar sv-logo[variant="white"] { display: inline-block; }
 }
+.sv-dusk-head__bar .sv-icon-btn { color: var(--color-on-head); }
+.sv-dusk-head__intro { display: grid; gap: var(--space-2); padding: var(--space-2) var(--layout-gutter) var(--space-5); }
+.sv-dusk-head__greeting { color: var(--color-on-head); }
+.sv-dusk-head__lede { color: var(--color-on-head-muted); max-width: 34ch; }
+/* Thẻ kính và thẻ SOS nằm trong vùng đầu: một tấm kính mờ */
+.sv-dusk-head .sv-glasses,
+.sv-dusk-head .sv-sos-status {
+  --color-on-dusk: var(--color-on-head);
+  --color-on-dusk-muted: var(--color-on-head-muted);
+  --color-accent-on-dark: var(--color-accent-on-head);
+  background: var(--color-head-glass);
+  border: var(--border-width) solid var(--color-head-glass-edge);
+  box-shadow: var(--shadow-head-card);
+}
+.sv-dusk-head .sv-glasses { margin: 0 var(--layout-gutter); }
+.sv-dusk-head .sv-glasses__icon { background: var(--color-head-icon-bg); color: var(--color-head-icon); }
+.sv-dusk-head .sv-meter__track { background: var(--color-head-track); }
 
 /* Dòng trạng thái SOS trong vùng Dusk */
 .sv-sos-status {

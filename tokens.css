@@ -125,6 +125,24 @@
   --color-on-dusk-muted: var(--brand-on-dark-soft);
   --color-dusk-edge: transparent;                          /* viền vùng Dusk: chỉ hiện ở chủ đề tối */
 
+  /* 2.9 Vùng đầu Trang chủ · Aurora (sáng ở chủ đề sáng, tối ở chủ đề tối) */
+  --gradient-head:
+    radial-gradient(60% 50% at 12% 18%, rgb(217 252 237 / 0.95) 0%, transparent 70%),
+    radial-gradient(50% 45% at 88% 12%, rgb(231 224 255 / 0.95) 0%, transparent 70%),
+    radial-gradient(55% 55% at 70% 85%, rgb(147 166 254 / 0.55) 0%, transparent 70%),
+    radial-gradient(45% 45% at 20% 90%, rgb(94 215 225 / 0.45) 0%, transparent 70%),
+    var(--brand-tint);
+  --color-on-head: var(--brand-ink-800);                   /* chữ chính trên vùng đầu */
+  --color-on-head-muted: var(--brand-indigo-soft);         /* chữ phụ (≥ 6,3:1) */
+  --color-accent-on-head: var(--brand-sapphire-600);       /* "Đã kết nối" */
+  --color-head-glass: rgb(255 255 255 / 0.62);             /* nền thẻ kính / SOS trên vùng đầu */
+  --color-head-glass-edge: rgb(255 255 255 / 0.85);
+  --color-head-icon-bg: var(--brand-tint);                 /* ô tròn biểu tượng kính */
+  --color-head-icon: #2337B4;
+  --color-head-track: var(--brand-line);                   /* rãnh thanh pin */
+  --shadow-head: 0 6px 18px rgb(42 38 80 / 0.10);
+  --shadow-head-card: 0 2px 10px rgb(42 38 80 / 0.06);
+
   /* ---------------------------------------------------------------
      3. CHỮ (thang Material 3, cỡ nhân với --font-scale)
      --------------------------------------------------------------- */
@@ -278,6 +296,22 @@ html[data-font="lg"] { --font-scale: 1.28; }
     --color-on-error-container: var(--fn-red-300);
     --color-sos: var(--fn-red-700);
     --color-dusk-edge: color-mix(in oklab, var(--brand-lilac) 22%, transparent);
+    --gradient-head:
+      radial-gradient(60% 50% at 12% 14%, rgb(94 215 225 / 0.30) 0%, transparent 70%),
+      radial-gradient(50% 45% at 90% 10%, rgb(139 108 255 / 0.42) 0%, transparent 70%),
+      radial-gradient(55% 55% at 72% 88%, rgb(64 95 250 / 0.42) 0%, transparent 70%),
+      radial-gradient(45% 45% at 18% 92%, rgb(127 227 180 / 0.16) 0%, transparent 70%),
+      var(--brand-ink-900);
+    --color-on-head: var(--brand-white);
+    --color-on-head-muted: var(--brand-on-dark-soft);
+    --color-accent-on-head: var(--fn-green-300);
+    --color-head-glass: rgb(255 255 255 / 0.09);
+    --color-head-glass-edge: rgb(255 255 255 / 0.20);
+    --color-head-icon-bg: rgb(255 255 255 / 0.10);
+    --color-head-icon: var(--brand-white);
+    --color-head-track: rgb(255 255 255 / 0.16);
+    --shadow-head: none;
+    --shadow-head-card: none;
     --color-device-frame: #08071A;
     --shadow-color: 0 0 0;
     color-scheme: dark;
@@ -314,6 +348,22 @@ html[data-theme="dark"]:not([data-contrast="high"]) {
   --color-on-error-container: var(--fn-red-300);
   --color-sos: var(--fn-red-700);
   --color-dusk-edge: color-mix(in oklab, var(--brand-lilac) 22%, transparent);
+  --gradient-head:
+    radial-gradient(60% 50% at 12% 14%, rgb(94 215 225 / 0.30) 0%, transparent 70%),
+    radial-gradient(50% 45% at 90% 10%, rgb(139 108 255 / 0.42) 0%, transparent 70%),
+    radial-gradient(55% 55% at 72% 88%, rgb(64 95 250 / 0.42) 0%, transparent 70%),
+    radial-gradient(45% 45% at 18% 92%, rgb(127 227 180 / 0.16) 0%, transparent 70%),
+    var(--brand-ink-900);
+  --color-on-head: var(--brand-white);
+  --color-on-head-muted: var(--brand-on-dark-soft);
+  --color-accent-on-head: var(--fn-green-300);
+  --color-head-glass: rgb(255 255 255 / 0.09);
+  --color-head-glass-edge: rgb(255 255 255 / 0.20);
+  --color-head-icon-bg: rgb(255 255 255 / 0.10);
+  --color-head-icon: var(--brand-white);
+  --color-head-track: rgb(255 255 255 / 0.16);
+  --shadow-head: none;
+  --shadow-head-card: none;
   --color-device-frame: #08071A;
   --shadow-color: 0 0 0;
   color-scheme: dark;
@@ -359,6 +409,17 @@ html[data-contrast="high"] {
   --color-on-sos: #FFFFFF;
   --color-device-frame: var(--brand-indigo);
   --gradient-dusk: #0B0A1A;
+  --gradient-head: #0B0A1A;
+  --color-on-head: #FFFFFF;
+  --color-on-head-muted: var(--brand-lilac);
+  --color-accent-on-head: var(--brand-cyan);
+  --color-head-glass: transparent;
+  --color-head-glass-edge: #FFFFFF;
+  --color-head-icon-bg: transparent;
+  --color-head-icon: #FFFFFF;
+  --color-head-track: rgb(255 255 255 / 0.3);
+  --shadow-head: none;
+  --shadow-head-card: none;
   --gradient-glass: var(--brand-cyan);
   --color-on-dusk-muted: var(--brand-lilac);
   --shadow-color: 0 0 0;
